@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  #wrapper(align="center")
+    div#gallery.carousel.slide(data-ride="carousel", style="width: 400px!important;")
+      ol.carousel-indicators
+        li.active(data-target="#gallery", data-slide-to="0")
+        li(data-target="#gallery", data-slide-to="1")
+      div.carousel-inner(role="listbox")
+        div.item.active(align="center")
+          img.img-responsive(src="images/carousel/quote01.jpg")
+        div.item(align="center")
+          img.img-responsive(src="images/carousel/quote02.jpg")
+      a.left.carousel-control(href="#gallery", role="button", data-slide="prev")
+        span.icon-prev(aria-hidden="true")
+      a.right.carousel-control(href="#gallery", role="button", data-slide="next")
+        span.icon-next(aria-hidden="true")

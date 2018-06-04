@@ -1,0 +1,67 @@
+extends ../layout
+
+
+block content
+  .page-header
+    h3
+      if title2
+        = title2
+      else
+        = title
+    .btn-toolbar(role="toolbar")
+      .btn-group(role="group")
+        a(href='#', onclick='showSearch()' class='btn btn-primary')
+          span.glyphicon.glyphicon-search
+      .btn-group(role="group")
+        a(href='/job/create' class='btn btn-primary') Create
+
+  #listing.table-wrap
+    table.table.table-striped
+      thead
+        tr
+          th Job Title
+          th Employer Name
+          th Publish Date From
+          th Publish Date To
+          th Closing
+      tbody
+        each job in job_list
+          tr
+            td 
+              a(href=job.url) !{job.title}
+            td !{job.employer.name}
+            td #{job.publishStartDisplay}
+            td #{job.publishEndDisplay}
+            td #{job.closing}
+        else
+          tr
+            td(colspan='5' align='center') No records found.
+
+  #searchModal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal')
+            span &times;
+          h4 Search
+        .modal-body
+          form.form-horizontal(id="searchForm")
+            .form-group
+              label.col-sm-4(for='searchPublishStartFrom') Publish Date From: 
+              .col-sm-7
+                input.form-control(type='date', name='searchPublishStartFrom', id='searchPublishStartFrom', placeholder='Search...', value=searchPublishStartFrom)
+            .form-group
+              label.col-sm-4(for='searchPublishStartTo') Publish Date To: 
+              .col-sm-7
+                input.form-control(type='date', name='searchPublishStartTo', id='searchPublishStartTo', placeholder='Search...', value=searchPublishStartTo)
+            .form-group
+              label.col-sm-4(for='searchTitle') Job Title: 
+              .col-sm-7
+                input.form-control(type='text', name='searchTitle', id='searchTitle', placeholder='Search...', value=searchTitle)
+            .form-group
+              label.col-sm-4(for='searchEmployerName') Employer Name: 
+              .col-sm-7
+                input.form-control(type='text', name='searchEmployerName', id='searchEmployerName', placeholder='Search...', value=searchEmployerName)
+        .modal-footer
+          button.btn.btn-default(type='button', data-dismiss='modal') Close
+          button.btn.btn-primary(type='button', onclick="submitSearch()") Submit
