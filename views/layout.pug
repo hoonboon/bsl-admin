@@ -27,8 +27,9 @@ html(lang='')
     
     //- module or page specific that requires client side script 
     //- need to be assigned to the variable "includeScript" in the Controller
-    if includeScript
-      script(src=includeScript)
+    if includeScripts
+      each script in includeScripts
+        script(src=script)
 
     //- Google Analytics: change UA-38177297-2 to be your site's ID
     //- script.

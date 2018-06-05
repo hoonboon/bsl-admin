@@ -52,7 +52,7 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
     query.sort([["publishStart", "descending"], ["createdAt", "descending"]]);
 
     // client side script
-    const includeScript = "/js/job/list.js";
+    const includeScripts = ["/js/job/list.js"];
 
     query.exec(function (err, item_list: any) {
             if (err) {
@@ -66,7 +66,7 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
                 searchPublishStartTo: searchPublishStartTo,
                 searchTitle: searchTitle,
                 searchEmployerName: searchEmployerName,
-                includeScript: includeScript
+                includeScripts: includeScripts
             });
         });
 };
@@ -98,14 +98,18 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
 
     // set default values
     const jobInput = new Job({
-            publishStart: moment().add(3, "days"),
-            publishEnd: moment().add(13, "days")
+            publishStart: moment().add(1, "days"),
+            publishEnd: moment().add(16, "days")
     });
+
+    // client side script
+    const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
 
     res.render("job/form", {
         title: "Job",
         title2: "Create Job",
-        job: jobInput
+        job: jobInput,
+        includeScripts: includeScripts
     });
 };
 
@@ -156,7 +160,8 @@ export let postJobCreate = [
             publishEnd: req.body.publishEnd,
             // weight: number,
             // tag: string[],
-            // customContent: string,
+            otherInfo: req.body.otherInfo,
+            customContent: req.body.customContent,
             status: "A",
             createdBy: req.user.id
         });
@@ -170,10 +175,14 @@ export let postJobCreate = [
         } else {
             req.flash("errors", errors.array());
 
+            // client side script
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+
             res.render("job/form", {
                 title: "Job",
                 title2: "Create Job",
-                job: jobInput
+                job: jobInput,
+                includeScripts: includeScripts
             });
         }
     }
@@ -189,14 +198,14 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
         if (err) { return next(err); }
         if (jobDb) {
             // client side script
-            const includeScript = "/js/job/detail.js";
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/detail.js"];
 
             res.render("job/detail", {
                 title: "Job",
                 title2: "Job Detail",
                 job: jobDb,
                 jobId: jobDb._id,
-                includeScript: includeScript
+                includeScripts: includeScripts
             });
         } else {
             req.flash("errors", { msg: "Job not found." });
@@ -225,11 +234,15 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
 
         const jobDb = <JobModel>results.job;
 
+        // client side script
+        const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+
         res.render("job/form", {
             title: "Job",
             title2: "Edit Job Detail",
             job: jobDb,
-            jobId: jobDb._id
+            jobId: jobDb._id,
+            includeScripts: includeScripts
         });
 
     });
@@ -282,7 +295,8 @@ export let postJobUpdate = [
             publishEnd: req.body.publishEnd,
             // weight: number,
             // tag: string[],
-            // customContent: string,
+            otherInfo: req.body.otherInfo,
+            customContent: req.body.customContent,
             _id: req.params.id,
             updatedBy: req.user.id
         });

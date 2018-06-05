@@ -1,8 +1,10 @@
 $(document).ready(function() {
-
+    CKEDITOR.replace("customContent", {
+        height: 300
+    });
 });
 
-export function submitDelete() {
+function submitDelete() {
     if (confirm("Confirm to delete this record?")) {
         $("#jobDeleteForm").submit();
     }
