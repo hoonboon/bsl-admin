@@ -1,0 +1,61 @@
+#previewModal.modal.fade(tabindex='-1')
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        button.close(type='button', data-dismiss='modal')
+          span &times;
+        h4 Preview
+      .modal-body.post-preview
+        #modalContent.form-horizontal
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Nama Jawatan
+            .col-sm-7.col-xs-9
+              #jobTitle 
+                strong !{job.title}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Keterangan
+            .col-sm-7.col-xs-9
+              #jobDescription 
+                strong !{job.description}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Nama Majikan
+            .col-sm-7.col-xs-9
+              #jobEmployerName 
+                strong !{job.employer.name}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Hubungi
+            .col-sm-7.col-xs-9
+              #jobEmployerContact 
+                strong !{job.employer.contact}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Gaji
+            .col-sm-7.col-xs-9
+              #jobSalary 
+                strong !{job.salary}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Jenis Kerja
+            .col-sm-7.col-xs-9
+              #jobEmpType 
+                strong !{job.empType}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Bahasa
+            .col-sm-7.col-xs-9
+              #jobLanguage 
+                strong !{job.language}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Tempat Kerja
+            .col-sm-7.col-xs-9
+              #jobLocation 
+                strong !{job.location}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Tarikh Tutup
+            .col-sm-7.col-xs-9
+              #jobClosing 
+                strong #{job.closing}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Lain-lain
+            .col-sm-7.col-xs-9
+              #jobOtherInfo 
+                strong !{job.otherInfo}
+      .modal-footer
+        button.btn.btn-default(type='button', data-dismiss='modal') Close

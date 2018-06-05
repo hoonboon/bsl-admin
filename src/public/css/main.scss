@@ -73,3 +73,9 @@ textarea {
   border: 0;
   box-shadow: none;
 }
+
+.post-preview {
+  background-image: url("/images/watermark.png");
+  background-repeat: repeat;
+  background-color: white
+}

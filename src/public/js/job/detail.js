@@ -9,3 +9,10 @@ function submitDelete() {
         $("#jobDeleteForm").submit();
     }
 }
+
+function preview() {
+    if ($("#customContent").text() != "")
+        $("#modalContent").html($("#customContent").text());
+
+    $("#previewModal").modal("show");
+}
