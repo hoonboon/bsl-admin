@@ -24,7 +24,12 @@ export type JobModel = mongoose.Document & {
   status: string,
   createdBy: any,
   updatedBy: any,
-  url: string
+  url: string,
+  imgUrl: string,
+  publishUrl: string,
+  publishImgUrl: string,
+  highlights: string,
+  apiModel: any
 };
 
 const jobSchema = new mongoose.Schema({
@@ -44,6 +49,7 @@ const jobSchema = new mongoose.Schema({
   weight: { type: Number, default: 5 },
   tag: [String],
   otherInfo: String,
+  imgUrl: String,
   customContent: String,
   status: { type: String, required: true, default: "A" },
   createdBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -78,11 +84,77 @@ jobSchema
     return this.publishEnd ? moment(this.publishEnd).format("YYYY-MM-DD") : "";
 });
 
-// Virtual for Job 's URL
+// Virtual for Job's URL
 jobSchema
 .virtual("url")
 .get(function() {
     return "/job/" + this._id;
+});
+
+// Virtual for Job's Published URL on public site
+jobSchema
+.virtual("publishUrl")
+.get(function() {
+    const baseUrl = process.env.PUBLIC_SITE || "";
+    return baseUrl + "/job/" + this._id;
+});
+
+// Virtual for Job's Published Image URL on public site
+jobSchema
+.virtual("publishImgUrl")
+.get(function() {
+    const baseUrl = process.env.PUBLIC_SITE || "";
+    const imgUrl = this.imgUrl || baseUrl + "/images/fbProfilePhoto.jpg";
+    return imgUrl;
+});
+
+// Virtual for Job's highlights
+jobSchema
+.virtual("highlights")
+.get(function() {
+    let result = "Majikan: " + this.employer.name;
+    if (this.location) {
+        result += ", Tempat Kerja: " + this.location;
+    }
+    result += ", Tarik Tutup: " + this.closing;
+    return result;
+});
+
+// Virtual for Job's highlights
+jobSchema
+.virtual("highlights")
+.get(function() {
+    let result = "Majikan: " + this.employer.name;
+    if (this.location) {
+        result += ", Tempat Kerja: " + this.location;
+    }
+    result += ", Tarik Tutup: " + this.closing;
+    return result;
+});
+
+// Virtual for Job's model returned to API call
+jobSchema
+.virtual("apiModel")
+.get(function() {
+    const result = {
+        _id: this._id,
+        title: this.title,
+        description: this.description,
+        employer: {
+            name: this.employer.name,
+            contact: this.employer.contact
+        },
+        salary: this.salary,
+        empType: this.empType,
+        language: this.language,
+        location: this.location,
+        closing: this.closing,
+        otherInfo: this.otherInfo,
+        customContent: this.customContent,
+        highlights: this.highlights,
+        publishImgUrl: this.publishImgUrl
+    };
+    return result;
 });
 
 const Job = mongoose.model("Job", jobSchema);

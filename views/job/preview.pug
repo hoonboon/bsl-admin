@@ -6,6 +6,9 @@
           span &times;
         h4 Preview
       .modal-body.post-preview
+        #postImage
+          p
+            img.img-responsive.img-thumbnail.center-block(src!=job.publishImgUrl, alt="Post Image")
         #modalContent.form-horizontal
           .form-group
             label.col-sm-3.col-xs-3.control-label Nama Jawatan
@@ -16,7 +19,7 @@
             label.col-sm-3.col-xs-3.control-label Keterangan
             .col-sm-7.col-xs-9
               #jobDescription 
-                strong !{job.description}
+                textarea.form-control.no-border(rows="5") !{job.description}
           .form-group
             label.col-sm-3.col-xs-3.control-label Nama Majikan
             .col-sm-7.col-xs-9
@@ -56,6 +59,6 @@
             label.col-sm-3.col-xs-3.control-label Lain-lain
             .col-sm-7.col-xs-9
               #jobOtherInfo 
-                strong !{job.otherInfo}
+                textarea.form-control.no-border(rows="5") !{job.otherInfo}
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Close

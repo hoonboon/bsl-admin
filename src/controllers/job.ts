@@ -162,6 +162,7 @@ export let postJobCreate = [
             // tag: string[],
             otherInfo: req.body.otherInfo,
             customContent: req.body.customContent,
+            imgUrl: req.body.imgUrl,
             status: "A",
             createdBy: req.user.id
         });
@@ -297,6 +298,7 @@ export let postJobUpdate = [
             // tag: string[],
             otherInfo: req.body.otherInfo,
             customContent: req.body.customContent,
+            imgUrl: req.body.imgUrl,
             _id: req.params.id,
             updatedBy: req.user.id
         });
