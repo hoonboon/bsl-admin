@@ -16,3 +16,12 @@ function preview() {
 
     $("#previewModal").modal("show");
 }
+
+function fbShare(url) {
+    if (FB) {
+        FB.ui({
+            method: 'share',
+            href: url,
+        }, function (response) { });
+    }
+}

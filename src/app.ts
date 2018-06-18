@@ -33,6 +33,8 @@ import * as passportConfig from "./config/passport";
 // Create Express server
 const app = express();
 
+app.locals.fbAppId = process.env.FACEBOOK_APP_ID || "";
+
 // Connect to MongoDB
 const mongoUrl = MONGODB_URI;
 (<any>mongoose).Promise = bluebird;
