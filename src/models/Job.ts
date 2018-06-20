@@ -105,7 +105,7 @@ jobSchema
 .virtual("publishImgUrl")
 .get(function() {
     const baseUrl = process.env.PUBLIC_SITE || "";
-    const imgUrl = this.imgUrl || baseUrl + "/images/fbProfilePhoto.jpg";
+    const imgUrl = this.imgUrl || baseUrl + "/images/fbProfilePhoto2.jpg";
     return imgUrl;
 });
 
