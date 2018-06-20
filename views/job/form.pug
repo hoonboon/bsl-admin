@@ -27,7 +27,7 @@ block content
     .form-group
       label.col-sm-3.control-label(for='description') ** Job Description
       .col-sm-7
-        textarea.form-control(rows='3', name='description', id='description', placeholder='Job Description', required) !{job.description}
+        textarea.form-control(rows='8', name='description', id='description', placeholder='Job Description', required) !{job.description}
     .form-group
       label.col-sm-3.control-label(for='employerName') ** Employer Name
       .col-sm-7
@@ -43,15 +43,24 @@ block content
     .form-group
       label.col-sm-3.control-label(for='empType') Employment Type
       .col-sm-7
-        input.form-control(type='text', name='empType', id='empType', placeholder='E.g. Full time, part time, contract, temporary etc', value!=(job === undefined ? '' : job.empType))
+        for option in empTypeOptions
+          .checkbox-inline
+            input.checkbox-input(type='checkbox', name='empType', id=option.value, value=option.value checked=option.isSelected)
+            label(for=option.value) #{option.label}
     .form-group
       label.col-sm-3.control-label(for='language') Language
       .col-sm-7
-        input.form-control(type='text', name='language', id='language', placeholder='E.g. Malay, English, Chinese etc', value!=(job === undefined ? '' : job.language))
+        for option in languageOptions
+          .checkbox-inline
+            input.checkbox-input(type='checkbox', name='language', id=option.value, value=option.value checked=option.isSelected)
+            label(for=option.value) #{option.label}
     .form-group
       label.col-sm-3.control-label(for='location') Job Location
       .col-sm-7
-        input.form-control(type='text', name='location', id='location', placeholder='E.g. Kota Bharu, Jeli, Pasir Puteh etc', value!=(job === undefined ? '' : job.location))
+        for option in locationOptions
+          .checkbox-inline
+            input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value checked=option.isSelected)
+            label(for=option.value) #{option.label}
     .form-group
       label.col-sm-3.control-label(for='publishStart') ** Publish Date Start
       .col-sm-7

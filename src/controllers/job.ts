@@ -8,6 +8,7 @@ import { sanitizeBody } from "express-validator/filter";
 
 import { default as Job, JobModel } from "../models/Job";
 import logger from "../util/logger";
+import * as selectOption from "../util/selectOption";
 
 /**
  * GET /jobs
@@ -109,7 +110,10 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
         title: "Job",
         title2: "Create Job",
         job: jobInput,
-        includeScripts: includeScripts
+        includeScripts: includeScripts,
+        empTypeOptions: selectOption.OPTIONS_EMPTYPE(),
+        languageOptions: selectOption.OPTIONS_LANGUAGE(),
+        locationOptions: selectOption.OPTIONS_LOCATION()
     });
 };
 
@@ -118,6 +122,35 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
  * Create a new Job.
  */
 export let postJobCreate = [
+    // convert multiple selection input into array
+    (req: Request, res: Response, next: NextFunction) => {
+        if (!(req.body.empType instanceof Array)) {
+            if (typeof req.body.empType === "undefined") {
+                req.body.empType = [];
+            }
+            else {
+                req.body.empType = new Array(req.body.empType);
+            }
+        }
+        if (!(req.body.language instanceof Array)) {
+            if (typeof req.body.language === "undefined") {
+                req.body.language = [];
+            }
+            else {
+                req.body.language = new Array(req.body.language);
+            }
+        }
+        if (!(req.body.location instanceof Array)) {
+            if (typeof req.body.location === "undefined") {
+                req.body.location = [];
+            }
+            else {
+                req.body.location = new Array(req.body.location);
+            }
+        }
+        next();
+    },
+
     // validate values
     body("title").isLength({ min: 1 }).trim().withMessage("Job Title is required."),
     body("description").isLength({ min: 1 }).trim().withMessage("Job Description is required."),
@@ -165,7 +198,7 @@ export let postJobCreate = [
             imgUrl: req.body.imgUrl,
             status: "A",
             createdBy: req.user.id
-        });
+        }) as JobModel;
 
         if (errors.isEmpty()) {
             jobInput.save((err, jobCreated) => {
@@ -176,6 +209,29 @@ export let postJobCreate = [
         } else {
             req.flash("errors", errors.array());
 
+            const empTypeOptions = selectOption.OPTIONS_EMPTYPE();
+            const languageOptions = selectOption.OPTIONS_LANGUAGE();
+            const locationOptions = selectOption.OPTIONS_LOCATION();
+
+            // mark user-selected options as checked
+            empTypeOptions.forEach(option => {
+                if (jobInput.empType.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
+            languageOptions.forEach(option => {
+                if (jobInput.language.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
+            locationOptions.forEach(option => {
+                if (jobInput.location.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
             // client side script
             const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
 
@@ -183,7 +239,10 @@ export let postJobCreate = [
                 title: "Job",
                 title2: "Create Job",
                 job: jobInput,
-                includeScripts: includeScripts
+                includeScripts: includeScripts,
+                empTypeOptions: empTypeOptions,
+                languageOptions: languageOptions,
+                locationOptions: locationOptions
             });
         }
     }
@@ -233,7 +292,30 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             res.redirect("/jobss");
         }
 
-        const jobDb = <JobModel>results.job;
+        const jobDb = results.job as JobModel;
+
+        const empTypeOptions = selectOption.OPTIONS_EMPTYPE();
+        const languageOptions = selectOption.OPTIONS_LANGUAGE();
+        const locationOptions = selectOption.OPTIONS_LOCATION();
+
+        // mark user-selected options as checked
+        empTypeOptions.forEach(option => {
+            if (jobDb.empType.indexOf(option.value) > -1) {
+                option.isSelected = true;
+            }
+        });
+
+        languageOptions.forEach(option => {
+            if (jobDb.language.indexOf(option.value) > -1) {
+                option.isSelected = true;
+            }
+        });
+
+        locationOptions.forEach(option => {
+            if (jobDb.location.indexOf(option.value) > -1) {
+                option.isSelected = true;
+            }
+        });
 
         // client side script
         const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
@@ -243,7 +325,10 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             title2: "Edit Job Detail",
             job: jobDb,
             jobId: jobDb._id,
-            includeScripts: includeScripts
+            includeScripts: includeScripts,
+            empTypeOptions: empTypeOptions,
+            languageOptions: languageOptions,
+            locationOptions: locationOptions
         });
 
     });
@@ -254,6 +339,35 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
  * Update an existing Job.
  */
 export let postJobUpdate = [
+    // convert multiple selection input into array
+    (req: Request, res: Response, next: NextFunction) => {
+        if (!(req.body.empType instanceof Array)) {
+            if (typeof req.body.empType === "undefined") {
+                req.body.empType = [];
+            }
+            else {
+                req.body.empType = new Array(req.body.empType);
+            }
+        }
+        if (!(req.body.language instanceof Array)) {
+            if (typeof req.body.language === "undefined") {
+                req.body.language = [];
+            }
+            else {
+                req.body.language = new Array(req.body.language);
+            }
+        }
+        if (!(req.body.location instanceof Array)) {
+            if (typeof req.body.location === "undefined") {
+                req.body.location = [];
+            }
+            else {
+                req.body.location = new Array(req.body.location);
+            }
+        }
+        next();
+    },
+
     // validate values
     body("title").isLength({ min: 1 }).trim().withMessage("Job Title is required."),
     body("description").isLength({ min: 1 }).trim().withMessage("Job Description is required."),
@@ -301,7 +415,7 @@ export let postJobUpdate = [
             imgUrl: req.body.imgUrl,
             _id: req.params.id,
             updatedBy: req.user.id
-        });
+        }) as JobModel;
 
         if (errors.isEmpty()) {
             Job.findById(req.params.id, (err, targetJob) => {
@@ -321,11 +435,37 @@ export let postJobUpdate = [
         } else {
             req.flash("errors", errors.array());
 
+            const empTypeOptions = selectOption.OPTIONS_EMPTYPE();
+            const languageOptions = selectOption.OPTIONS_LANGUAGE();
+            const locationOptions = selectOption.OPTIONS_LOCATION();
+
+            // mark user-selected options as checked
+            empTypeOptions.forEach(option => {
+                if (jobInput.empType.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
+            languageOptions.forEach(option => {
+                if (jobInput.language.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
+            locationOptions.forEach(option => {
+                if (jobInput.location.indexOf(option.value) > -1) {
+                    option.isSelected = true;
+                }
+            });
+
             res.render("job/form", {
                 title: "Job",
                 title2: "Edit Job Detail",
                 job: jobInput,
-                jobId: jobInput._id
+                jobId: jobInput._id,
+                empTypeOptions: empTypeOptions,
+                languageOptions: languageOptions,
+                locationOptions: locationOptions
             });
         }
     }

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import moment from "moment";
+import * as selectOption  from "../util/selectOption";
 
 const Schema = mongoose.Schema;
 
@@ -11,9 +12,9 @@ export type JobModel = mongoose.Document & {
     contact: string
   },
   salary: string,
-  empType: string,
-  language: string,
-  location: string,
+  empType: string[],
+  language: string[],
+  location: string[],
   closing: string,
   publishStart: Date,
   publishEnd: Date,
@@ -40,9 +41,9 @@ const jobSchema = new mongoose.Schema({
     contact: { type: String, required: true, uppercase: true },
   },
   salary: String,
-  empType: String,
-  language: String,
-  location: String,
+  empType: [String],
+  language: [String],
+  location: [String],
   closing: { type: String, required: true, uppercase: true },
   publishStart: Date,
   publishEnd: Date,
@@ -114,19 +115,7 @@ jobSchema
 .get(function() {
     let result = "Majikan: " + this.employer.name;
     if (this.location) {
-        result += ", Tempat Kerja: " + this.location;
-    }
-    result += ", Tarik Tutup: " + this.closing;
-    return result;
-});
-
-// Virtual for Job's highlights
-jobSchema
-.virtual("highlights")
-.get(function() {
-    let result = "Majikan: " + this.employer.name;
-    if (this.location) {
-        result += ", Tempat Kerja: " + this.location;
+        result += ", Tempat Kerja: " + this.locationDisplay;
     }
     result += ", Tarik Tutup: " + this.closing;
     return result;
@@ -145,15 +134,48 @@ jobSchema
             contact: this.employer.contact
         },
         salary: this.salary,
-        empType: this.empType,
-        language: this.language,
-        location: this.location,
+        empType: this.empTypeDisplay,
+        language: this.languageDisplay,
+        location: this.locationDisplay,
         closing: this.closing,
         otherInfo: this.otherInfo,
         customContent: this.customContent,
         highlights: this.highlights,
         publishImgUrl: this.publishImgUrl
     };
+    return result;
+});
+
+// Virtual for Job's EmpType for display
+jobSchema
+.virtual("empTypeDisplay")
+.get(function() {
+    let result = "";
+    if (this.empType && this.empType.length > 0) {
+        result = selectOption.getFlattenedLabelsByValues(this.empType, selectOption.OPTIONS_EMPTYPE());
+    }
+    return result;
+});
+
+// Virtual for Job's language for display
+jobSchema
+.virtual("languageDisplay")
+.get(function() {
+    let result = "";
+    if (this.language && this.language.length > 0) {
+        result = selectOption.getFlattenedLabelsByValues(this.language, selectOption.OPTIONS_LANGUAGE());
+    }
+    return result;
+});
+
+// Virtual for Job's Locations for display
+jobSchema
+.virtual("locationDisplay")
+.get(function() {
+    let result = "";
+    if (this.location && this.location.length > 0) {
+        result = selectOption.getFlattenedLabelsByValues(this.location, selectOption.OPTIONS_LOCATION());
+    }
     return result;
 });
 

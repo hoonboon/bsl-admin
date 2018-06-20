@@ -13,52 +13,52 @@
           .form-group
             label.col-sm-3.col-xs-3.control-label Nama Jawatan
             .col-sm-7.col-xs-9
-              #jobTitle 
+              #jobTitle.form-control-static
                 strong !{job.title}
           .form-group
             label.col-sm-3.col-xs-3.control-label Keterangan
             .col-sm-7.col-xs-9
-              #jobDescription 
-                textarea.form-control.no-border(rows="5") !{job.description}
+              #jobDescription.form-control-static
+                textarea.form-control.no-border(rows="8") !{job.description}
           .form-group
             label.col-sm-3.col-xs-3.control-label Nama Majikan
             .col-sm-7.col-xs-9
-              #jobEmployerName 
+              #jobEmployerName.form-control-static
                 strong !{job.employer.name}
           .form-group
             label.col-sm-3.col-xs-3.control-label Hubungi
             .col-sm-7.col-xs-9
-              #jobEmployerContact 
+              #jobEmployerContact.form-control-static
                 strong !{job.employer.contact}
           .form-group
             label.col-sm-3.col-xs-3.control-label Gaji
             .col-sm-7.col-xs-9
-              #jobSalary 
+              #jobSalary.form-control-static 
                 strong !{job.salary}
           .form-group
             label.col-sm-3.col-xs-3.control-label Jenis Kerja
             .col-sm-7.col-xs-9
-              #jobEmpType 
-                strong !{job.empType}
+              #jobEmpType.form-control-static 
+                strong !{job.empTypeDisplay}
           .form-group
             label.col-sm-3.col-xs-3.control-label Bahasa
             .col-sm-7.col-xs-9
-              #jobLanguage 
-                strong !{job.language}
+              #jobLanguage.form-control-static 
+                strong !{job.languageDisplay}
           .form-group
             label.col-sm-3.col-xs-3.control-label Tempat Kerja
             .col-sm-7.col-xs-9
-              #jobLocation 
-                strong !{job.location}
+              #jobLocation.form-control-static 
+                strong !{job.locationDisplay}
           .form-group
             label.col-sm-3.col-xs-3.control-label Tarikh Tutup
             .col-sm-7.col-xs-9
-              #jobClosing 
+              #jobClosing.form-control-static 
                 strong #{job.closing}
           .form-group
             label.col-sm-3.col-xs-3.control-label Lain-lain
             .col-sm-7.col-xs-9
-              #jobOtherInfo 
+              #jobOtherInfo.form-control-static 
                 textarea.form-control.no-border(rows="5") !{job.otherInfo}
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Close
