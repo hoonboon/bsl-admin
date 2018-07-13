@@ -1,7 +1,9 @@
 $(document).ready(function() {
-    CKEDITOR.replace("customContent", {
-        height: 300
-    });
+    if ($("#customContent").length) {
+        CKEDITOR.replace("customContent", {
+            height: 300
+        });
+    }
 });
 
 function submitDelete() {

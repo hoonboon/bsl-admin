@@ -9,80 +9,110 @@ block content
         = title
     p Job Id: #{jobId}
   #jobDetail.form-horizontal
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Job Title
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.title}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Job Description
-      .col-sm-7.col-xs-9
-        .form-control-static
-          textarea.form-control.no-border(rows="8") !{job.description}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Employer Name
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.employer.name}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Contact
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.employer.contact}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Salary
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.salary}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Employment Type
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.empTypeDisplay}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Language
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.languageDisplay}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Job Location
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.locationDisplay}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Publish Date Start
-      .col-sm-7.col-xs-9
-        .form-control-static #{job.publishStartDisplay}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Publish Date End
-      .col-sm-7.col-xs-9
-        .form-control-static #{job.publishEndDisplay}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Closing
-      .col-sm-7.col-xs-9
-        .form-control-static #{job.closing}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Other Information
-      .col-sm-7.col-xs-9
-        .form-control-static
-          textarea.form-control.no-border(rows="3") !{job.otherInfo}
-    .form-group
-      label.col-sm-3.control-label Customized full detail content to be displayed to user
-      .col-sm-7
-        .form-control-static
-          textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
-    .form-group
-      label.col-sm-3.col-xs-3.control-label Image URL
-      .col-sm-7.col-xs-9
-        .form-control-static !{job.imgUrl}
-    .form-group
-      .col-sm-offset-3.col-sm-7
-        a.btn.btn-primary(href=job.url+'/update') Edit
-        span
-        | 
-        a.btn.btn-primary(href='#', onclick='preview()') Preview
-        span
-        | 
-        a.btn.btn-primary(href='#', onclick='fbShare(\'' + job.publishUrl + '\')') FB Share
-        span
-        | 
-        a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
-        span
-        | 
-        a.btn.btn-warning(href='/jobs') Back
+    if (job.postType && job.postType == "FB")
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Post Title
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.title}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Facebook Post URL
+        .col-sm-7.col-xs-9
+          .form-control-static
+            .form-control-static 
+              #fbPostUrl !{job.fbPostUrl}
+              .fb-post(data-href!=job.fbPostUrl)
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Publish Date Start
+        .col-sm-7.col-xs-9
+          .form-control-static #{job.publishStartDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Publish Date End
+        .col-sm-7.col-xs-9
+          .form-control-static #{job.publishEndDisplay}
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          a.btn.btn-primary(href=job.url+'/updateFbPost') Edit
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
+          span
+          | 
+          a.btn.btn-warning(href='/jobs') Back
+    else
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Job Title
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.title}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Job Description
+        .col-sm-7.col-xs-9
+          .form-control-static
+            textarea.form-control.no-border(rows="8") !{job.description}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Employer Name
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.employer.name}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Contact
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.employer.contact}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Salary
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.salary}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Employment Type
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.empTypeDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Language
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.languageDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Job Location
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.locationDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Publish Date Start
+        .col-sm-7.col-xs-9
+          .form-control-static #{job.publishStartDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Publish Date End
+        .col-sm-7.col-xs-9
+          .form-control-static #{job.publishEndDisplay}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Closing
+        .col-sm-7.col-xs-9
+          .form-control-static #{job.closing}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Other Information
+        .col-sm-7.col-xs-9
+          .form-control-static
+            textarea.form-control.no-border(rows="3") !{job.otherInfo}
+      .form-group
+        label.col-sm-3.control-label Customized full detail content to be displayed to user
+        .col-sm-7
+          .form-control-static
+            textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
+      .form-group
+        label.col-sm-3.col-xs-3.control-label Image URL
+        .col-sm-7.col-xs-9
+          .form-control-static !{job.imgUrl}
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          a.btn.btn-primary(href=job.url+'/update') Edit
+          span
+          | 
+          a.btn.btn-primary(href='#', onclick='preview()') Preview
+          span
+          | 
+          a.btn.btn-primary(href='#', onclick='fbShare(\'' + job.publishUrl + '\')') FB Share
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
+          span
+          | 
+          a.btn.btn-warning(href='/jobs') Back
 
   include preview.pug
   

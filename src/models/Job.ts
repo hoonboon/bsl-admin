@@ -4,6 +4,9 @@ import * as selectOption  from "../util/selectOption";
 
 const Schema = mongoose.Schema;
 
+export const POSTTYPE_NORMAL = "NORMAL";
+export const POSTTYPE_FB = "FB";
+
 export type JobModel = mongoose.Document & {
   title: string,
   description: string,
@@ -30,21 +33,23 @@ export type JobModel = mongoose.Document & {
   publishUrl: string,
   publishImgUrl: string,
   highlights: string,
-  apiModel: any
+  apiModel: any,
+  postType: string,
+  fbPostUrl: string
 };
 
 const jobSchema = new mongoose.Schema({
-  title: { type: String, required: true, uppercase: true },
-  description: { type: String, required: true },
+  title: { type: String, uppercase: true },
+  description: String,
   employer: {
-    name: { type: String, required: true, uppercase: true },
-    contact: { type: String, required: true, uppercase: true },
+    name: { type: String, uppercase: true },
+    contact: { type: String, uppercase: true },
   },
   salary: String,
   empType: [String],
   language: [String],
   location: [String],
-  closing: { type: String, required: true, uppercase: true },
+  closing: { type: String, uppercase: true },
   publishStart: Date,
   publishEnd: Date,
   weight: { type: Number, default: 5 },
@@ -54,7 +59,9 @@ const jobSchema = new mongoose.Schema({
   customContent: String,
   status: { type: String, required: true, default: "A" },
   createdBy: { type: Schema.Types.ObjectId, ref: "User" },
-  updatedBy: { type: Schema.Types.ObjectId, ref: "User" }
+  updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+  postType: { type: String, required: true },
+  fbPostUrl: String,
 }, { timestamps: true });
 
 // Virtual for Publish Start Date for display

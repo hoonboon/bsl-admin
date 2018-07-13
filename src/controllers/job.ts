@@ -6,7 +6,7 @@ import { WriteError } from "mongodb";
 import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
 
-import { default as Job, JobModel } from "../models/Job";
+import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL } from "../models/Job";
 import logger from "../util/logger";
 import * as selectOption from "../util/selectOption";
 
@@ -22,9 +22,9 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
 
     // default filter
     if (!searchPublishStartFrom && !searchPublishStartTo && !searchTitle && !searchEmployerName) {
-        // show posts with Publish Start date 7 days before and after current date
-        searchPublishStartFrom = moment().subtract(7, "days").format("YYYY-MM-DD");
-        searchPublishStartTo = moment().add(7, "days").format("YYYY-MM-DD");
+        // show posts with Publish Start date 28 days before and after current date
+        searchPublishStartFrom = moment().subtract(28, "days").format("YYYY-MM-DD");
+        searchPublishStartTo = moment().add(28, "days").format("YYYY-MM-DD");
     }
 
     const query = Job.find();
@@ -100,7 +100,7 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
     // set default values
     const jobInput = new Job({
             publishStart: moment().add(1, "days"),
-            publishEnd: moment().add(16, "days")
+            publishEnd: moment().add(29, "days")
     });
 
     // client side script
@@ -196,6 +196,7 @@ export let postJobCreate = [
             otherInfo: req.body.otherInfo,
             customContent: req.body.customContent,
             imgUrl: req.body.imgUrl,
+            postType: POSTTYPE_NORMAL,
             status: "A",
             createdBy: req.user.id
         }) as JobModel;
@@ -289,7 +290,7 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
 
         if (!results.job) {
             req.flash("errors", { msg: "Job not found." });
-            res.redirect("/jobss");
+            res.redirect("/jobs");
         }
 
         const jobDb = results.job as JobModel;
@@ -413,6 +414,7 @@ export let postJobUpdate = [
             otherInfo: req.body.otherInfo,
             customContent: req.body.customContent,
             imgUrl: req.body.imgUrl,
+            postType: POSTTYPE_NORMAL,
             _id: req.params.id,
             updatedBy: req.user.id
         }) as JobModel;
@@ -458,11 +460,15 @@ export let postJobUpdate = [
                 }
             });
 
+            // client side script
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+
             res.render("job/form", {
                 title: "Job",
                 title2: "Edit Job Detail",
                 job: jobInput,
                 jobId: jobInput._id,
+                includeScripts: includeScripts,
                 empTypeOptions: empTypeOptions,
                 languageOptions: languageOptions,
                 locationOptions: locationOptions
@@ -507,6 +513,195 @@ export let postJobDelete = [
         } else {
             req.flash("errors", errors.array());
             res.redirect("/jobs");
+        }
+    }
+];
+
+
+
+/**
+ * GET /job/embedFbPost
+ * Embed Facebook Post page.
+ */
+export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction) => {
+
+    // set default values
+    const jobInput = new Job({
+            publishStart: moment().add(1, "days"),
+            publishEnd: moment().add(29, "days")
+    });
+
+    // client side script
+    // const includeScripts = ["/js/job/form.js"];
+
+    res.render("job/formEmbedFbPost", {
+        title: "Job",
+        title2: "Embed Facebook Post",
+        job: jobInput,
+        // includeScripts: includeScripts,
+    });
+};
+
+/**
+ * POST /job/embedFbPost
+ * Embed Facebook Post page.
+ */
+export let postJobEmbedFbPost = [
+    // validate values
+    body("title").isLength({ min: 1 }).trim().withMessage("Post Title is required."),
+    body("fbPostUrl").isLength({ min: 1 }).trim().withMessage("Facebook Post URL is required."),
+
+    // TODO: must be >= today
+    body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
+    .isISO8601().withMessage("Publish Date Start is invalid."),
+
+    body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
+    .isISO8601().withMessage("Publish Date End is invalid."),
+
+    // TODO: publish start <= publish end
+
+    // sanitize values
+    sanitizeBody("*").trim().escape(),
+    sanitizeBody("publishStart").toDate(),
+    sanitizeBody("publishEnd").toDate(),
+
+    // process request
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+
+        const jobInput = new Job({
+            title: req.body.title,
+            fbPostUrl: req.body.fbPostUrl,
+            publishStart: req.body.publishStart,
+            publishEnd: req.body.publishEnd,
+            // weight: number,
+            // tag: string[],
+            postType: POSTTYPE_FB,
+            status: "A",
+            createdBy: req.user.id
+        }) as JobModel;
+
+        if (errors.isEmpty()) {
+            jobInput.save((err, jobCreated) => {
+                if (err) { return next(err); }
+                req.flash("success", { msg: "New post created: " + jobCreated._id });
+                res.redirect("/jobs");
+            });
+        } else {
+            req.flash("errors", errors.array());
+
+            // client side script
+            // const includeScripts = [];
+
+            res.render("job/formEmbedFbPost", {
+                title: "Job",
+                title2: "Embed Facebook Post",
+                job: jobInput,
+                // includeScripts: includeScripts,
+            });
+        }
+    }
+];
+
+
+
+/**
+ * GET /job/:id/updateFbPost
+ * Update Embedded Facebook Post page.
+ */
+export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction) => {
+    async.parallel({
+        job: function(callback) {
+            Job.findById(req.params.id)
+                .exec(callback);
+        }
+    }, function(err, results) {
+        if (err) { return next(err); }
+
+        if (!results.job) {
+            req.flash("errors", { msg: "Post not found." });
+            res.redirect("/jobs");
+        }
+
+        const jobDb = results.job as JobModel;
+
+        // client side script
+        // const includeScripts = [];
+
+        res.render("job/formEmbedFbPost", {
+            title: "Job",
+            title2: "Edit Embedded Facebook Post Detail",
+            job: jobDb,
+            jobId: jobDb._id,
+            // includeScripts: includeScripts,
+        });
+
+    });
+};
+
+/**
+ * POST /job/:id/updateFbPost
+ * Update Embedded Facebook Post page.
+ */
+export let postJobUpdateFbPost = [
+    // validate values
+    body("title").isLength({ min: 1 }).trim().withMessage("Post Title is required."),
+    body("fbPostUrl").isLength({ min: 1 }).trim().withMessage("Facebook Post URL is required."),
+
+    // TODO: must be >= today
+    body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
+    .isISO8601().withMessage("Publish Date Start is invalid."),
+
+    body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
+    .isISO8601().withMessage("Publish Date End is invalid."),
+
+    // TODO: publish start <= publish end
+
+    // sanitize values
+    sanitizeBody("*").trim().escape(),
+    sanitizeBody("publishStart").toDate(),
+    sanitizeBody("publishEnd").toDate(),
+
+    // process request
+    (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
+
+        const jobInput = new Job({
+            title: req.body.title,
+            fbPostUrl: req.body.fbPostUrl,
+            publishStart: req.body.publishStart,
+            publishEnd: req.body.publishEnd,
+            // weight: number,
+            // tag: string[],
+            postType: POSTTYPE_FB,
+            _id: req.params.id,
+            updatedBy: req.user.id
+        }) as JobModel;
+
+        if (errors.isEmpty()) {
+            Job.findById(req.params.id, (err, targetJob) => {
+                if (err) { return next(err); }
+
+                if (!targetJob) {
+                    req.flash("errors", { msg: "Post not found." });
+                    res.redirect("/jobs");
+                }
+
+                Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
+                    if (err) { return next(err); }
+                    req.flash("success", { msg: "Post successfully updated." });
+                    res.redirect(jobUpdated.url);
+                });
+            });
+        } else {
+            req.flash("errors", errors.array());
+
+            res.render("job/formEmbedFbPost", {
+                title: "Job",
+                title2: "Edit Embedded Facebook Post Detail",
+                job: jobInput,
+                jobId: jobInput._id,
+            });
         }
     }
 ];

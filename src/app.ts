@@ -119,9 +119,13 @@ app.get("/account/unlink/:provider", passportConfig.isAuthenticated, userControl
 app.get("/jobs", passportConfig.isAuthenticated, jobController.getJobs);
 app.get("/job/create", passportConfig.isAuthenticated, jobController.getJobCreate);
 app.post("/job/create", passportConfig.isAuthenticated, jobController.postJobCreate);
+app.get("/job/embedFbPost", passportConfig.isAuthenticated, jobController.getJobEmbedFbPost);
+app.post("/job/embedFbPost", passportConfig.isAuthenticated, jobController.postJobEmbedFbPost);
 app.get("/job/:id", passportConfig.isAuthenticated, jobController.getJobDetail);
 app.get("/job/:id/update", passportConfig.isAuthenticated, jobController.getJobUpdate);
 app.post("/job/:id/update", passportConfig.isAuthenticated, jobController.postJobUpdate);
+app.get("/job/:id/updateFbPost", passportConfig.isAuthenticated, jobController.getJobUpdateFbPost);
+app.post("/job/:id/updateFbPost", passportConfig.isAuthenticated, jobController.postJobUpdateFbPost);
 app.post("/job/:id/delete", passportConfig.isAuthenticated, jobController.postJobDelete);
 
 /**
