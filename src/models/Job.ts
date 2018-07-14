@@ -121,7 +121,7 @@ jobSchema
 .virtual("highlights")
 .get(function() {
     let result = "Majikan: " + this.employer.name;
-    if (this.location) {
+    if (this.location && this.location.length > 0) {
         result += ", Tempat Kerja: " + this.locationDisplay;
     }
     result += ", Tarik Tutup: " + this.closing;
@@ -179,7 +179,7 @@ jobSchema
 jobSchema
 .virtual("locationDisplay")
 .get(function() {
-    let result = "";
+    let result = "-";
     if (this.location && this.location.length > 0) {
         result = selectOption.getFlattenedLabelsByValues(this.location, selectOption.OPTIONS_LOCATION());
     }
