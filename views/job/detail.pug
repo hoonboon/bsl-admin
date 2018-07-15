@@ -46,8 +46,7 @@ block content
       .form-group
         label.col-sm-3.col-xs-3.control-label Job Description
         .col-sm-7.col-xs-9
-          .form-control-static
-            textarea.form-control.no-border(rows="8") !{job.description}
+          .form-control-static !{job.descriptionDisplay}
       .form-group
         label.col-sm-3.col-xs-3.control-label Employer Name
         .col-sm-7.col-xs-9
@@ -87,8 +86,7 @@ block content
       .form-group
         label.col-sm-3.col-xs-3.control-label Other Information
         .col-sm-7.col-xs-9
-          .form-control-static
-            textarea.form-control.no-border(rows="3") !{job.otherInfo}
+          .form-control-static !{job.otherInfoDisplay}
       .form-group
         label.col-sm-3.control-label Customized full detail content to be displayed to user
         .col-sm-7

@@ -10,6 +10,7 @@ export const POSTTYPE_FB = "FB";
 export type JobModel = mongoose.Document & {
   title: string,
   description: string,
+  descriptionDisplay: string,
   employer: {
     name: string,
     contact: string
@@ -24,6 +25,7 @@ export type JobModel = mongoose.Document & {
   weight: number,
   tag: string[],
   otherInfo: string,
+  otherInfoDisplay: string,
   customContent: string,
   status: string,
   createdBy: any,
@@ -184,6 +186,20 @@ jobSchema
         result = selectOption.getFlattenedLabelsByValues(this.location, selectOption.OPTIONS_LOCATION());
     }
     return result;
+});
+
+// Virtual for Description for display
+jobSchema
+.virtual("descriptionDisplay")
+.get(function () {
+    return this.description ? this.description.replace(/\n/g, "<br/>") : "";
+});
+
+// Virtual for Other Info for display
+jobSchema
+.virtual("otherInfoDisplay")
+.get(function () {
+    return this.otherInfo ? this.otherInfo.replace(/\n/g, "<br/>") : "";
 });
 
 const Job = mongoose.model("Job", jobSchema);

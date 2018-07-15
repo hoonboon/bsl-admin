@@ -5,60 +5,54 @@
         button.close(type='button', data-dismiss='modal')
           span &times;
         h4 Preview
-      .modal-body.post-preview
-        #postImage
-          p
-            img.img-responsive.img-thumbnail.center-block(src!=job.publishImgUrl, alt="Post Image")
-        #modalContent.form-horizontal
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Nama Jawatan
-            .col-sm-7.col-xs-9
-              #jobTitle.form-control-static
-                strong !{job.title}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Keterangan
-            .col-sm-7.col-xs-9
-              #jobDescription.form-control-static
-                textarea.form-control.no-border(rows="8") !{job.description}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Nama Majikan
-            .col-sm-7.col-xs-9
-              #jobEmployerName.form-control-static
-                strong !{job.employer.name}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Hubungi
-            .col-sm-7.col-xs-9
-              #jobEmployerContact.form-control-static
-                strong !{job.employer.contact}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Gaji
-            .col-sm-7.col-xs-9
-              #jobSalary.form-control-static 
-                strong !{job.salary}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Jenis Kerja
-            .col-sm-7.col-xs-9
-              #jobEmpType.form-control-static 
-                strong !{job.empTypeDisplay}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Bahasa
-            .col-sm-7.col-xs-9
-              #jobLanguage.form-control-static 
-                strong !{job.languageDisplay}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Tempat Kerja
-            .col-sm-7.col-xs-9
-              #jobLocation.form-control-static 
-                strong !{job.locationDisplay}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Tarikh Tutup
-            .col-sm-7.col-xs-9
-              #jobClosing.form-control-static 
-                strong #{job.closing}
-          .form-group
-            label.col-sm-3.col-xs-3.control-label Lain-lain
-            .col-sm-7.col-xs-9
-              #jobOtherInfo.form-control-static 
-                textarea.form-control.no-border(rows="5") !{job.otherInfo}
+      .modal-body
+        .panel.panel-default
+          .panel-heading 
+            h3.panel-title !{job.title}
+          #modalContent
+            table.table.table-condensed
+              if job.imgUrl
+                tr
+                  td(colspan='4', align='center')
+                    img.img-responsive.img-thumbnail(src!=job.publishImgUrl, alt="Post Image")
+              if job.description
+                tr
+                  td(colspan='4', align='left')
+                    | !{job.descriptionDisplay}
+              tr
+                td(width='15%')
+                  label.control-label Majikan
+                td(width='35%')
+                  | !{job.employer.name}
+                td(width='15%')
+                  label.control-label Hubungi
+                td(width='35%')
+                  | !{job.employer.contact}
+              tr
+                td
+                  label.control-label Gaji
+                td 
+                  | !{job.salary}
+                td
+                  label.control-label Jenis Kerja
+                td
+                  | !{job.empTypeDisplay}
+              tr
+                td
+                  label.control-label Tempat Kerja
+                td 
+                  | !{job.locationDisplay}
+                td
+                  label.control-label Bahasa
+                td
+                  | !{job.languageDisplay}
+              if job.closing
+                tr
+                  td(colspan='4', align='center') 
+                    strong Tarikh Tutup: !{job.closing}
+              if job.otherInfoDisplay
+                tr
+                  td(colspan='4', align='left') !{job.otherInfoDisplay}
+          .panel-footer
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Close
