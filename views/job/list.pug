@@ -18,6 +18,8 @@ block content
         a(href='/job/embedFbPost' class='btn btn-primary') Embed FB Post
 
   #listing.table-wrap
+    include ../partials/pagination.pug
+
     table.table.table-striped
       thead
         tr
@@ -27,17 +29,20 @@ block content
           th Publish Date To
           th Closing
       tbody
-        each job in job_list
-          tr
-            td 
-              a(href=job.url) !{job.title}
-            td !{job.employer.name}
-            td #{job.publishStartDisplay}
-            td #{job.publishEndDisplay}
-            td #{job.closing}
+        if job_list
+          each job in job_list
+            tr
+              td 
+                a(href=job.url) !{job.title}
+              td !{job.employer.name}
+              td #{job.publishStartDisplay}
+              td #{job.publishEndDisplay}
+              td #{job.closing}
         else
           tr
             td(colspan='5' align='center') No records found.
+
+    include ../partials/pagination.pug
 
   #searchModal.modal.fade(tabindex='-1')
     .modal-dialog
@@ -48,6 +53,9 @@ block content
           h4 Search
         .modal-body
           form.form-horizontal(id="searchForm")
+            if (pageInfo && pageInfo.totalRow > 0)
+              input(type='hidden', id='newPageNo', name='newPageNo')
+              input(type='hidden', id='rowPerPage', name='rowPerPage', value=(pageInfo.rowPerPage))
             .form-group
               label.col-sm-4(for='searchPublishStartFrom') Publish Date From: 
               .col-sm-7
@@ -66,4 +74,4 @@ block content
                 input.form-control(type='text', name='searchEmployerName', id='searchEmployerName', placeholder='Search...', value=searchEmployerName)
         .modal-footer
           button.btn.btn-default(type='button', data-dismiss='modal') Close
-          button.btn.btn-primary(type='button', onclick="submitSearch()") Submit
+          button.btn.btn-primary(type='button', onclick="submitViewList()") Submit

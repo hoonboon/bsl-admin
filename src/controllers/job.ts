@@ -7,35 +7,41 @@ import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
 
 import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL } from "../models/Job";
-import logger from "../util/logger";
+
+import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
+
+const DEFAULT_ROW_PER_PAGE: number = 10;
 
 /**
  * GET /jobs
  * Job listing page.
  */
 export let getJobs = (req: Request, res: Response, next: NextFunction) => {
-    let searchPublishStartFrom = req.query.searchPublishStartFrom;
-    let searchPublishStartTo = req.query.searchPublishStartTo;
-    const searchTitle = req.query.searchTitle;
-    const searchEmployerName = req.query.searchNric;
+    const searchPublishStartFrom: string = req.query.searchPublishStartFrom;
+    const searchPublishStartTo: string = req.query.searchPublishStartTo;
+    const searchTitle: string = req.query.searchTitle;
+    const searchEmployerName: string = req.query.searchNric;
 
-    // default filter
-    if (!searchPublishStartFrom && !searchPublishStartTo && !searchTitle && !searchEmployerName) {
-        // show posts with Publish Start date 28 days before and after current date
-        searchPublishStartFrom = moment().subtract(28, "days").format("YYYY-MM-DD");
-        searchPublishStartTo = moment().add(28, "days").format("YYYY-MM-DD");
+    let newPageNo: number = parseInt(req.query.newPageNo);
+    if (!newPageNo) {
+        newPageNo = 1; // default
+    }
+
+    let rowPerPage: number = parseInt(req.query.rowPerPage);
+    if (!rowPerPage) {
+        rowPerPage = DEFAULT_ROW_PER_PAGE; // default
     }
 
     const query = Job.find();
 
     // filter records
     if (searchPublishStartFrom) {
-        query.where("publishStart").gte(searchPublishStartFrom);
+        query.where("publishStart").gte(<any>searchPublishStartFrom);
     }
 
     if (searchPublishStartTo) {
-        query.where("publishStart").lte(searchPublishStartTo);
+        query.where("publishStart").lte(<any>searchPublishStartTo);
     }
 
     if (searchTitle) {
@@ -50,15 +56,35 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
 
     query.where("status").in(["A"]);
 
-    query.sort([["publishStart", "descending"], ["createdAt", "descending"]]);
+    let pageInfo: PageInfo;
 
-    // client side script
-    const includeScripts = ["/js/job/list.js"];
+    query.count()
+        .then(function(count: number) {
+            if (count > 0) {
+                pageInfo = getNewPageInfo(count, rowPerPage, newPageNo);
 
-    query.exec(function (err, item_list: any) {
-            if (err) {
-                return next(err);
+                query.find();
+                query.skip(pageInfo.rowNoStart - 1);
+                query.limit(rowPerPage);
+                query.sort([["publishStart", "descending"], ["createdAt", "descending"]]);
+                return query.exec();
+            } else {
+                Promise.resolve();
             }
+        })
+        .then(function (item_list: any) {
+            let rowPerPageOptions, pageNoOptions;
+            if (pageInfo) {
+                rowPerPageOptions = selectOption.OPTIONS_ROW_PER_PAGE();
+                selectOption.markSelectedOption(rowPerPage.toString(), rowPerPageOptions);
+
+                pageNoOptions = selectOption.OPTIONS_PAGE_NO(pageInfo.totalPageNo);
+                selectOption.markSelectedOption(pageInfo.curPageNo.toString(), pageNoOptions);
+            }
+
+            // client side script
+            const includeScripts = ["/js/job/list.js", "/js/util/pagination.js"];
+
             res.render("job/list", {
                 title: "Job",
                 title2: "Job List",
@@ -67,9 +93,17 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
                 searchPublishStartTo: searchPublishStartTo,
                 searchTitle: searchTitle,
                 searchEmployerName: searchEmployerName,
+                rowPerPageOptions: rowPerPageOptions,
+                pageNoOptions: pageNoOptions,
+                pageInfo: pageInfo,
                 includeScripts: includeScripts
             });
+        })
+        .catch(function(error) {
+            console.error(error);
+            return next(error);
         });
+
 };
 
 /**

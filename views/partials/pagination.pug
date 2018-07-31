@@ -1,0 +1,37 @@
+if (pageInfo && pageInfo.totalRow > 0)
+  #pagination
+    .col-xs-4.text-left
+      | Show 
+      select.form-control-static(id='selRowPerPage', onchange='changeRowPerPage(this.value)')
+        for option in rowPerPageOptions
+          option(
+            label=option.label, 
+            value=option.value, 
+            selected=(option.isSelected ? 'selected' : false)
+          ) #{option.label}
+      |  entries
+    .col-xs-4.text-center
+      button.btn.btn-primary(
+        id='btnPrevPage', 
+        disabled=(pageInfo.hasPrevPage ? false : 'disabled'),
+        onclick='goToPage(' + (pageInfo.curPageNo - 1) + ')'
+      )
+        span.glyphicon.glyphicon-chevron-left
+      | 
+      button.btn.btn-primary(
+        id='btnNextPage', 
+        disabled=(pageInfo.hasNextPage ? false : 'disabled'),
+        onclick='goToPage(' + (pageInfo.curPageNo + 1) + ')'
+      )
+        span.glyphicon.glyphicon-chevron-right
+    .col-xs-4.text-right
+      | Page 
+      select.form-control-static(id='selNewPageNo', onchange='goToPage(this.value)')
+        for option in pageNoOptions
+          option(
+            label=option.label, 
+            value=option.value, 
+            selected=(option.isSelected ? 'selected' : false)
+          ) #{option.label}
+      |  of #{pageInfo.totalPageNo}
+  

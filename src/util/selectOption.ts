@@ -45,6 +45,50 @@ export function OPTIONS_LOCATION() {
     ] as SelectOption[];
 }
 
+// Row Per Page
+export function OPTIONS_ROW_PER_PAGE() {
+    return [
+        { label: "10", value: "10" },
+        { label: "25", value: "25" },
+        { label: "50", value: "50" },
+        { label: "100", value: "100" }
+    ] as SelectOption[];
+}
+
+// Page No.
+export function OPTIONS_PAGE_NO(totalPageNo: number) {
+    const result = [] as SelectOption[];
+    if (totalPageNo && totalPageNo > 0) {
+        for (let i = 0; i < totalPageNo; i++) {
+            const option = {
+                label: (i + 1).toString(),
+                value: (i + 1).toString()
+            };
+            result.push(option);
+        }
+    }
+    return result;
+}
+
+export function markSelectedOption(selectedValue: string, options: SelectOption[]) {
+    if (selectedValue && options) {
+        const option = options.find(option => option.value === selectedValue);
+        if (option) {
+            option.isSelected = true;
+        }
+    }
+}
+
+export function markSelectedOptions(selectedValues: string[], options: SelectOption[]) {
+    if (selectedValues && options) {
+        options.forEach(option => {
+            if (selectedValues.indexOf(option.value) > -1) {
+                option.isSelected = true;
+            }
+        });
+    }
+}
+
 export function getLabelByValue(value: string, options: SelectOption[]) {
     let result: string;
     if (options) {
