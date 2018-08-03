@@ -2,7 +2,7 @@ import express from "express";
 import compression from "compression";  // compresses requests
 import session from "express-session";
 import bodyParser from "body-parser";
-import logger from "./util/logger";
+import helmet from "helmet";
 import lusca from "lusca";
 import dotenv from "dotenv";
 import mongo from "connect-mongo";
@@ -23,9 +23,6 @@ dotenv.config({ path: ".env.example" });
 import * as homeController from "./controllers/home";
 import * as userController from "./controllers/user";
 import * as jobController from "./controllers/job";
-import * as apiController from "./controllers/api";
-import * as contactController from "./controllers/contact";
-
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -65,8 +62,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use(lusca.xframe("SAMEORIGIN"));
-app.use(lusca.xssProtection(true));
+app.use(helmet());
+app.use(helmet.noCache());
+app.use(lusca.csrf());
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -141,5 +139,22 @@ app.post("/job/:id/delete", passportConfig.isAuthenticated, jobController.postJo
 // app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login" }), (req, res) => {
 //   res.redirect(req.session.returnTo || "/");
 // });
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  const err: any = new Error("Not Found");
+  err.status = 404;
+  next(err);
+});
+
+// error handler
+app.use(function(err: any, req: any, res: any, next: any) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render("error");
+});
 
 export default app;
