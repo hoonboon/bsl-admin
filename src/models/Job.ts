@@ -11,21 +11,15 @@ export type JobModel = mongoose.Document & {
   title: string,
   description: string,
   descriptionDisplay: string,
-  employer: {
-    name: string,
-    contact: string
-  },
+  employerName: string,
+  applyMethod: string,
   salary: string,
-  empType: string[],
-  language: string[],
   location: string[],
   closing: string,
   publishStart: Date,
   publishEnd: Date,
   weight: number,
   tag: string[],
-  otherInfo: string,
-  otherInfoDisplay: string,
   customContent: string,
   status: string,
   createdBy: any,
@@ -43,20 +37,15 @@ export type JobModel = mongoose.Document & {
 const jobSchema = new mongoose.Schema({
   title: { type: String, uppercase: true },
   description: String,
-  employer: {
-    name: { type: String, uppercase: true },
-    contact: { type: String, uppercase: true },
-  },
+  employerName: { type: String, uppercase: true },
+  applyMethod: String,
   salary: String,
-  empType: [String],
-  language: [String],
   location: [String],
   closing: { type: String, uppercase: true },
   publishStart: Date,
   publishEnd: Date,
   weight: { type: Number, default: 5 },
   tag: [String],
-  otherInfo: String,
   imgUrl: String,
   customContent: String,
   status: { type: String, required: true, default: "A" },
@@ -122,7 +111,7 @@ jobSchema
 jobSchema
 .virtual("highlights")
 .get(function() {
-    let result = "Majikan: " + this.employer.name;
+    let result = "Majikan: " + this.employerName;
     if (this.location && this.location.length > 0) {
         result += ", Tempat Kerja: " + this.locationDisplay;
     }
@@ -138,42 +127,15 @@ jobSchema
         _id: this._id,
         title: this.title,
         description: this.description,
-        employer: {
-            name: this.employer.name,
-            contact: this.employer.contact
-        },
+        employerName: this.employerName,
+        applyMethod: this.applyMethod,
         salary: this.salary,
-        empType: this.empTypeDisplay,
-        language: this.languageDisplay,
         location: this.locationDisplay,
         closing: this.closing,
-        otherInfo: this.otherInfo,
         customContent: this.customContent,
         highlights: this.highlights,
         publishImgUrl: this.publishImgUrl
     };
-    return result;
-});
-
-// Virtual for Job's EmpType for display
-jobSchema
-.virtual("empTypeDisplay")
-.get(function() {
-    let result = "";
-    if (this.empType && this.empType.length > 0) {
-        result = selectOption.getFlattenedLabelsByValues(this.empType, selectOption.OPTIONS_EMPTYPE());
-    }
-    return result;
-});
-
-// Virtual for Job's language for display
-jobSchema
-.virtual("languageDisplay")
-.get(function() {
-    let result = "";
-    if (this.language && this.language.length > 0) {
-        result = selectOption.getFlattenedLabelsByValues(this.language, selectOption.OPTIONS_LANGUAGE());
-    }
     return result;
 });
 
@@ -193,13 +155,6 @@ jobSchema
 .virtual("descriptionDisplay")
 .get(function () {
     return this.description ? this.description.replace(/\n/g, "<br/>") : "";
-});
-
-// Virtual for Other Info for display
-jobSchema
-.virtual("otherInfoDisplay")
-.get(function () {
-    return this.otherInfo ? this.otherInfo.replace(/\n/g, "<br/>") : "";
 });
 
 const Job = mongoose.model("Job", jobSchema);

@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-  .page-header
+  .container
     if jobId
       h3
         if title2
@@ -15,30 +15,30 @@ block content
           = title2
         else
           = title
-  p.text-center
-    font(color="red") 
-      i ** Required fields.
-  form.form-horizontal(id='jobForm', method='POST')
-    input(type='hidden', name='_csrf', value=_csrf)
-    .form-group
-      label.col-sm-3.control-label(for='title') ** Post Title
-      .col-sm-7
-        input.form-control(type='text', name='title', id='title', placeholder='Job Title', autofocus, required, value!=(job === undefined ? '' : job.title))
-    .form-group
-      label.col-sm-3.control-label(for='fbPostUrl') ** Facebook Post URL
-      .col-sm-7
-        input.form-control(type='text', name='fbPostUrl', id='fbPostUrl', placeholder='E.g. https://www.facebook.com/CariKijoKlate/posts/2477681305577142', autofocus, required, value!=(job === undefined ? '' : job.fbPostUrl))
-    .form-group
-      label.col-sm-3.control-label(for='publishStart') ** Publish Date Start
-      .col-sm-7
-        input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', required, value=(job === undefined ? '' : job.publishStartInput))
-    .form-group
-      label.col-sm-3.control-label(for='publishEnd') ** Publish Date End
-      .col-sm-7
-        input.form-control(type='date', name='publishEnd', id='publishEnd', placeholder='Publish Date End', required, value=(job === undefined ? '' : job.publishEndInput))
-    .form-group
-      .col-sm-offset-3.col-sm-7
-        button.btn.btn-success(type='submit') Save
-        span
-        | 
-        a.btn.btn-danger(href='/jobs') Cancel
+    p.text-center
+      font(color="red") 
+        i ** Required fields.
+    form.form-horizontal(id='jobForm', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      .form-group
+        label.col-sm-3.control-label(for='title') ** Post Title
+        .col-sm-7
+          input.form-control(type='text', name='title', id='title', placeholder='Job Title', autofocus, required, value!=(job === undefined ? '' : job.title))
+      .form-group
+        label.col-sm-3.control-label(for='fbPostUrl') ** Facebook Post URL
+        .col-sm-7
+          input.form-control(type='text', name='fbPostUrl', id='fbPostUrl', placeholder='E.g. https://www.facebook.com/CariKijoKlate/posts/2477681305577142', autofocus, required, value!=(job === undefined ? '' : job.fbPostUrl))
+      .form-group
+        label.col-sm-3.control-label(for='publishStart') ** Publish Date Start
+        .col-sm-7
+          input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', required, value=(job === undefined ? '' : job.publishStartInput))
+      .form-group
+        label.col-sm-3.control-label(for='publishEnd') ** Publish Date End
+        .col-sm-7
+          input.form-control(type='date', name='publishEnd', id='publishEnd', placeholder='Publish Date End', required, value=(job === undefined ? '' : job.publishEndInput))
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          button.btn.btn-success(type='submit') Save
+          span
+          | 
+          a.btn.btn-danger(href='/jobs') Cancel

@@ -2,47 +2,52 @@ extends ../layout
 
 
 block content
-  .page-header
+  .container
     h3
       if title2
         = title2
       else
         = title
-    .btn-toolbar(role="toolbar")
-      .btn-group(role="group")
-        a(href='#', onclick='showSearch()' class='btn btn-primary')
-          span.glyphicon.glyphicon-search
-      .btn-group(role="group")
-        a(href='/job/create' class='btn btn-primary') Create
-      .btn-group(role="group")
-        a(href='/job/embedFbPost' class='btn btn-primary') Embed FB Post
+    
+    p
+      .btn-toolbar(role="toolbar")
+        .btn-group(role="group")
+          a(href='#', onclick='showSearch()' class='btn btn-primary')
+            span.glyphicon.glyphicon-search
+        .btn-group(role="group")
+          a(href='/job/create' class='btn btn-primary') Create
+        .btn-group(role="group")
+          a(href='/job/embedFbPost' class='btn btn-primary') Embed FB Post
 
-  #listing.table-wrap
-    include ../partials/pagination.pug
-
-    table.table.table-striped
-      thead
-        tr
-          th Job Title
-          th Employer Name
-          th Publish Date From
-          th Publish Date To
-          th Closing
-      tbody
-        if job_list
-          each job in job_list
-            tr
-              td 
-                a(href=job.url) !{job.title}
-              td !{job.employer.name}
-              td #{job.publishStartDisplay}
-              td #{job.publishEndDisplay}
-              td #{job.closing}
-        else
+    #listing.table-responsive
+      table.table.table-striped
+        thead
           tr
-            td(colspan='5' align='center') No records found.
-
-    include ../partials/pagination.pug
+            td(colspan="5")
+              include ../partials/pagination.pug
+          tr
+            th Employer Name
+            th Post Title
+            th Publish Date From
+            th Publish Date To
+            th Closing
+        tbody
+          if job_list
+            each job in job_list
+              tr
+                td 
+                  a(href=job.url) !{job.employerName}
+                td !{job.title}
+                td #{job.publishStartDisplay}
+                td #{job.publishEndDisplay}
+                td #{job.closing}
+          else
+            tr
+              td(colspan='5' align='center') No records found.
+        tfoot
+          tr
+            td(colspan="5")
+              include ../partials/pagination.pug
 
   #searchModal.modal.fade(tabindex='-1')
     .modal-dialog

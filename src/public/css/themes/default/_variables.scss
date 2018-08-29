@@ -54,7 +54,9 @@ $navbar-default-bg: #ff0000;
 $navbar-default-link-color: #252525;
 $navbar-default-link-hover-color: #ffffff;
 $navbar-default-link-active-color: #ffffff;
-$navbar-default-link-hover-bg: transparent;
-$navbar-default-link-active-bg: transparent;
+$navbar-default-link-hover-bg: lighten($navbar-default-bg, 25%);
+$navbar-default-link-active-bg: lighten($navbar-default-bg, 25%);
 $navbar-default-color: #ff0000;
 $navbar-default-brand-hover-color: #ffffff;
+
+$grid-gutter-width: 12px;
