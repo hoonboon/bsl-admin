@@ -13,6 +13,7 @@ export type JobModel = mongoose.Document & {
   descriptionDisplay: string,
   employerName: string,
   applyMethod: string,
+  applyMethodDisplay: string,
   salary: string,
   location: string[],
   closing: string,
@@ -155,6 +156,13 @@ jobSchema
 .virtual("descriptionDisplay")
 .get(function () {
     return this.description ? this.description.replace(/\n/g, "<br/>") : "";
+});
+
+// Virtual for Apply Method for display
+jobSchema
+.virtual("applyMethodDisplay")
+.get(function () {
+    return this.applyMethod ? this.applyMethod.replace(/\n/g, "<br/>") : "";
 });
 
 const Job = mongoose.model("Job", jobSchema);

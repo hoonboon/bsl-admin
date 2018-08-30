@@ -63,7 +63,7 @@ block content
         .form-group
           label.col-sm-3.col-xs-3.control-label Apply Method
           .col-sm-7.col-xs-9
-            .form-control-static !{job.applyMethod}
+            .form-control-static !{job.applyMethodDisplay}
         .form-group
           label.col-sm-3.col-xs-3.control-label Publish Date Start
           .col-sm-7.col-xs-9
@@ -75,7 +75,7 @@ block content
         .form-group
           label.col-sm-3.col-xs-3.control-label Closing
           .col-sm-7.col-xs-9
-            .form-control-static #{job.closing}
+            .form-control-static !{job.closing}
         .form-group
           label.col-sm-3.col-xs-3.control-label Image URL
           .col-sm-7.col-xs-9
