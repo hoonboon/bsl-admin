@@ -4,6 +4,12 @@ $(document).ready(function() {
             height: 300
         });
     }
+
+    if (window.history.length > 1) {
+        $("#btnGoBack").show();
+    } else {
+        $("#btnGoBack").hide();
+    }
 });
 
 function submitDelete() {
@@ -26,4 +32,8 @@ function fbShare(url) {
             href: url,
         }, function (response) { });
     }
+}
+
+function goBack() {
+    window.history.back();
 }

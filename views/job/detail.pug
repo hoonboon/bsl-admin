@@ -13,23 +13,22 @@ block content
     #jobDetail.form-horizontal
       if (job.postType && job.postType == "FB")
         .form-group
-          label.col-sm-3.col-xs-3.control-label Post Title
-          .col-sm-7.col-xs-9
+          label.col-sm-3.col-xs-4.control-label Post Title
+          .col-sm-7.col-xs-8
             .form-control-static !{job.title}
         .form-group
-          label.col-sm-3.col-xs-3.control-label Facebook Post URL
-          .col-sm-7.col-xs-9
+          label.col-sm-3.col-xs-12.control-label Facebook Post URL
+          .col-sm-7.col-xs-12
             .form-control-static
-              .form-control-static 
-                #fbPostUrl !{job.fbPostUrl}
-                .fb-post(data-href!=job.fbPostUrl)
+              #fbPostUrl !{job.fbPostUrl}
+              .fb-post(data-href!=job.fbPostUrl)
         .form-group
-          label.col-sm-3.col-xs-3.control-label Publish Date Start
-          .col-sm-7.col-xs-9
+          label.col-sm-3.col-xs-4.control-label Publish Date Start
+          .col-sm-7.col-xs-8
             .form-control-static #{job.publishStartDisplay}
         .form-group
-          label.col-sm-3.col-xs-3.control-label Publish Date End
-          .col-sm-7.col-xs-9
+          label.col-sm-3.col-xs-4.control-label Publish Date End
+          .col-sm-7.col-xs-8
             .form-control-static #{job.publishEndDisplay}
         .form-group
           .col-sm-offset-3.col-sm-7
@@ -39,7 +38,7 @@ block content
             a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
             span
             | 
-            a.btn.btn-warning(href='/jobs') Back
+            a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
       else
         .form-group
           label.col-sm-3.col-xs-3.control-label Employer Name
@@ -100,7 +99,7 @@ block content
             a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
             span
             | 
-            a.btn.btn-warning(href='/jobs') Back
+            a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
 
   include preview.pug
   

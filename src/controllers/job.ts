@@ -449,13 +449,13 @@ export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction)
     });
 
     // client side script
-    // const includeScripts = ["/js/job/form.js"];
+    const includeScripts = ["/js/job/formEmbedFbPost.js"];
 
     res.render("job/formEmbedFbPost", {
         title: "Job",
         title2: "Embed Facebook Post",
         job: jobInput,
-        // includeScripts: includeScripts,
+        includeScripts: includeScripts,
     });
 };
 
@@ -508,13 +508,13 @@ export let postJobEmbedFbPost = [
             req.flash("errors", errors.array());
 
             // client side script
-            // const includeScripts = [];
+            const includeScripts = ["/js/job/formEmbedFbPost.js"];
 
             res.render("job/formEmbedFbPost", {
                 title: "Job",
                 title2: "Embed Facebook Post",
                 job: jobInput,
-                // includeScripts: includeScripts,
+                includeScripts: includeScripts,
             });
         }
     }
@@ -543,14 +543,14 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
         const jobDb = results.job as JobModel;
 
         // client side script
-        // const includeScripts = [];
+        const includeScripts = ["/js/job/formEmbedFbPost.js"];
 
         res.render("job/formEmbedFbPost", {
             title: "Job",
             title2: "Edit Embedded Facebook Post Detail",
             job: jobDb,
             jobId: jobDb._id,
-            // includeScripts: includeScripts,
+            includeScripts: includeScripts,
         });
 
     });
@@ -613,11 +613,15 @@ export let postJobUpdateFbPost = [
         } else {
             req.flash("errors", errors.array());
 
+            // client side script
+            const includeScripts = ["/js/job/formEmbedFbPost.js"];
+
             res.render("job/formEmbedFbPost", {
                 title: "Job",
                 title2: "Edit Embedded Facebook Post Detail",
                 job: jobInput,
                 jobId: jobInput._id,
+                includeScripts: includeScripts,
             });
         }
     }
