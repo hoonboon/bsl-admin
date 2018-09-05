@@ -21,6 +21,7 @@ block content
   
     form.form-horizontal(id='jobForm', method='POST')
       input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='bu', value=bu)
       .form-group
         label.col-sm-3.control-label(for='employerName') ** Employer Name
         .col-sm-7

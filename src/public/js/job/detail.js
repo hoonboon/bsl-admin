@@ -35,5 +35,15 @@ function fbShare(url) {
 }
 
 function goBack() {
-    window.history.back();
+    let bu = $("#bu").val();
+    if (bu) {
+        window.location = window.atob(bu);
+    } else {
+        window.history.back();
+    }
+}
+
+function editDetail(targetUrl) {
+    targetUrl += "?bu=" + $("#bu").val();
+    window.location = targetUrl;
 }

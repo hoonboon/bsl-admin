@@ -7,8 +7,11 @@ import { sanitizeBody } from "express-validator/filter";
 
 import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL } from "../models/Job";
 
+
 import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
+import * as backUrl from "../util/backUrl";
+import logger from "../util/logger";
 
 const DEFAULT_ROW_PER_PAGE: number = 10;
 
@@ -249,11 +252,17 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
                 title2: "Job Detail",
                 job: jobDb,
                 jobId: jobDb._id,
-                includeScripts: includeScripts
+                includeScripts: includeScripts,
+                bu: req.query.bu,
             });
         } else {
             req.flash("errors", { msg: "Job not found." });
-            res.redirect("/jobs");
+            const bu = backUrl.decodeBackUrl(req.query.bu);
+            if (bu) {
+                res.redirect(bu);
+            } else {
+                res.redirect("/jobs");
+            }
         }
     });
 };
@@ -273,7 +282,12 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
 
         if (!results.job) {
             req.flash("errors", { msg: "Job not found." });
-            res.redirect("/jobs");
+            const bu = backUrl.decodeBackUrl(req.query.bu);
+            if (bu) {
+                res.redirect(bu);
+            } else {
+                res.redirect("/jobs");
+            }
         }
 
         const jobDb = results.job as JobModel;
@@ -290,7 +304,8 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             job: jobDb,
             jobId: jobDb._id,
             includeScripts: includeScripts,
-            locationOptions: locationOptions
+            locationOptions: locationOptions,
+            bu: req.query.bu,
         });
 
     });
@@ -332,6 +347,7 @@ export let postJobUpdate = [
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
+    sanitizeBody("bu").trim().unescape(),
     sanitizeBody("publishStart").toDate(),
     sanitizeBody("publishEnd").toDate(),
 
@@ -364,13 +380,18 @@ export let postJobUpdate = [
 
                 if (!targetJob) {
                     req.flash("errors", { msg: "Job not found." });
-                    res.redirect("/jobs");
+                    const bu = backUrl.decodeBackUrl(req.body.bu);
+                    if (bu) {
+                        res.redirect(bu);
+                    } else {
+                        res.redirect("/jobs");
+                    }
                 }
 
                 Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Job successfully updated." });
-                    res.redirect(jobUpdated.url);
+                    res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
                 });
             });
         } else {
@@ -388,7 +409,8 @@ export let postJobUpdate = [
                 job: jobInput,
                 jobId: jobInput._id,
                 includeScripts: includeScripts,
-                locationOptions: locationOptions
+                locationOptions: locationOptions,
+                bu: req.body.bu,
             });
         }
     }
@@ -418,18 +440,33 @@ export let postJobDelete = [
 
                 if (!targetJob) {
                     req.flash("errors", { msg: "Job not found." });
-                    res.redirect("/jobs");
+                    const bu = backUrl.decodeBackUrl(req.body.bu);
+                    if (bu) {
+                        res.redirect(bu);
+                    } else {
+                        res.redirect("/jobs");
+                    }
                 }
 
                 Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Job successfully deleted." });
-                    res.redirect("/jobs");
+                    const bu = backUrl.decodeBackUrl(req.body.bu);
+                    if (bu) {
+                        res.redirect(bu);
+                    } else {
+                        res.redirect("/jobs");
+                    }
                 });
             });
         } else {
             req.flash("errors", errors.array());
-            res.redirect("/jobs");
+            const bu = backUrl.decodeBackUrl(req.body.bu);
+            if (bu) {
+                res.redirect(bu);
+            } else {
+                res.redirect("/jobs");
+            }
         }
     }
 ];
@@ -537,7 +574,12 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
 
         if (!results.job) {
             req.flash("errors", { msg: "Post not found." });
-            res.redirect("/jobs");
+            const bu = backUrl.decodeBackUrl(req.query.bu);
+            if (bu) {
+                res.redirect(bu);
+            } else {
+                res.redirect("/jobs");
+            }
         }
 
         const jobDb = results.job as JobModel;
@@ -551,6 +593,7 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
             job: jobDb,
             jobId: jobDb._id,
             includeScripts: includeScripts,
+            bu: req.query.bu,
         });
 
     });
@@ -576,6 +619,7 @@ export let postJobUpdateFbPost = [
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
+    sanitizeBody("bu").trim().unescape(),
     sanitizeBody("publishStart").toDate(),
     sanitizeBody("publishEnd").toDate(),
 
@@ -601,13 +645,18 @@ export let postJobUpdateFbPost = [
 
                 if (!targetJob) {
                     req.flash("errors", { msg: "Post not found." });
-                    res.redirect("/jobs");
+                    const bu = backUrl.decodeBackUrl(req.body.bu);
+                    if (bu) {
+                        res.redirect(bu);
+                    } else {
+                        res.redirect("/jobs");
+                    }
                 }
 
                 Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Post successfully updated." });
-                    res.redirect(jobUpdated.url);
+                    res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
                 });
             });
         } else {
@@ -622,6 +671,7 @@ export let postJobUpdateFbPost = [
                 job: jobInput,
                 jobId: jobInput._id,
                 includeScripts: includeScripts,
+                bu: req.body.bu,
             });
         }
     }

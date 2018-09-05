@@ -32,7 +32,7 @@ block content
             .form-control-static #{job.publishEndDisplay}
         .form-group
           .col-sm-offset-3.col-sm-7
-            a.btn.btn-primary(href=job.url+'/updateFbPost') Edit
+            a.btn.btn-primary(href="#", onclick="editDetail('" + job.url + "/updateFbPost')") Edit
             span
             | 
             a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
@@ -87,7 +87,7 @@ block content
               textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
         .form-group
           .col-sm-offset-3.col-sm-7
-            a.btn.btn-primary(href=job.url+'/update') Edit
+            a.btn.btn-primary(href="#", onclick="editDetail('" + job.url + "/update')") Edit
             span
             | 
             a.btn.btn-primary(href='#', onclick='preview()') Preview
@@ -106,3 +106,4 @@ block content
   form(id='jobDeleteForm', action=job.url+'/delete', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
     input(type='hidden', name='id', value=jobId)
+    input(type='hidden', name='bu', id='bu', value=bu)
