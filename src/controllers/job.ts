@@ -53,7 +53,7 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
 
     if (searchEmployerName) {
         const regex = new RegExp(searchEmployerName.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
-        query.where("nric").regex(regex);
+        query.where("employerName").regex(regex);
     }
 
     query.where("status").in(["A"]);
