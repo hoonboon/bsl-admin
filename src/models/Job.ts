@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import moment from "moment";
+import { XmlEntities } from "html-entities";
 import * as selectOption  from "../util/selectOption";
 
 const Schema = mongoose.Schema;
@@ -9,6 +10,7 @@ export const POSTTYPE_FB = "FB";
 
 export type JobModel = mongoose.Document & {
   title: string,
+  titleDecoded: string,
   description: string,
   descriptionDisplay: string,
   employerName: string,
@@ -27,22 +29,25 @@ export type JobModel = mongoose.Document & {
   updatedBy: any,
   url: string,
   imgUrl: string,
+  imgUrlDecoded: string,
   publishUrl: string,
   publishImgUrl: string,
   highlights: string,
+  highlightsDecoded: string,
   apiModel: any,
   postType: string,
-  fbPostUrl: string
+  fbPostUrl: string,
+  fbPostUrlDecoded: string
 };
 
 const jobSchema = new mongoose.Schema({
-  title: { type: String, uppercase: true },
+  title: { type: String },
   description: String,
-  employerName: { type: String, uppercase: true },
+  employerName: { type: String },
   applyMethod: String,
   salary: String,
   location: [String],
-  closing: { type: String, uppercase: true },
+  closing: { type: String },
   publishStart: Date,
   publishEnd: Date,
   weight: { type: Number, default: 5 },
@@ -104,7 +109,7 @@ jobSchema
 .virtual("publishImgUrl")
 .get(function() {
     const baseUrl = process.env.PUBLIC_SITE || "";
-    const imgUrl = this.imgUrl || baseUrl + "/images/fbProfilePhoto2.jpg";
+    const imgUrl = this.imgUrlDecoded || baseUrl + "/images/fbProfilePhoto2.jpg";
     return imgUrl;
 });
 
@@ -163,6 +168,38 @@ jobSchema
 .virtual("applyMethodDisplay")
 .get(function () {
     return this.applyMethod ? this.applyMethod.replace(/\n/g, "<br/>") : "";
+});
+
+// Virtual for Job's Title for social sharing data exchange
+jobSchema
+.virtual("titleDecoded")
+.get(function() {
+    const entities = new XmlEntities();
+    return this.title ?  entities.decode(this.title) : "" ;
+});
+
+// Virtual for Job's highlights for social sharing data exchange
+jobSchema
+.virtual("highlightsDecoded")
+.get(function() {
+    const entities = new XmlEntities();
+    return this.highlights ?  entities.decode(this.highlights) : "" ;
+});
+
+// Virtual for Job's image Url for social sharing data exchange
+jobSchema
+.virtual("imgUrlDecoded")
+.get(function() {
+    const entities = new XmlEntities();
+    return this.imgUrl ?  entities.decode(this.imgUrl) : "" ;
+});
+
+// Virtual for Job's Facebook Post Url for social sharing data exchange
+jobSchema
+.virtual("fbPostUrlDecoded")
+.get(function() {
+    const entities = new XmlEntities();
+    return this.fbPostUrl ?  entities.decode(this.fbPostUrl) : "" ;
 });
 
 const Job = mongoose.model("Job", jobSchema);
