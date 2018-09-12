@@ -47,12 +47,12 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (searchTitle) {
-        const regex = new RegExp(searchTitle.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
+        const regex = new RegExp(searchTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
         query.where("title").regex(regex);
     }
 
     if (searchEmployerName) {
-        const regex = new RegExp(searchEmployerName.toUpperCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
+        const regex = new RegExp(searchEmployerName.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
         query.where("employerName").regex(regex);
     }
 
