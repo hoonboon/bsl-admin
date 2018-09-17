@@ -34,9 +34,11 @@ block content
         label.col-sm-3.control-label(for='location') Job Location
         .col-sm-7
           for option in locationOptions
-            .checkbox-inline
-              input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value, checked=option.isSelected)
-              label(for=option.value) #{option.label}
+            .checkbox.col-xs-offset-1.col-xs-11.col-sm-4
+                input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value, checked=option.isSelected)
+                label(for=option.value) #{option.label}
+            .col-xs-12.col-sm-6
+              input.form-control(type='text', name='area_' + option.value, id='area_' + option.value, placeholder='Area in ' + option.label, value!=(job === undefined ? '' : job.getAreaByLocationCode(option.value)))
       .form-group
         label.col-sm-3.control-label(for='description') Job Description
         .col-sm-7

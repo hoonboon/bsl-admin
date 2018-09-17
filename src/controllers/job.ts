@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
 
-import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL } from "../models/Job";
+import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL, Location } from "../models/Job";
 
 
 import { PageInfo, getNewPageInfo } from "../util/pagination";
@@ -147,6 +147,22 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+function composeLocationFromRequest(req: Request) {
+    const locations: string[] = req.body.location;
+    const results: Location[] = [];
+    if (locations && locations.length > 0) {
+        locations.forEach(location => {
+            const area = req.body["area_" + location];
+            if (area) {
+                results.push({ code: location, area: area });
+            } else {
+                results.push({ code: location, area: "" });
+            }
+        });
+    }
+    return results;
+}
+
 /**
  * POST /job/create
  * Create a new Job.
@@ -190,13 +206,15 @@ export let postJobCreate = [
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
+        const location = composeLocationFromRequest(req);
+
         const jobInput = new Job({
             title: req.body.title,
             description: req.body.description,
             employerName: req.body.employerName,
             applyMethod: req.body.applyMethod,
             salary: req.body.salary,
-            location: req.body.location,
+            location: location,
             closing: req.body.closing,
             publishStart: req.body.publishStart,
             publishEnd: req.body.publishEnd,
@@ -219,7 +237,7 @@ export let postJobCreate = [
             req.flash("errors", errors.array());
 
             const locationOptions = selectOption.OPTIONS_LOCATION();
-            selectOption.markSelectedOptions(jobInput.location, locationOptions);
+            selectOption.markSelectedOptions(req.body.location, locationOptions);
 
             // client side script
             const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
@@ -293,7 +311,7 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
         const jobDb = results.job as JobModel;
 
         const locationOptions = selectOption.OPTIONS_LOCATION();
-        selectOption.markSelectedOptions(jobDb.location, locationOptions);
+        selectOption.markSelectedOptions(jobDb.locationCodes, locationOptions);
 
         // client side script
         const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
@@ -355,13 +373,15 @@ export let postJobUpdate = [
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
+        const location = composeLocationFromRequest(req);
+
         const jobInput = new Job({
             title: req.body.title,
             description: req.body.description,
             employerName: req.body.employerName,
             applyMethod: req.body.applyMethod,
             salary: req.body.salary,
-            location: req.body.location,
+            location: location,
             closing: req.body.closing,
             publishStart: req.body.publishStart,
             publishEnd: req.body.publishEnd,
@@ -398,7 +418,7 @@ export let postJobUpdate = [
             req.flash("errors", errors.array());
 
             const locationOptions = selectOption.OPTIONS_LOCATION();
-            selectOption.markSelectedOptions(jobInput.location, locationOptions);
+            selectOption.markSelectedOptions(req.body.location, locationOptions);
 
             // client side script
             const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
