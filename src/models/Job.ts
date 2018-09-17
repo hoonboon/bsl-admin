@@ -8,6 +8,11 @@ const Schema = mongoose.Schema;
 export const POSTTYPE_NORMAL = "NORMAL";
 export const POSTTYPE_FB = "FB";
 
+export type Location = {
+    code: string;
+    area: string;
+};
+
 export type JobModel = mongoose.Document & {
   title: string,
   titleDecoded: string,
@@ -17,7 +22,8 @@ export type JobModel = mongoose.Document & {
   applyMethod: string,
   applyMethodDisplay: string,
   salary: string,
-  location: string[],
+  location: Location[],
+  locationCodes: string[],
   closing: string,
   publishStart: Date,
   publishEnd: Date,
@@ -37,8 +43,13 @@ export type JobModel = mongoose.Document & {
   apiModel: any,
   postType: string,
   fbPostUrl: string,
-  fbPostUrlDecoded: string
+  fbPostUrlDecoded: string,
+
+  getAreaByLocationCode: getAreaByLocationCodeFunc,
+
 };
+
+type getAreaByLocationCodeFunc = (locationCode: string) => string;
 
 const jobSchema = new mongoose.Schema({
   title: { type: String },
@@ -46,7 +57,10 @@ const jobSchema = new mongoose.Schema({
   employerName: { type: String },
   applyMethod: String,
   salary: String,
-  location: [String],
+  location: [{
+      code: String,
+      area: String,
+  }],
   closing: { type: String },
   publishStart: Date,
   publishEnd: Date,
@@ -119,7 +133,7 @@ jobSchema
 .get(function() {
     let result = "Majikan: " + this.employerName;
     if (this.location && this.location.length > 0) {
-        result += ", Tempat Kerja: " + this.locationDisplay;
+        result += ", Tempat Kerja: " + this.locationDisplayPlain;
     }
     result += ", Tarik Tutup: " + this.closing;
     return result;
@@ -136,12 +150,26 @@ jobSchema
         employerName: this.employerName,
         applyMethod: this.applyMethod,
         salary: this.salary,
-        location: this.locationDisplay,
+        location: this.locationDisplayPlain,
         closing: this.closing,
         customContent: this.customContent,
         highlights: this.highlights,
         publishImgUrl: this.publishImgUrl
     };
+    return result;
+});
+
+// Virtual for Job's Locations' Code
+jobSchema
+.virtual("locationCodes")
+.get(function() {
+    const result: string[] = [];
+    if (this.location && this.location.length > 0) {
+        const labels: string[] = [];
+        this.location.forEach((location: Location) => {
+            result.push(location.code);
+        });
+    }
     return result;
 });
 
@@ -151,7 +179,58 @@ jobSchema
 .get(function() {
     let result = "-";
     if (this.location && this.location.length > 0) {
-        result = selectOption.getFlattenedLabelsByValues(this.location, selectOption.OPTIONS_LOCATION());
+        const labels: string[] = [];
+        if (selectOption.OPTIONS_LOCATION()) {
+            this.location.forEach((location: Location) => {
+                const label = selectOption.getLabelByValue(location.code, selectOption.OPTIONS_LOCATION());
+                if (label) {
+                    if (location.area) {
+                        labels.push(`<b>${label}</b> (${location.area})`);
+                    } else {
+                        labels.push(`<b>${label}</b>`);
+                    }
+                }
+            });
+        }
+        if (labels) {
+            labels.forEach((label, i) => {
+                if (i == 0)
+                    result = label;
+                else
+                    result += " | " + label;
+            });
+        }
+    }
+    return result;
+});
+
+// Virtual for Job's Locations for display - without any styling
+jobSchema
+.virtual("locationDisplayPlain")
+.get(function() {
+    let result = "-";
+    if (this.location && this.location.length > 0) {
+        const labels: string[] = [];
+        if (selectOption.OPTIONS_LOCATION()) {
+            this.location.forEach((location: Location) => {
+                const label = selectOption.getLabelByValue(location.code, selectOption.OPTIONS_LOCATION());
+                if (label) {
+                    if (location.area) {
+                        labels.push(`${label} (${location.area})`);
+                    } else {
+                        labels.push(label);
+                    }
+                }
+            });
+        }
+        if (labels) {
+            labels.forEach((label, i) => {
+                if (i == 0)
+                    result = label;
+                else
+                    result += " | " + label;
+            });
+        }
     }
     return result;
 });
@@ -201,6 +280,19 @@ jobSchema
     const entities = new XmlEntities();
     return this.fbPostUrl ?  entities.decode(this.fbPostUrl) : "" ;
 });
+
+const getAreaByLocationCode: getAreaByLocationCodeFunc = function (locationCode) {
+    let result: string;
+    if (this.location && this.location.length > 0) {
+        const matched = (this.location as Location[]).find(location => location.code === locationCode);
+        if (matched) {
+            result = matched.area;
+        }
+    }
+    return result;
+};
+
+jobSchema.methods.getAreaByLocationCode = getAreaByLocationCode;
 
 const Job = mongoose.model("Job", jobSchema);
 export default Job;
