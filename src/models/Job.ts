@@ -133,7 +133,7 @@ jobSchema
 .get(function() {
     let result = "Majikan: " + this.employerName;
     if (this.location && this.location.length > 0) {
-        result += ", Tempat Kerja: " + this.locationDisplayPlain;
+        result += ", Tempat Kerja: " + this.locationDisplay;
     }
     result += ", Tarik Tutup: " + this.closing;
     return result;
@@ -150,7 +150,7 @@ jobSchema
         employerName: this.employerName,
         applyMethod: this.applyMethod,
         salary: this.salary,
-        location: this.locationDisplayPlain,
+        location: this.locationDisplay,
         closing: this.closing,
         customContent: this.customContent,
         highlights: this.highlights,
@@ -176,37 +176,6 @@ jobSchema
 // Virtual for Job's Locations for display
 jobSchema
 .virtual("locationDisplay")
-.get(function() {
-    let result = "-";
-    if (this.location && this.location.length > 0) {
-        const labels: string[] = [];
-        if (selectOption.OPTIONS_LOCATION()) {
-            this.location.forEach((location: Location) => {
-                const label = selectOption.getLabelByValue(location.code, selectOption.OPTIONS_LOCATION());
-                if (label) {
-                    if (location.area) {
-                        labels.push(`<b>${label}</b> (${location.area})`);
-                    } else {
-                        labels.push(`<b>${label}</b>`);
-                    }
-                }
-            });
-        }
-        if (labels) {
-            labels.forEach((label, i) => {
-                if (i == 0)
-                    result = label;
-                else
-                    result += " | " + label;
-            });
-        }
-    }
-    return result;
-});
-
-// Virtual for Job's Locations for display - without any styling
-jobSchema
-.virtual("locationDisplayPlain")
 .get(function() {
     let result = "-";
     if (this.location && this.location.length > 0) {
