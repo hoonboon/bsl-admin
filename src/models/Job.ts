@@ -135,7 +135,7 @@ jobSchema
     if (this.location && this.location.length > 0) {
         result += ", Tempat Kerja: " + this.locationDisplay;
     }
-    result += ", Tarik Tutup: " + this.closing;
+    result += ", Tarikh Tutup: " + this.closing;
     return result;
 });
 
