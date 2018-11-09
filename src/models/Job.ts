@@ -13,45 +13,45 @@ export type Location = {
     area: string;
 };
 
-export type JobModel = mongoose.Document & {
-  title: string,
-  titleDecoded: string,
-  description: string,
-  descriptionDisplay: string,
-  employerName: string,
-  applyMethod: string,
-  applyMethodDisplay: string,
-  salary: string,
-  location: Location[],
-  locationCodes: string[],
-  closing: string,
-  publishStart: Date,
-  publishEnd: Date,
-  weight: number,
-  tag: string[],
-  customContent: string,
-  status: string,
-  createdBy: any,
-  updatedBy: any,
-  url: string,
-  imgUrl: string,
-  imgUrlDecoded: string,
-  publishUrl: string,
-  publishImgUrl: string,
-  highlights: string,
-  highlightsDecoded: string,
-  apiModel: any,
-  postType: string,
-  fbPostUrl: string,
-  fbPostUrlDecoded: string,
+export interface IJob extends mongoose.Document {
+  title: string;
+  titleDecoded: string;
+  description: string;
+  descriptionDisplay: string;
+  employerName: string;
+  applyMethod: string;
+  applyMethodDisplay: string;
+  salary: string;
+  location: Location[];
+  locationCodes: string[];
+  closing: string;
+  publishStart: Date;
+  publishEnd: Date;
+  weight: number;
+  tag: string[];
+  customContent: string;
+  status: string;
+  createdBy: any;
+  updatedBy: any;
+  url: string;
+  imgUrl: string;
+  imgUrlDecoded: string;
+  publishUrl: string;
+  publishImgUrl: string;
+  highlights: string;
+  highlightsDecoded: string;
+  apiModel: any;
+  postType: string;
+  fbPostUrl: string;
+  fbPostUrlDecoded: string;
 
-  getAreaByLocationCode: getAreaByLocationCodeFunc,
+  getAreaByLocationCode: getAreaByLocationCodeFunc;
 
-};
+}
 
 type getAreaByLocationCodeFunc = (locationCode: string) => string;
 
-const jobSchema = new mongoose.Schema({
+const JobSchema = new mongoose.Schema({
   title: { type: String },
   description: String,
   employerName: { type: String },
@@ -76,42 +76,42 @@ const jobSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Virtual for Publish Start Date for display
-jobSchema
+JobSchema
 .virtual("publishStartDisplay")
 .get(function () {
     return this.publishStart ? moment(this.publishStart).format("YYYY-MM-DD") : "?";
 });
 
 // Virtual for Publish End Date for display
-jobSchema
+JobSchema
 .virtual("publishEndDisplay")
 .get(function () {
     return this.publishEnd ? moment(this.publishEnd).format("YYYY-MM-DD") : "?";
 });
 
 // Virtual for Publish Start Date for form input
-jobSchema
+JobSchema
 .virtual("publishStartInput")
 .get(function () {
     return this.publishStart ? moment(this.publishStart).format("YYYY-MM-DD") : "";
 });
 
 // Virtual for Publish End Date for form input
-jobSchema
+JobSchema
 .virtual("publishEndInput")
 .get(function () {
     return this.publishEnd ? moment(this.publishEnd).format("YYYY-MM-DD") : "";
 });
 
 // Virtual for Job's URL
-jobSchema
+JobSchema
 .virtual("url")
 .get(function() {
     return "/job/" + this._id;
 });
 
 // Virtual for Job's Published URL on public site
-jobSchema
+JobSchema
 .virtual("publishUrl")
 .get(function() {
     const baseUrl = process.env.PUBLIC_SITE || "";
@@ -119,7 +119,7 @@ jobSchema
 });
 
 // Virtual for Job's Published Image URL on public site
-jobSchema
+JobSchema
 .virtual("publishImgUrl")
 .get(function() {
     const baseUrl = process.env.PUBLIC_SITE || "";
@@ -128,7 +128,7 @@ jobSchema
 });
 
 // Virtual for Job's highlights
-jobSchema
+JobSchema
 .virtual("highlights")
 .get(function() {
     let result = "Majikan: " + this.employerName;
@@ -140,7 +140,7 @@ jobSchema
 });
 
 // Virtual for Job's model returned to API call
-jobSchema
+JobSchema
 .virtual("apiModel")
 .get(function() {
     const result = {
@@ -160,7 +160,7 @@ jobSchema
 });
 
 // Virtual for Job's Locations' Code
-jobSchema
+JobSchema
 .virtual("locationCodes")
 .get(function() {
     const result: string[] = [];
@@ -174,7 +174,7 @@ jobSchema
 });
 
 // Virtual for Job's Locations for display
-jobSchema
+JobSchema
 .virtual("locationDisplay")
 .get(function() {
     let result = "-";
@@ -205,21 +205,21 @@ jobSchema
 });
 
 // Virtual for Description for display
-jobSchema
+JobSchema
 .virtual("descriptionDisplay")
 .get(function () {
     return this.description ? this.description.replace(/\n/g, "<br/>") : "";
 });
 
 // Virtual for Apply Method for display
-jobSchema
+JobSchema
 .virtual("applyMethodDisplay")
 .get(function () {
     return this.applyMethod ? this.applyMethod.replace(/\n/g, "<br/>") : "";
 });
 
 // Virtual for Job's Title for social sharing data exchange
-jobSchema
+JobSchema
 .virtual("titleDecoded")
 .get(function() {
     const entities = new XmlEntities();
@@ -227,7 +227,7 @@ jobSchema
 });
 
 // Virtual for Job's highlights for social sharing data exchange
-jobSchema
+JobSchema
 .virtual("highlightsDecoded")
 .get(function() {
     const entities = new XmlEntities();
@@ -235,7 +235,7 @@ jobSchema
 });
 
 // Virtual for Job's image Url for social sharing data exchange
-jobSchema
+JobSchema
 .virtual("imgUrlDecoded")
 .get(function() {
     const entities = new XmlEntities();
@@ -243,7 +243,7 @@ jobSchema
 });
 
 // Virtual for Job's Facebook Post Url for social sharing data exchange
-jobSchema
+JobSchema
 .virtual("fbPostUrlDecoded")
 .get(function() {
     const entities = new XmlEntities();
@@ -261,7 +261,7 @@ const getAreaByLocationCode: getAreaByLocationCodeFunc = function (locationCode)
     return result;
 };
 
-jobSchema.methods.getAreaByLocationCode = getAreaByLocationCode;
+JobSchema.methods.getAreaByLocationCode = getAreaByLocationCode;
 
-const Job = mongoose.model("Job", jobSchema);
-export default Job;
+const JobModel = mongoose.model<IJob>("Job", JobSchema);
+export default JobModel;

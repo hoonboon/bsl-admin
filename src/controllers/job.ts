@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
 
-import { default as Job, JobModel, POSTTYPE_FB, POSTTYPE_NORMAL, Location } from "../models/Job";
+import { default as JobModel, IJob, POSTTYPE_FB, POSTTYPE_NORMAL, Location } from "../models/Job";
 
 
 import { PageInfo, getNewPageInfo } from "../util/pagination";
@@ -35,7 +35,7 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
         rowPerPage = DEFAULT_ROW_PER_PAGE; // default
     }
 
-    const query = Job.find();
+    const query = JobModel.find();
 
     // filter records
     if (searchPublishStartFrom) {
@@ -130,7 +130,7 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
     // });
 
     // set default values
-    const jobInput = new Job({
+    const jobInput = new JobModel({
             publishStart: moment().add(1, "days"),
             publishEnd: moment().add(29, "days")
     });
@@ -208,7 +208,7 @@ export let postJobCreate = [
 
         const location = composeLocationFromRequest(req);
 
-        const jobInput = new Job({
+        const jobInput = new JobModel({
             title: req.body.title,
             description: req.body.description,
             employerName: req.body.employerName,
@@ -225,7 +225,7 @@ export let postJobCreate = [
             postType: POSTTYPE_NORMAL,
             status: "A",
             createdBy: req.user.id
-        }) as JobModel;
+        });
 
         if (errors.isEmpty()) {
             jobInput.save((err, jobCreated) => {
@@ -258,7 +258,7 @@ export let postJobCreate = [
  * View Job Detail page.
  */
 export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
-    Job.findById(req.params.id)
+    JobModel.findById(req.params.id)
     .exec((err, jobDb) => {
         if (err) { return next(err); }
         if (jobDb) {
@@ -292,7 +292,7 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
 export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
     async.parallel({
         job: function(callback) {
-            Job.findById(req.params.id)
+            JobModel.findById(req.params.id)
                 .exec(callback);
         }
     }, function(err, results) {
@@ -308,7 +308,7 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             }
         }
 
-        const jobDb = results.job as JobModel;
+        const jobDb = results.job as IJob;
 
         const locationOptions = selectOption.OPTIONS_LOCATION();
         selectOption.markSelectedOptions(jobDb.locationCodes, locationOptions);
@@ -375,7 +375,7 @@ export let postJobUpdate = [
 
         const location = composeLocationFromRequest(req);
 
-        const jobInput = new Job({
+        const jobInput = new JobModel({
             title: req.body.title,
             description: req.body.description,
             employerName: req.body.employerName,
@@ -392,10 +392,10 @@ export let postJobUpdate = [
             postType: POSTTYPE_NORMAL,
             _id: req.params.id,
             updatedBy: req.user.id
-        }) as JobModel;
+        });
 
         if (errors.isEmpty()) {
-            Job.findById(req.params.id, (err, targetJob) => {
+            JobModel.findById(req.params.id, (err, targetJob) => {
                 if (err) { return next(err); }
 
                 if (!targetJob) {
@@ -408,7 +408,7 @@ export let postJobUpdate = [
                     }
                 }
 
-                Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
+                JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Job successfully updated." });
                     res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
@@ -448,14 +448,14 @@ export let postJobDelete = [
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
-        const jobInput = new Job({
+        const jobInput = new JobModel({
             _id: req.params.id,
             status: "D",
             updatedBy: req.user.id
         });
 
         if (errors.isEmpty()) {
-            Job.findById(req.params.id, (err, targetJob) => {
+            JobModel.findById(req.params.id, (err, targetJob) => {
                 if (err) { return next(err); }
 
                 if (!targetJob) {
@@ -468,7 +468,7 @@ export let postJobDelete = [
                     }
                 }
 
-                Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
+                JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Job successfully deleted." });
                     const bu = backUrl.decodeBackUrl(req.body.bu);
@@ -500,7 +500,7 @@ export let postJobDelete = [
 export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction) => {
 
     // set default values
-    const jobInput = new Job({
+    const jobInput = new JobModel({
             publishStart: moment().add(1, "days"),
             publishEnd: moment().add(29, "days")
     });
@@ -543,7 +543,7 @@ export let postJobEmbedFbPost = [
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
-        const jobInput = new Job({
+        const jobInput = new JobModel({
             title: req.body.title,
             fbPostUrl: req.body.fbPostUrl,
             publishStart: req.body.publishStart,
@@ -553,7 +553,7 @@ export let postJobEmbedFbPost = [
             postType: POSTTYPE_FB,
             status: "A",
             createdBy: req.user.id
-        }) as JobModel;
+        });
 
         if (errors.isEmpty()) {
             jobInput.save((err, jobCreated) => {
@@ -586,7 +586,7 @@ export let postJobEmbedFbPost = [
 export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction) => {
     async.parallel({
         job: function(callback) {
-            Job.findById(req.params.id)
+            JobModel.findById(req.params.id)
                 .exec(callback);
         }
     }, function(err, results) {
@@ -602,7 +602,7 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
             }
         }
 
-        const jobDb = results.job as JobModel;
+        const jobDb = results.job as IJob;
 
         // client side script
         const includeScripts = ["/js/job/formEmbedFbPost.js"];
@@ -647,7 +647,7 @@ export let postJobUpdateFbPost = [
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
-        const jobInput = new Job({
+        const jobInput = new JobModel({
             title: req.body.title,
             fbPostUrl: req.body.fbPostUrl,
             publishStart: req.body.publishStart,
@@ -657,10 +657,10 @@ export let postJobUpdateFbPost = [
             postType: POSTTYPE_FB,
             _id: req.params.id,
             updatedBy: req.user.id
-        }) as JobModel;
+        });
 
         if (errors.isEmpty()) {
-            Job.findById(req.params.id, (err, targetJob) => {
+            JobModel.findById(req.params.id, (err, targetJob) => {
                 if (err) { return next(err); }
 
                 if (!targetJob) {
@@ -673,7 +673,7 @@ export let postJobUpdateFbPost = [
                     }
                 }
 
-                Job.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: JobModel) => {
+                JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Post successfully updated." });
                     res.redirect(jobUpdated.url + "?bu=" + req.body.bu);

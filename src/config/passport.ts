@@ -4,7 +4,7 @@ import passportLocal from "passport-local";
 import _ from "lodash";
 
 // import { User, UserType } from '../models/User';
-import { default as User } from "../models/User";
+import { default as UserModel } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 
 const LocalStrategy = passportLocal.Strategy;
@@ -14,7 +14,7 @@ passport.serializeUser<any, any>((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  User.findById(id, (err, user) => {
+  UserModel.findById(id, (err, user) => {
     done(err, user);
   });
 });
@@ -24,7 +24,7 @@ passport.deserializeUser((id, done) => {
  * Sign in using Email and Password.
  */
 passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-  User.findOne({ email: email.toLowerCase() }, (err, user: any) => {
+  UserModel.findOne({ email: email.toLowerCase() }, (err, user: any) => {
     if (err) { return done(err); }
     if (!user) {
       return done(undefined, false, { message: `Email ${email} not found.` });
