@@ -231,7 +231,7 @@ export let postJobCreate = [
             jobInput.save((err, jobCreated) => {
                 if (err) { return next(err); }
                 req.flash("success", { msg: "New job created: " + jobCreated._id });
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             });
         } else {
             req.flash("errors", errors.array());
@@ -277,9 +277,9 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
             req.flash("errors", { msg: "Job not found." });
             const bu = backUrl.decodeBackUrl(req.query.bu);
             if (bu) {
-                res.redirect(bu);
+                return res.redirect(bu);
             } else {
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             }
         }
     });
@@ -302,9 +302,9 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             req.flash("errors", { msg: "Job not found." });
             const bu = backUrl.decodeBackUrl(req.query.bu);
             if (bu) {
-                res.redirect(bu);
+                return res.redirect(bu);
             } else {
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             }
         }
 
@@ -402,16 +402,16 @@ export let postJobUpdate = [
                     req.flash("errors", { msg: "Job not found." });
                     const bu = backUrl.decodeBackUrl(req.body.bu);
                     if (bu) {
-                        res.redirect(bu);
+                        return res.redirect(bu);
                     } else {
-                        res.redirect("/jobs");
+                        return res.redirect("/jobs");
                     }
                 }
 
                 JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Job successfully updated." });
-                    res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
+                    return res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
                 });
             });
         } else {
@@ -462,9 +462,9 @@ export let postJobDelete = [
                     req.flash("errors", { msg: "Job not found." });
                     const bu = backUrl.decodeBackUrl(req.body.bu);
                     if (bu) {
-                        res.redirect(bu);
+                        return res.redirect(bu);
                     } else {
-                        res.redirect("/jobs");
+                        return res.redirect("/jobs");
                     }
                 }
 
@@ -473,9 +473,9 @@ export let postJobDelete = [
                     req.flash("success", { msg: "Job successfully deleted." });
                     const bu = backUrl.decodeBackUrl(req.body.bu);
                     if (bu) {
-                        res.redirect(bu);
+                        return res.redirect(bu);
                     } else {
-                        res.redirect("/jobs");
+                        return res.redirect("/jobs");
                     }
                 });
             });
@@ -483,9 +483,9 @@ export let postJobDelete = [
             req.flash("errors", errors.array());
             const bu = backUrl.decodeBackUrl(req.body.bu);
             if (bu) {
-                res.redirect(bu);
+                return res.redirect(bu);
             } else {
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             }
         }
     }
@@ -559,7 +559,7 @@ export let postJobEmbedFbPost = [
             jobInput.save((err, jobCreated) => {
                 if (err) { return next(err); }
                 req.flash("success", { msg: "New post created: " + jobCreated._id });
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             });
         } else {
             req.flash("errors", errors.array());
@@ -596,9 +596,9 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
             req.flash("errors", { msg: "Post not found." });
             const bu = backUrl.decodeBackUrl(req.query.bu);
             if (bu) {
-                res.redirect(bu);
+                return res.redirect(bu);
             } else {
-                res.redirect("/jobs");
+                return res.redirect("/jobs");
             }
         }
 
@@ -667,16 +667,16 @@ export let postJobUpdateFbPost = [
                     req.flash("errors", { msg: "Post not found." });
                     const bu = backUrl.decodeBackUrl(req.body.bu);
                     if (bu) {
-                        res.redirect(bu);
+                        return res.redirect(bu);
                     } else {
-                        res.redirect("/jobs");
+                        return res.redirect("/jobs");
                     }
                 }
 
                 JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
                     if (err) { return next(err); }
                     req.flash("success", { msg: "Post successfully updated." });
-                    res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
+                    return res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
                 });
             });
         } else {
