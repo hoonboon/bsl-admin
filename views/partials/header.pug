@@ -12,22 +12,24 @@
       ul.nav.navbar-nav.navbar-left
         li(class=(title == 'Home') ? 'active' : undefined)
           a(href='/') Home
-        if user
+        if user && user.hasAccess('job:list')
           li.dropdown(class=(title == 'Job') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               span Job
               i.caret
             ul.dropdown-menu
-              li
-                a(href='/jobs') Job List
+              if user.hasAccess('job:list')
+                li
+                  a(href='/jobs') Job List
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)
             a(href='/login') Login
-          //- // ** open for local development use only **
-          //- li(class=(title == 'Create Account') ? 'active' : undefined)
-          //-   a(href='/signup') Create Account
         else
+          // ** open for local development use only **
+          if user.hasAccess('user:signup')
+            li(class=(title == 'Create Account') ? 'active' : undefined)
+              a(href='/signup') Create Account
           li.dropdown(class=(title == 'Account Management') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               if user.profile.picture
