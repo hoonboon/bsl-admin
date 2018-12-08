@@ -2,7 +2,7 @@ import async from "async";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import passport from "passport";
-import { default as User, UserModel, AuthToken } from "../models/User";
+import { default as UserModel, IUser, AuthToken } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 import { IVerifyOptions } from "passport-local";
 import { WriteError } from "mongodb";
@@ -50,7 +50,7 @@ export let postLogin = (req: Request, res: Response, next: NextFunction) => {
     return res.redirect("/login");
   }
 
-  passport.authenticate("local", (err: Error, user: UserModel, info: IVerifyOptions) => {
+  passport.authenticate("local", (err: Error, user: IUser, info: IVerifyOptions) => {
     if (err) { return next(err); }
     if (!user) {
       req.flash("errors", info.message);
@@ -59,7 +59,7 @@ export let postLogin = (req: Request, res: Response, next: NextFunction) => {
     req.logIn(user, (err) => {
       if (err) { return next(err); }
       req.flash("success", { msg: "Success! You are logged in." });
-      res.redirect(req.session.returnTo || "/");
+      return res.redirect(req.session.returnTo || "/");
     });
   })(req, res, next);
 };
@@ -103,12 +103,12 @@ export let postSignup = (req: Request, res: Response, next: NextFunction) => {
     return res.redirect("/signup");
   }
 
-  const user = new User({
+  const user = new UserModel({
     email: req.body.email,
     password: req.body.password
   });
 
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
+  UserModel.findOne({ email: req.body.email }, (err, existingUser) => {
     if (err) { return next(err); }
     if (existingUser) {
       req.flash("errors", { msg: "Account with that email address already exists." });
@@ -151,7 +151,7 @@ export let postUpdateProfile = (req: Request, res: Response, next: NextFunction)
     return res.redirect("/account");
   }
 
-  User.findById(req.user.id, (err, user: UserModel) => {
+  UserModel.findById(req.user.id, (err, user: IUser) => {
     if (err) { return next(err); }
     user.email = req.body.email || "";
     user.profile.name = req.body.name || "";
@@ -187,7 +187,7 @@ export let postUpdatePassword = (req: Request, res: Response, next: NextFunction
     return res.redirect("/account");
   }
 
-  User.findById(req.user.id, (err, user: UserModel) => {
+  UserModel.findById(req.user.id, (err, user: IUser) => {
     if (err) { return next(err); }
     user.password = req.body.password;
     user.save((err: WriteError) => {
@@ -203,7 +203,7 @@ export let postUpdatePassword = (req: Request, res: Response, next: NextFunction
  * Delete user account.
  */
 export let postDeleteAccount = (req: Request, res: Response, next: NextFunction) => {
-  User.remove({ _id: req.user.id }, (err) => {
+  UserModel.remove({ _id: req.user.id }, (err) => {
     if (err) { return next(err); }
     req.logout();
     req.flash("info", { msg: "Your account has been deleted." });
@@ -217,7 +217,7 @@ export let postDeleteAccount = (req: Request, res: Response, next: NextFunction)
  */
 export let getOauthUnlink = (req: Request, res: Response, next: NextFunction) => {
   const provider = req.params.provider;
-  User.findById(req.user.id, (err, user: any) => {
+  UserModel.findById(req.user.id, (err, user: any) => {
     if (err) { return next(err); }
     user[provider] = undefined;
     user.tokens = user.tokens.filter((token: AuthToken) => token.kind !== provider);
@@ -237,7 +237,7 @@ export let getReset = (req: Request, res: Response, next: NextFunction) => {
   if (req.isAuthenticated()) {
     return res.redirect("/");
   }
-  User
+  UserModel
     .findOne({ passwordResetToken: req.params.token })
     .where("passwordResetExpires").gt(Date.now())
     .exec((err, user) => {
@@ -269,7 +269,7 @@ export let postReset = (req: Request, res: Response, next: NextFunction) => {
 
   async.waterfall([
     function resetPassword(done: Function) {
-      User
+      UserModel
         .findOne({ passwordResetToken: req.params.token })
         .where("passwordResetExpires").gt(Date.now())
         .exec((err, user: any) => {
@@ -289,7 +289,7 @@ export let postReset = (req: Request, res: Response, next: NextFunction) => {
           });
         });
     },
-    function sendResetPasswordEmail(user: UserModel, done: Function) {
+    function sendResetPasswordEmail(user: IUser, done: Function) {
       const transporter = nodemailer.createTransport(smtpConfig);
       const mailOptions = {
         to: user.email,
@@ -344,7 +344,7 @@ export let postForgot = (req: Request, res: Response, next: NextFunction) => {
       });
     },
     function setRandomToken(token: AuthToken, done: Function) {
-      User.findOne({ email: req.body.email }, (err, user: any) => {
+      UserModel.findOne({ email: req.body.email }, (err, user: any) => {
         if (err) { return done(err); }
         if (!user) {
           req.flash("errors", { msg: "Account with that email address does not exist." });
@@ -357,7 +357,7 @@ export let postForgot = (req: Request, res: Response, next: NextFunction) => {
         });
       });
     },
-    function sendForgotPasswordEmail(token: AuthToken, user: UserModel, done: Function) {
+    function sendForgotPasswordEmail(token: AuthToken, user: IUser, done: Function) {
       const transporter = nodemailer.createTransport(smtpConfig);
       const mailOptions = {
         to: user.email,
