@@ -6,7 +6,8 @@ import { default as UserModel, IUser, AuthToken } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 import { IVerifyOptions } from "passport-local";
 import { WriteError } from "mongodb";
-import { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD } from "../util/secrets";
+import { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM_NOREPLY } from "../util/secrets";
+import logger from "../util/logger";
 const request = require("express-validator");
 
 // TODO: refactor - move into a mail service
@@ -184,14 +185,33 @@ export let postUpdatePassword = (req: Request, res: Response, next: NextFunction
     return res.redirect("/account");
   }
 
-  UserModel.findById(req.user.id, (err, user: IUser) => {
+  async.waterfall([
+    function updatePassword(done: Function) {
+      UserModel.findById(req.user.id, (err, user: IUser) => {
+        if (err) { return next(err); }
+        user.password = req.body.password;
+        user.save((err: WriteError) => {
+          if (err) { return next(err); }
+          done(err, user);
+        });
+      });
+    },
+    function sendUpdatePasswordEmail(user: IUser, done: Function) {
+      const transporter = nodemailer.createTransport(smtpConfig);
+      const mailOptions = {
+        to: user.email,
+        from: process.env.EMAIL_FROM_NOREPLY,
+        subject: "Your password has been updated",
+        text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been updated.\n`
+      };
+      transporter.sendMail(mailOptions, (err) => {
+        req.flash("success", { msg: "Success! Your password has been updated." });
+        done(err);
+      });
+    }
+  ], (err) => {
     if (err) { return next(err); }
-    user.password = req.body.password;
-    user.save((err: WriteError) => {
-      if (err) { return next(err); }
-      req.flash("success", { msg: "Password has been changed." });
-      res.redirect("/account");
-    });
+    res.redirect("/account");
   });
 };
 
@@ -290,7 +310,7 @@ export let postReset = (req: Request, res: Response, next: NextFunction) => {
       const transporter = nodemailer.createTransport(smtpConfig);
       const mailOptions = {
         to: user.email,
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_FROM_NOREPLY,
         subject: "Your password has been changed",
         text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
       };
@@ -358,8 +378,8 @@ export let postForgot = (req: Request, res: Response, next: NextFunction) => {
       const transporter = nodemailer.createTransport(smtpConfig);
       const mailOptions = {
         to: user.email,
-        from: process.env.EMAIL_USER,
-        subject: "Reset your password on Hackathon Starter",
+        from: process.env.EMAIL_FROM_NOREPLY,
+        subject: "Reset your password on CariKijo.my - Back Office",
         text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
           Please click on the following link, or paste this into your browser to complete the process:\n\n
           http://${req.headers.host}/reset/${token}\n\n
