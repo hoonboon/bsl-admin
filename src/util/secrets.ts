@@ -29,8 +29,9 @@ export const EMAIL_HOST = process.env["EMAIL_HOST"];
 export const EMAIL_PORT = process.env["EMAIL_PORT"];
 export const EMAIL_USER = process.env["EMAIL_USER"];
 export const EMAIL_PASSWORD = process.env["EMAIL_PASSWORD"];
+export const EMAIL_FROM_NOREPLY = process.env["EMAIL_FROM_NOREPLY"];
 
-if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USER || !EMAIL_PASSWORD) {
-    logger.error("No SMTP configuration. Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD environment variables.");
+if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USER || !EMAIL_PASSWORD || !EMAIL_FROM_NOREPLY) {
+    logger.error("No SMTP configuration. Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM_NOREPLY environment variables.");
     process.exit(1);
 }
