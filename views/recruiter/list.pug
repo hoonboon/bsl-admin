@@ -1,0 +1,80 @@
+extends ../layout
+
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p
+      .btn-toolbar(role="toolbar")
+        .btn-group(role="group")
+          a(href='#', onclick='showSearch()' class='btn btn-primary')
+            span.glyphicon.glyphicon-search
+        .btn-group(role="group")
+          a(href='/job/create' class='btn btn-primary') Create
+
+    #listing.table-responsive
+      table.table.table-striped
+        thead
+          tr
+            td(colspan="5")
+              include ../partials/pagination.pug
+          tr
+            th Name
+            th NRIC No.
+            th Email
+            th Mobile No.
+            th Billing Name
+        tbody
+          if item_list
+            each item in item_list
+              tr
+                td 
+                  a(href="#", onclick="viewDetail('" + item.url + "')") !{item.name}
+                td !{item.nric}
+                td #{item.email}
+                td #{item.mobileNo}
+                td !{item.billingName}
+          else
+            tr
+              td(colspan='5' align='center') No records found.
+        tfoot
+          tr
+            td(colspan="5")
+              include ../partials/pagination.pug
+
+  #searchModal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal')
+            span &times;
+          h4 Search
+        .modal-body
+          form.form-horizontal(id="searchForm")
+            if (pageInfo && pageInfo.totalRow > 0)
+              input(type='hidden', id='newPageNo', name='newPageNo')
+              input(type='hidden', id='rowPerPage', name='rowPerPage', value=(pageInfo.rowPerPage))
+            .form-group
+              label.col-sm-4(for='searchName') Name: 
+              .col-sm-7
+                input.form-control(type='text', name='searchName', id='searchName', placeholder='Search...', value=searchName)
+            .form-group
+              label.col-sm-4(for='searchNric') NRIC No.: 
+              .col-sm-7
+                input.form-control(type='text', name='searchNric', id='searchNric', placeholder='Search...', value=searchNric)
+            .form-group
+              label.col-sm-4(for='searchEmail') Email: 
+              .col-sm-7
+                input.form-control(type='text', name='searchEmail', id='searchEmail', placeholder='Search...', value=searchEmail)
+            .form-group
+              label.col-sm-4(for='searchMobileNo') Mobile No.: 
+              .col-sm-7
+                input.form-control(type='text', name='searchMobileNo', id='searchMobileNo', placeholder='Search...', value=searchMobileNo)
+        .modal-footer
+          button.btn.btn-default(type='button', data-dismiss='modal') Close
+          button.btn.btn-primary(type='button', onclick="submitViewList()") Submit

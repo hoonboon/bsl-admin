@@ -12,15 +12,24 @@
       ul.nav.navbar-nav.navbar-left
         li(class=(title == 'Home') ? 'active' : undefined)
           a(href='/') Home
-        if user && user.hasAccess('job:list')
+        if user && user.hasAccess('admin_job:list')
           li.dropdown(class=(title == 'Job') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
-              span Job
+              span Admin
               i.caret
             ul.dropdown-menu
-              if user.hasAccess('job:list')
+              if user.hasAccess('admin_job:list')
                 li
-                  a(href='/jobs') Job List
+                  a(href='/jobs') Admin Job List
+        if user && user.hasAccess('recruiter:list')
+          li.dropdown(class=(title == 'Recruiter') ? 'active' : undefined)
+            a.dropdown-toggle(href='#', data-toggle='dropdown')
+              span Recruiter
+              i.caret
+            ul.dropdown-menu
+              if user.hasAccess('recruiter:list')
+                li
+                  a(href='/recruiters') Recruiter List
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)

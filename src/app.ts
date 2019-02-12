@@ -22,6 +22,7 @@ dotenv.config({ path: ".env.example" });
 import * as homeController from "./controllers/home";
 import * as userController from "./controllers/user";
 import * as jobController from "./controllers/job";
+import * as recruiterController from "./controllers/recruiter";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -132,17 +133,20 @@ app.post("/account/delete", passportConfig.isAuthenticated, userController.postD
 app.get("/account/unlink/:provider", passportConfig.isAuthenticated, userController.getOauthUnlink);
 
 // Job module
-app.get("/jobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobs);
-app.get("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobCreate);
-app.post("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobCreate);
-app.get("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobEmbedFbPost);
-app.post("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobEmbedFbPost);
-app.get("/job/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobDetail);
-app.get("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobUpdate);
-app.post("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobUpdate);
-app.get("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobUpdateFbPost);
-app.post("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobUpdateFbPost);
-app.post("/job/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobDelete);
+app.get("/jobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobs);
+app.get("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobCreate);
+app.post("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.postJobCreate);
+app.get("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobEmbedFbPost);
+app.post("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.postJobEmbedFbPost);
+app.get("/job/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobDetail);
+app.get("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobUpdate);
+app.post("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.postJobUpdate);
+app.get("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.getJobUpdateFbPost);
+app.post("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.postJobUpdateFbPost);
+app.post("/job/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("admin_job:list"), jobController.postJobDelete);
+
+// Recruiter modules
+app.get("/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiters);
 
 /**
  * API examples routes.
