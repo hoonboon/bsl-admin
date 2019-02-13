@@ -147,6 +147,8 @@ app.post("/job/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess
 
 // Recruiter modules
 app.get("/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiters);
+app.get("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterCreate);
+app.post("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterCreate);
 
 /**
  * API examples routes.

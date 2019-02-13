@@ -70,6 +70,37 @@ export function OPTIONS_PAGE_NO(totalPageNo: number) {
     return result;
 }
 
+// Nationality
+export function OPTIONS_NATIONALITY() {
+    return [
+        { label: "Malaysia", value: "MY" },
+        { label: "Singapore", value: "SG" },
+        { label: "Thailand", value: "TH" },
+        { label: "Brunei", value: "BR" },
+        { label: "Other", value: "OT" }
+    ] as SelectOption[];
+}
+
+// Race
+export function OPTIONS_RACE() {
+    return [
+        { label: "Malay", value: "M" },
+        { label: "Chinese", value: "C" },
+        { label: "Indian", value: "I" },
+        { label: "Siamese", value: "S" },
+        { label: "Other", value: "O" }
+    ] as SelectOption[];
+}
+
+// Gender
+export function OPTIONS_GENDER() {
+    return [
+        { label: "Male", value: "M" },
+        { label: "Female", value: "F" },
+        { label: "Other", value: "O" }
+    ] as SelectOption[];
+}
+
 export function markSelectedOption(selectedValue: string, options: SelectOption[]) {
     if (selectedValue && options) {
         const option = options.find(option => option.value === selectedValue);

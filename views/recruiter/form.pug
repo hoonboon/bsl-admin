@@ -1,0 +1,98 @@
+extends ../layout
+
+block content
+  .container
+    if recruiterId
+      h3
+        if title2
+          = title2
+        else
+          = title
+      p Recruiter Id: #{recruiterId}
+    else
+      h3
+        if title2
+          = title2
+        else
+          = title
+    p.text-center
+      font(color="red") 
+        i ** Required fields.
+  
+    form.form-horizontal(id='recruiterForm', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='bu', value=bu)
+      .form-group
+        label.col-sm-3.control-label(for='name') ** Name as per NRIC
+        .col-sm-7
+          input.form-control(type='text', name='name', id='name', placeholder='Recruiter Name', required, value!=(recruiter === undefined ? '' : recruiter.name))
+      .form-group
+        label.col-sm-3.control-label(for='nric') ** NRIC No.
+        .col-sm-7
+          input.form-control(type='text', name='nric', id='nric', placeholder='NRIC No.', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.nric))
+      .form-group
+        label.col-sm-3.control-label(for='email') ** Email Address
+        .col-sm-7
+          input.form-control(type='email', name='email', id='email', placeholder='Email Address', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.email))
+      .form-group
+        label.col-sm-3.control-label(for='mobileNo') ** Mobile Phone No.
+        .col-sm-7
+          input.form-control(type='text', name='mobileNo', id='mobileNo', placeholder='Mobile Phone No.', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.mobileNo))
+      .form-group
+        label.col-sm-3.control-label(for='nationality') Nationality
+        .col-sm-7
+          select.form-control(name='nationality', id='nationality', placeholder='Nationality')
+            for option in nationalityOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='race') Race
+        .col-sm-7
+          select.form-control(name='race', id='race', placeholder='Race')
+            for option in raceOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='language') Preferred Spoken Language
+        .col-sm-7
+          select.form-control(name='language', id='language', placeholder='Preferred Spoken Language')
+            for option in languageOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='dob') ** Date of Birth
+        .col-sm-7
+          input.form-control(type='date', name='dob', id='dob', placeholder='Date of Birth', required, value=(recruiter === undefined ? '' : recruiter.dobInput))
+      .form-group
+        label.col-sm-3.control-label(for='gender') Gender
+        .col-sm-7
+          select.form-control(name='gender', id='gender', placeholder='Gender')
+            for option in genderOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='billingName') ** Billing Name
+        .col-sm-7
+          input.form-control(type='text', name='billingName', id='billingName', placeholder='Billing Name', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.billingName))
+      .form-group
+        label.col-sm-3.control-label(for='billingAddress') ** Billing Address
+        .col-sm-7
+          textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address') !{recruiter.billingAddress}
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          button.btn.btn-success(type='submit') Save
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='goBack()', id='btnGoBack') Cancel
