@@ -149,6 +149,10 @@ app.post("/job/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess
 app.get("/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiters);
 app.get("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterCreate);
 app.post("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterCreate);
+app.get("/recruiter/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterDetail);
+app.get("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterUpdate);
+app.post("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterUpdate);
+app.post("/recruiter/:id/terminate", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterTerminate);
 
 /**
  * API examples routes.
