@@ -30,7 +30,10 @@ const roles: RoleAccess = {
         extends: ["guest"]
     },
     admin_2: {
-        can: [ { name: "recruiter:list" } ],
+        can: [
+            { name: "recruiter:list" },
+            { name: "creditAccount:list" },
+        ],
         extends: ["admin_1"]
     },
     admin_99: {

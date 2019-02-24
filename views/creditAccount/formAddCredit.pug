@@ -1,0 +1,64 @@
+extends ../layout
+
+block content
+  .container
+    if creditAccountId
+      h3
+        if title2
+          = title2
+        else
+          = title
+      p Credit Account Id: #{creditAccountId}
+    else
+      h3
+        if title2
+          = title2
+        else
+          = title
+    p.text-center
+      font(color="red") 
+        i ** Required fields.
+  
+    form.form-horizontal(id='addCreditForm', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='bu', value=bu)
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Recruiter Name
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.recruiter.name}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Recruiter NRIC No.
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.recruiter.nric}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Credit Balance
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.creditBalance}
+      .form-group
+        label.col-sm-3.control-label(for='productPriceId') ** Top-up Option
+        .col-sm-7
+          select.form-control(name='productPriceId', id='productPriceId', placeholder='Top-up Option')
+            for item in productPrice_list
+              option(
+                label=item.product.productDesc, 
+                value=item._id, 
+                selected=(creditTrx.productPriceId == item._id ? 'selected' : false)
+              ) #{item.product.productDesc}
+      .form-group
+        label.col-sm-3.col-xs-6.control-label(for='totalAmount') Total Amount Due
+        .col-sm-3.col-xs-6
+          input.form-control.text-right(type='text', name='totalAmount', id='totalAmount', placeholder='Total Amount Due', readonly, value=(creditTrx.totalAmount === undefined ? '' : creditTrx.totalAmount))
+      .form-group
+        label.col-sm-3.col-xs-6.control-label(for='totalCredit') Total Credit Value
+        .col-sm-3.col-xs-6
+          input.form-control.text-right(type='text', name='totalCredit', id='totalCredit', placeholder='Total Credit Value', readonly, value=(creditTrx.totalCredit === undefined ? '' : creditTrx.totalCredit))
+      .form-group
+        label.col-sm-3.control-label(for='paymentReference') ** Payment Reference
+        .col-sm-7
+          textarea.form-control(rows='3', name='paymentReference', id='paymentReference', placeholder='Payment Reference') !{creditTrx.paymentReference}
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          a.btn.btn-success(href='#', onclick='submitAddCredit()', id='btnSubmit') Save
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='goBack()', id='btnGoBack') Cancel

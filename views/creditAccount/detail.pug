@@ -1,0 +1,103 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p Credit Account Id: #{creditAccountId}
+  
+    form.form-horizontal
+      input(type='hidden', name='bu', id='bu', value=bu)
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Recruiter Name
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.recruiter.name}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Recruiter NRIC No.
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.recruiter.nric}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Valid Since
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.validDateStartDisplay}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Credit Expiry Date
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.validDateEndDisplay}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Credit Balance
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.creditBalance}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Credit Locked
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.creditLocked}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label(for='mobileNo') Credit Available
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.creditAvailable}
+      .form-group
+        label.col-sm-3.col-xs-4.control-label Status
+        .col-sm-7.col-xs-8
+          .form-control-static !{creditAccount.statusDisplay}
+      
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          a.btn.btn-primary(href="#", onclick="goTo('" + creditAccount.url + "/addCredit')") Add Credit
+          //- span
+          //- | 
+          //- a.btn.btn-primary(href="#", onclick="goTo('" + creditAccount.url + "/deductCredit')") Deduct Credit
+          span
+          | 
+          a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+
+    br
+          
+    h4 Transaction History
+
+    #listing.table-responsive
+      table.table.table-striped
+        thead
+          tr
+            th Date
+            th Description
+            th Type
+            th Credit Addition
+            th Credit Deduction
+            th Download
+        tbody
+          if creditTrx_list
+            each item in creditTrx_list
+              tr
+                td(align="center") #{item.trxDateDisplay}
+                td 
+                  if item.status === "P"
+                    | #{item.product.productDesc} (Pending)
+                  else
+                    | #{item.product.productDesc}
+                td #{item.trxTypeDisplay}
+                td(align="center") 
+                  if item.totalCredit > 0
+                    | #{item.totalCredit}
+                  else
+                    | -
+                td(align="center") 
+                  if item.totalCredit < 0
+                    | #{item.totalCredit * -1}
+                  else
+                    | -
+                td(align="center") 
+                  if item.trxType === "T"
+                    a(href="#", onclick="getDocument('" + item._id + "')") Invoice
+                  else if item.trxType === "R"
+                    a(href="#", onclick="getDocument('" + item._id + "')") Credit Note
+                  else
+                    | -
+          else
+            tr
+              td(colspan='6' align='center') No records found.
+        
