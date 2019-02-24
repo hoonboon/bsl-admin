@@ -107,7 +107,7 @@ JobSchema
 JobSchema
 .virtual("url")
 .get(function() {
-    return "/job/" + this._id;
+    return "/adminJob/" + this._id;
 });
 
 // Virtual for Job's Published URL on public site

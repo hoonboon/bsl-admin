@@ -16,7 +16,7 @@ import logger from "../util/logger";
 const DEFAULT_ROW_PER_PAGE: number = 10;
 
 /**
- * GET /jobs
+ * GET /adminJobs
  * Job listing page.
  */
 export let getJobs = (req: Request, res: Response, next: NextFunction) => {
@@ -85,11 +85,11 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
             }
 
             // client side script
-            const includeScripts = ["/js/job/list.js", "/js/util/pagination.js"];
+            const includeScripts = ["/js/adminJob/list.js", "/js/util/pagination.js"];
 
-            res.render("job/list", {
-                title: "Job",
-                title2: "Job List",
+            res.render("adminJob/list", {
+                title: "Admin",
+                title2: "Admin Job List",
                 job_list: item_list,
                 searchPublishStartFrom: searchPublishStartFrom,
                 searchPublishStartTo: searchPublishStartTo,
@@ -109,7 +109,7 @@ export let getJobs = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
- * GET /job/create
+ * GET /adminJob/create
  * Create Job page.
  */
 export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
@@ -136,11 +136,11 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
     });
 
     // client side script
-    const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+    const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/form.js"];
 
-    res.render("job/form", {
-        title: "Job",
-        title2: "Create Job",
+    res.render("adminJob/form", {
+        title: "Admin",
+        title2: "Create Admin Job",
         job: jobInput,
         includeScripts: includeScripts,
         locationOptions: selectOption.OPTIONS_LOCATION()
@@ -164,7 +164,7 @@ function composeLocationFromRequest(req: Request) {
 }
 
 /**
- * POST /job/create
+ * POST /adminJob/create
  * Create a new Job.
  */
 export let postJobCreate = [
@@ -231,7 +231,7 @@ export let postJobCreate = [
             jobInput.save((err, jobCreated) => {
                 if (err) { return next(err); }
                 req.flash("success", { msg: "New job created: " + jobCreated._id });
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             });
         } else {
             req.flash("errors", errors.array());
@@ -240,11 +240,11 @@ export let postJobCreate = [
             selectOption.markSelectedOptions(req.body.location, locationOptions);
 
             // client side script
-            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/form.js"];
 
-            res.render("job/form", {
-                title: "Job",
-                title2: "Create Job",
+            res.render("adminJob/form", {
+                title: "Admin",
+                title2: "Create Admin Job",
                 job: jobInput,
                 includeScripts: includeScripts,
                 locationOptions: locationOptions
@@ -254,7 +254,7 @@ export let postJobCreate = [
 ];
 
 /**
- * GET /job/:id
+ * GET /adminJob/:id
  * View Job Detail page.
  */
 export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
@@ -263,11 +263,11 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
         if (err) { return next(err); }
         if (jobDb) {
             // client side script
-            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/detail.js"];
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/detail.js"];
 
-            res.render("job/detail", {
-                title: "Job",
-                title2: "Job Detail",
+            res.render("adminJob/detail", {
+                title: "Admin",
+                title2: "Admin Job Detail",
                 job: jobDb,
                 jobId: jobDb._id,
                 includeScripts: includeScripts,
@@ -279,14 +279,14 @@ export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
             if (bu) {
                 return res.redirect(bu);
             } else {
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             }
         }
     });
 };
 
 /**
- * GET /job/:id/update
+ * GET /adminJob/:id/update
  * Update Job page.
  */
 export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
@@ -304,7 +304,7 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
             if (bu) {
                 return res.redirect(bu);
             } else {
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             }
         }
 
@@ -314,11 +314,11 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
         selectOption.markSelectedOptions(jobDb.locationCodes, locationOptions);
 
         // client side script
-        const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+        const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/form.js"];
 
-        res.render("job/form", {
-            title: "Job",
-            title2: "Edit Job Detail",
+        res.render("adminJob/form", {
+            title: "Admin",
+            title2: "Edit Admin Job Detail",
             job: jobDb,
             jobId: jobDb._id,
             includeScripts: includeScripts,
@@ -330,7 +330,7 @@ export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
- * POST /job/:id/update
+ * POST /adminJob/:id/update
  * Update an existing Job.
  */
 export let postJobUpdate = [
@@ -404,7 +404,7 @@ export let postJobUpdate = [
                     if (bu) {
                         return res.redirect(bu);
                     } else {
-                        return res.redirect("/jobs");
+                        return res.redirect("/adminJobs");
                     }
                 }
 
@@ -421,11 +421,11 @@ export let postJobUpdate = [
             selectOption.markSelectedOptions(req.body.location, locationOptions);
 
             // client side script
-            const includeScripts = ["/ckeditor/ckeditor.js", "/js/job/form.js"];
+            const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/form.js"];
 
-            res.render("job/form", {
-                title: "Job",
-                title2: "Edit Job Detail",
+            res.render("adminJob/form", {
+                title: "Admin",
+                title2: "Edit Admin Job Detail",
                 job: jobInput,
                 jobId: jobInput._id,
                 includeScripts: includeScripts,
@@ -437,7 +437,7 @@ export let postJobUpdate = [
 ];
 
 /**
- * POST /job/:id/delete
+ * POST /adminJob/:id/delete
  * Delete an existing Job.
  */
 export let postJobDelete = [
@@ -464,7 +464,7 @@ export let postJobDelete = [
                     if (bu) {
                         return res.redirect(bu);
                     } else {
-                        return res.redirect("/jobs");
+                        return res.redirect("/adminJobs");
                     }
                 }
 
@@ -475,7 +475,7 @@ export let postJobDelete = [
                     if (bu) {
                         return res.redirect(bu);
                     } else {
-                        return res.redirect("/jobs");
+                        return res.redirect("/adminJobs");
                     }
                 });
             });
@@ -485,7 +485,7 @@ export let postJobDelete = [
             if (bu) {
                 return res.redirect(bu);
             } else {
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             }
         }
     }
@@ -494,7 +494,7 @@ export let postJobDelete = [
 
 
 /**
- * GET /job/embedFbPost
+ * GET /adminJob/embedFbPost
  * Embed Facebook Post page.
  */
 export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction) => {
@@ -506,10 +506,10 @@ export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction)
     });
 
     // client side script
-    const includeScripts = ["/js/job/formEmbedFbPost.js"];
+    const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
 
-    res.render("job/formEmbedFbPost", {
-        title: "Job",
+    res.render("adminJob/formEmbedFbPost", {
+        title: "Admin",
         title2: "Embed Facebook Post",
         job: jobInput,
         includeScripts: includeScripts,
@@ -517,7 +517,7 @@ export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction)
 };
 
 /**
- * POST /job/embedFbPost
+ * POST /adminJob/embedFbPost
  * Embed Facebook Post page.
  */
 export let postJobEmbedFbPost = [
@@ -559,16 +559,16 @@ export let postJobEmbedFbPost = [
             jobInput.save((err, jobCreated) => {
                 if (err) { return next(err); }
                 req.flash("success", { msg: "New post created: " + jobCreated._id });
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             });
         } else {
             req.flash("errors", errors.array());
 
             // client side script
-            const includeScripts = ["/js/job/formEmbedFbPost.js"];
+            const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
 
-            res.render("job/formEmbedFbPost", {
-                title: "Job",
+            res.render("adminJob/formEmbedFbPost", {
+                title: "Admin",
                 title2: "Embed Facebook Post",
                 job: jobInput,
                 includeScripts: includeScripts,
@@ -580,7 +580,7 @@ export let postJobEmbedFbPost = [
 
 
 /**
- * GET /job/:id/updateFbPost
+ * GET /adminJob/:id/updateFbPost
  * Update Embedded Facebook Post page.
  */
 export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction) => {
@@ -598,17 +598,17 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
             if (bu) {
                 return res.redirect(bu);
             } else {
-                return res.redirect("/jobs");
+                return res.redirect("/adminJobs");
             }
         }
 
         const jobDb = results.job as IJob;
 
         // client side script
-        const includeScripts = ["/js/job/formEmbedFbPost.js"];
+        const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
 
-        res.render("job/formEmbedFbPost", {
-            title: "Job",
+        res.render("adminJob/formEmbedFbPost", {
+            title: "Admin",
             title2: "Edit Embedded Facebook Post Detail",
             job: jobDb,
             jobId: jobDb._id,
@@ -620,7 +620,7 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
 };
 
 /**
- * POST /job/:id/updateFbPost
+ * POST /adminJob/:id/updateFbPost
  * Update Embedded Facebook Post page.
  */
 export let postJobUpdateFbPost = [
@@ -669,7 +669,7 @@ export let postJobUpdateFbPost = [
                     if (bu) {
                         return res.redirect(bu);
                     } else {
-                        return res.redirect("/jobs");
+                        return res.redirect("/adminJobs");
                     }
                 }
 
@@ -683,10 +683,10 @@ export let postJobUpdateFbPost = [
             req.flash("errors", errors.array());
 
             // client side script
-            const includeScripts = ["/js/job/formEmbedFbPost.js"];
+            const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
 
-            res.render("job/formEmbedFbPost", {
-                title: "Job",
+            res.render("adminJob/formEmbedFbPost", {
+                title: "Admin",
                 title2: "Edit Embedded Facebook Post Detail",
                 job: jobInput,
                 jobId: jobInput._id,

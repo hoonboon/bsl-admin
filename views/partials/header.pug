@@ -12,15 +12,15 @@
       ul.nav.navbar-nav.navbar-left
         li(class=(title == 'Home') ? 'active' : undefined)
           a(href='/') Home
-        if user && user.hasAccess('admin_job:list')
-          li.dropdown(class=(title == 'Job') ? 'active' : undefined)
+        if user && user.hasAccess('adminJob:list')
+          li.dropdown(class=(title == 'Admin') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               span Admin
               i.caret
             ul.dropdown-menu
-              if user.hasAccess('admin_job:list')
+              if user.hasAccess('adminJob:list')
                 li
-                  a(href='/jobs') Admin Job List
+                  a(href='/adminJobs') Admin Job List
         if user && (user.hasAccess('recruiter:list') || user.hasAccess('creditAccount:list'))
           li.dropdown(class=(title == 'Recruiter') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
