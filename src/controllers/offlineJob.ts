@@ -16,57 +16,48 @@ import logger from "../util/logger";
 const DEFAULT_ROW_PER_PAGE: number = 10;
 
 const productPriceList = [{
-    _id: "4001",
+    _id: "4101",
     product: {
-        productCode: "T19001",
-        productDesc: "TOP-UP 50 CREDITS @ MYR50",
+        productCode: "P19001",
+        productDesc: "PUBLISH 15 DAYS @ 25 CREDITS",
     },
-    unitPrice: 50,
+    unitCreditValue: 25,
+    postingDays: 15,
+    fixedQty: 1,
+}, {
+    _id: "4102",
+    product: {
+        productCode: "P19002",
+        productDesc: "PUBLISH 30 DAYS @ 50 CREDITS",
+    },
     unitCreditValue: 50,
+    postingDays: 30,
     fixedQty: 1,
 }, {
-    _id: "4002",
+    _id: "4103",
     product: {
-        productCode: "T19002",
-        productDesc: "TOP-UP 120 CREDITS @ MYR100",
+        productCode: "P19003",
+        productDesc: "PUBLISH 45 DAYS @ 70 CREDITS",
     },
-    unitPrice: 100,
-    unitCreditValue: 120,
+    unitCreditValue: 70,
+    postingDays: 45,
     fixedQty: 1,
 }, {
-    _id: "4003",
+    _id: "4104",
     product: {
-        productCode: "T19003",
-        productDesc: "TOP-UP 200 CREDITS @ MYR150",
+        productCode: "P19004",
+        productDesc: "PUBLISH 60 DAYS @ 90 CREDITS",
     },
-    unitPrice: 150,
-    unitCreditValue: 200,
-    fixedQty: 1,
-}, {
-    _id: "4004",
-    product: {
-        productCode: "T19004",
-        productDesc: "TOP-UP 300 CREDITS @ MYR200",
-    },
-    unitPrice: 200,
-    unitCreditValue: 300,
-    fixedQty: 1,
-}, {
-    _id: "4005",
-    product: {
-        productCode: "C19001",
-        productDesc: "SIGN-UP CAMPAIGN 2019 FREE 50 CREDITS"
-    },
-    unitPrice: 0,
-    unitCreditValue: 50,
+    unitCreditValue: 90,
+    postingDays: 60,
     fixedQty: 1,
 }];
 
 /**
- * GET /creditAccounts
- * Credit Account listing page.
+ * GET /offlineJobs
+ * Offline Job listing page.
  */
-export let getCreditAccounts = (req: Request, res: Response, next: NextFunction) => {
+export let getJobs = (req: Request, res: Response, next: NextFunction) => {
     let newPageNo: number = parseInt(req.query.newPageNo);
     if (!newPageNo) {
         newPageNo = 1; // default
@@ -79,79 +70,126 @@ export let getCreditAccounts = (req: Request, res: Response, next: NextFunction)
 
     let pageInfo: PageInfo;
 
+    const recruiterSet = [
+        { value: "1001", label: "Recruiter #1 - A0000001"},
+        { value: "1002", label: "Recruiter #2 - A0000002"},
+        { value: "1003", label: "Recruiter #3 - A0000003"},
+        { value: "1004", label: "Recruiter #4 - A0000004"},
+    ];
+
+    let recruiterId = req.query.recruiterId;
+    if (!recruiterId)
+        recruiterId = recruiterSet[2].value;
+
+    const recruiter = recruiterSet.find(function(elem) {
+        return elem.value === recruiterId;
+    });
+
+    const recruiterLabel = recruiter.label;
+
     const item_list = [];
     item_list.push({
-        _id: "2001",
-        url: "/creditAccount/2001",
-        recruiterId: "1001",
+        url: "/offlineJob/5002",
         recruiter: {
-            url: "/recruiter/1001",
-            name: "Recruiter #1",
-            nric: "A0000001",
-            email: "some1@e.mail",
-            mobileNo: "+60122222221",
-            billingName: "Company #1"
-        },
-        validDateStartDisplay: moment("2018-10-21").format("YYYY-MM-DD"),
-        validDateEndDisplay: moment("2019-10-21").format("YYYY-MM-DD"),
-        creditBalance: 0,
-        creditLocked: 0,
-        get creditAvailable() {
-            return this.creditBalance - this.creditLocked;
-        },
-        lastTrxDate: moment("2018-12-12 22:41:41.445").format("YYYY-MM-DD HH:mm:ss"),
-        status: "T",
-        get statusDisplay() {
-            let result = this.status;
-            if (this.status === "A")
-                result = "Active";
-            else if (this.status === "T")
-                result = "Terminated";
-            return result;
-        },
-    });
-    item_list.push({
-        _id: "2002",
-        url: "/creditAccount/2002",
-        recruiterId: "1002",
-        recruiter: {
-            url: "/recruiter/1002",
-            name: "Recruiter #2",
-            nric: "A0000002",
-            email: "some2@e.mail",
-            mobileNo: "+60122222222",
-            billingName: "Company #2"
-        },
-        validDateStartDisplay: moment("2019-02-10").format("YYYY-MM-DD"),
-        validDateEndDisplay: moment("2020-02-10").format("YYYY-MM-DD"),
-        creditBalance: 25,
-        creditLocked: 0,
-        get creditAvailable() {
-            return this.creditBalance - this.creditLocked;
-        },
-        lastTrxDate: moment("2019-02-12 20:13:51.422").format("YYYY-MM-DD HH:mm:ss"),
-        status: "A",
-        get statusDisplay() {
-            let result = this.status;
-            if (this.status === "A")
-                result = "Active";
-            else if (this.status === "T")
-                result = "Terminated";
-            return result;
-        },
-    });
-    item_list.push({
-        _id: "2003",
-        url: "/creditAccount/2003",
-        recruiterId: "1003",
-        recruiter: {
-            url: "/recruiter/1003",
             name: "Recruiter #3",
             nric: "A0000003",
-            email: "some3@e.mail",
-            mobileNo: "+60122222223",
-            billingName: "Company #3"
         },
+        job: {
+            title: "Some Offline Job 2",
+            description: "Some Job Description 2",
+            employerName: "Some Employer 2",
+            applyMethod: "Whatsapp/ SMS 012-3456789",
+            salary: "Min MYR800.00/bulan +EPF+SOCSO",
+            location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+            closing: "SEGERA",
+            publishStartDisplay: moment("2019-02-16").format("YYYY-MM-DD"),
+            get publishEndDisplay() {
+                return moment(this.publishStartDisplay, "YYYY-MM-DD").add(15 - 1, "days").format("YYYY-MM-DD");
+            },
+        },
+        status: "P",
+        get statusDisplay() {
+            let result = this.status;
+            if (this.status === "P")
+                result = "Pending";
+            else if (this.status === "B")
+                result = "Published";
+            return result;
+        },
+    });
+    item_list.push({
+        url: "/offlineJob/5001",
+        recruiter: {
+            name: "Recruiter #3",
+            nric: "A0000003",
+        },
+        job: {
+            title: "Some Offline Job 1",
+            description: "Some Job Description 1",
+            employerName: "Some Employer 1",
+            applyMethod: "Whatsapp/ SMS 012-3456789",
+            salary: "Min MYR800.00/bulan +EPF+SOCSO",
+            location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+            closing: "SEGERA",
+            publishStartDisplay: moment("2019-02-15").format("YYYY-MM-DD"),
+            get publishEndDisplay() {
+                return moment(this.publishStartDisplay, "YYYY-MM-DD").add(30 - 1, "days").format("YYYY-MM-DD");
+            },
+        },
+        status: "B",
+        get statusDisplay() {
+            let result = this.status;
+            if (this.status === "P")
+                result = "Pending";
+            else if (this.status === "B")
+                result = "Published";
+            return result;
+        },
+    });
+
+    pageInfo = getNewPageInfo(item_list.length, rowPerPage, newPageNo);
+
+    let rowPerPageOptions, pageNoOptions;
+    if (pageInfo) {
+        rowPerPageOptions = selectOption.OPTIONS_ROW_PER_PAGE();
+        selectOption.markSelectedOption(rowPerPage.toString(), rowPerPageOptions);
+
+        pageNoOptions = selectOption.OPTIONS_PAGE_NO(pageInfo.totalPageNo);
+        selectOption.markSelectedOption(pageInfo.curPageNo.toString(), pageNoOptions);
+    }
+
+    // client side script
+    const includeScripts = ["/js/offlineJob/list.js", "/js/util/pagination.js", "/js/lib/typeahead.bundle.js"];
+
+    res.render("offlineJob/list", {
+        title: "Recruiter",
+        title2: "Offline Job List",
+        item_list: item_list,
+        recruiterSet: recruiterSet,
+        recruiterId: recruiterId,
+        recruiterLabel: recruiterLabel,
+        rowPerPageOptions: rowPerPageOptions,
+        pageNoOptions: pageNoOptions,
+        pageInfo: pageInfo,
+        includeScripts: includeScripts
+    });
+
+};
+
+/**
+ * GET /offlineJob/create
+ * Create Offline Job page.
+ */
+export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
+    const recruiterId = req.query.recruiterId;
+
+    // TODO: for local testing only
+    const recruiter = {
+        name: "Recruiter #3",
+        nric: "A0000003",
+    };
+
+    const creditAccount = {
         validDateStartDisplay: moment("2019-02-13").format("YYYY-MM-DD"),
         validDateEndDisplay: moment("2020-02-13").format("YYYY-MM-DD"),
         creditBalance: 50,
@@ -169,59 +207,36 @@ export let getCreditAccounts = (req: Request, res: Response, next: NextFunction)
                 result = "Terminated";
             return result;
         },
-    });
-
-    pageInfo = getNewPageInfo(item_list.length, rowPerPage, newPageNo);
-
-    let rowPerPageOptions, pageNoOptions;
-    if (pageInfo) {
-        rowPerPageOptions = selectOption.OPTIONS_ROW_PER_PAGE();
-        selectOption.markSelectedOption(rowPerPage.toString(), rowPerPageOptions);
-
-        pageNoOptions = selectOption.OPTIONS_PAGE_NO(pageInfo.totalPageNo);
-        selectOption.markSelectedOption(pageInfo.curPageNo.toString(), pageNoOptions);
-    }
-
-    // client side script
-    const includeScripts = ["/js/creditAccount/list.js", "/js/util/pagination.js"];
-
-    res.render("creditAccount/list", {
-        title: "Recruiter",
-        title2: "Credit Account List",
-        item_list: item_list,
-        rowPerPageOptions: rowPerPageOptions,
-        pageNoOptions: pageNoOptions,
-        pageInfo: pageInfo,
-        includeScripts: includeScripts
-    });
-
-};
-
-/**
- * GET /creditAccount/create
- * Create Recruiter page.
- */
-export let getCreditAccountCreate = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: for local testing only
-    const creditAccountInput = {
-        validDateStartInput: moment().format("YYYY-MM-DD"),
-        validDateEndInput: moment().add(3, "months").format("YYYY-MM-DD"),
     };
 
-    // const jobInput = new Job({
-    //     title: "Some Job 1",
-    //     description: "Some Job Description 1",
-    //     employerName: "Some Employer",
-    //     applyMethod: "Whatsapp/ SMS 012-3456789",
-    //     salary: "Min MYR800.00/bulan +EPF+SOCSO",
-    //     location: "Pasir Pekan, Wakaf Bahru",
-    //     closing: "SEGERA",
-    //     publishStart: moment().add(1, "days"),
-    //     publishEnd: moment().add(29, "days"),
-    //     // weight: number,
-    //     // tag: string[],
-    //     // customContent: string,
-    // });
+    const jobInput = {
+        productPriceId: "4102",
+        title: "Some Offline Job 3",
+        description: "Some Offline Job Description 3",
+        employerName: "Some Employer",
+        applyMethod: "Whatsapp/ SMS 012-3456789",
+        salary: "Min MYR800.00/bulan +EPF+SOCSO",
+        location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+        closing: "SEGERA",
+        publishStartInput: moment().add(1, "days").format("YYYY-MM-DD"),
+        get publishEndInput() {
+            return moment(this.publishStartInput, "YYYY-MM-DD").add(30 - 1, "days").format("YYYY-MM-DD");
+        },
+        // weight: number,
+        // tag: string[],
+        // customContent: string,
+
+        getAreaByLocationCode: function (locationCode: string) {
+            let result: string;
+            if (this.location && this.location.length > 0) {
+                const matched = (this.location as Location[]).find(location => location.code === locationCode);
+                if (matched) {
+                    result = matched.area;
+                }
+            }
+            return result;
+        }
+    };
 
     // set default values
     // const jobInput = new JobModel({
@@ -229,27 +244,31 @@ export let getCreditAccountCreate = (req: Request, res: Response, next: NextFunc
     //         publishEnd: moment().add(29, "days")
     // });
 
-    const recruiterOptions = [
-        { label: "Recruiter #4 (A0000004)", value: "1004" },
-    ];
+    const locationOptions = selectOption.OPTIONS_LOCATION();
+    selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
 
     // client side script
-    const includeScripts = ["/js/creditAccount/form.js"];
+    const includeScripts = ["/ckeditor/ckeditor.js", "/js/lib/moment.min.js", "/js/offlineJob/form.js"];
 
-    res.render("creditAccount/form", {
+    res.render("offlineJob/form", {
         title: "Recruiter",
-        title2: "Create Credit Account",
-        creditAccount: creditAccountInput,
+        title2: "Create Offline Job",
+        recruiterId: recruiterId,
+        recruiter: recruiter,
+        creditAccount: creditAccount,
+        job: jobInput,
         includeScripts: includeScripts,
-        recruiterOptions: recruiterOptions,
+        locationOptions: locationOptions,
+        productPrice_list: productPriceList,
+        productPriceSet: productPriceList,
     });
 };
 
 /**
- * POST /creditAccount/create
- * Create a new Credit Account.
+ * POST /offlineJob/create
+ * Create a new Offline Job.
  */
-export let postCreditAccountCreate = [
+export let postJobCreate = [
     // convert multiple selection input into array
     (req: Request, res: Response, next: NextFunction) => {
         // if (!(req.body.location instanceof Array)) {
@@ -281,15 +300,16 @@ export let postCreditAccountCreate = [
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
-    sanitizeBody("validDateStart").toDate(),
-    sanitizeBody("validDateEnd").toDate(),
+    // sanitizeBody("dob").toDate(),
 
     // process request
     (req: Request, res: Response, next: NextFunction) => {
         const errors = validationResult(req);
 
-        req.flash("success", { msg: "New Credit Account created: 2004" });
-        return res.redirect("/creditAccounts");
+        const recruiterId = req.body.recruiterId;
+
+        req.flash("success", { msg: "New job posting created.<br>Please review before proceed to Publish the post." });
+        return res.redirect("/offlineJobs?recruiterId=" + recruiterId);
 
         // const jobInput = new JobModel({
         //     title: req.body.title,
@@ -337,162 +357,109 @@ export let postCreditAccountCreate = [
 ];
 
 /**
- * GET /creditAccount/:id
- * View Credit Account Detail page.
+ * GET /offlineJob/:id
+ * View Offline Job Detail page.
  */
-export let getCreditAccountDetail = (req: Request, res: Response, next: NextFunction) => {
-    const creditAccountDb = {
-        _id: "2003",
-        url: "/creditAccount/2003",
-        recruiterId: "1003",
-        recruiter: {
-            url: "/recruiter/1003",
-            name: "Recruiter #3",
-            nric: "A0000003",
-            email: "some3@e.mail",
-            mobileNo: "+60122222223",
-            billingName: "Company #3",
-            billingAddress: "ADDR LINE 1"
-                + "\r\nADDR LINE 2"
-                + "\r\nADDR LINE 3"
-                + "\r\n15150 KOTA BHARU"
-                + "\r\nKELANTAN"
-                + "\r\nMALAYSIA",
-        },
-        validDateStartDisplay: moment("2019-02-13").format("YYYY-MM-DD"),
-        validDateEndDisplay: moment("2020-02-13").format("YYYY-MM-DD"),
-        creditBalance: 50,
-        creditLocked: 25,
-        get creditAvailable() {
-            return this.creditBalance - this.creditLocked;
-        },
-        lastTrxDate: moment("2019-02-14 16:43:55.422").format("YYYY-MM-DD HH:mm:ss"),
-        status: "A",
-        get statusDisplay() {
-            let result = this.status;
-            if (this.status === "A")
-                result = "Active";
-            else if (this.status === "T")
-                result = "Terminated";
-            return result;
-        },
+export let getJobDetail = (req: Request, res: Response, next: NextFunction) => {
+
+    // TODO: for local testing only
+    const recruiter = {
+        _id: "1003",
+        name: "Recruiter #3",
+        nric: "A0000003",
     };
 
-    const creditTrx_list = [{
-        _id: "3004",
-        trxDateDisplay: moment("2019-02-14 16:43:55.422").format("YYYY-MM-DD HH:mm:ss"),
-        trxType: "U",
-        get trxTypeDisplay() {
-            let result = this.trxType;
-            if (this.trxType === "T") {
-                result = "Top-up";
-            } else if (this.trxType === "R") {
-                result = "Refund";
-            } else if (this.trxType === "C") {
-                result = "Complimentary";
-            } else if (this.trxType === "U") {
-                result = "Utilization";
-            } else if (this.trxType === "E") {
-                result = "Expiry";
-            }
-            return result;
-        },
-        currency: "MYR",
+    const recruiterId = recruiter._id;
+
+    const productPrice = {
+        _id: "4101",
         product: {
             productCode: "P19001",
             productDesc: "PUBLISH 15 DAYS @ 25 CREDITS",
         },
-        totalCredit: -25,
+        unitCreditValue: 25,
+        postingDays: 15,
+        fixedQty: 1,
+    };
+
+    const jobDb = {
+        _id: "5002",
+        url: "/offlineJob/5002",
+        title: "Some Offline Job 2",
+        description: "Some Job Description 2",
+        employerName: "Some Employer 2",
+        applyMethod: "Whatsapp/ SMS 012-3456789",
+        salary: "Min MYR800.00/bulan +EPF+SOCSO",
+        location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+        closing: "SEGERA",
+        publishStartDisplay: moment("2019-02-16").format("YYYY-MM-DD"),
+        get publishEndDisplay() {
+            return moment(this.publishStartDisplay, "YYYY-MM-DD").add(15 - 1, "days").format("YYYY-MM-DD");
+        },
+        // weight: number,
+        // tag: string[],
+        // customContent: string,
+
         status: "P",
-    }, {
-        _id: "3003",
-        trxDateDisplay: moment("2019-02-13 17:01:04.065").format("YYYY-MM-DD HH:mm:ss"),
-        trxType: "T",
-        get trxTypeDisplay() {
-            let result = this.trxType;
-            if (this.trxType === "T") {
-                result = "Top-up";
-            } else if (this.trxType === "R") {
-                result = "Refund";
-            } else if (this.trxType === "C") {
-                result = "Complimentary";
-            } else if (this.trxType === "U") {
-                result = "Utilization";
-            } else if (this.trxType === "E") {
-                result = "Expiry";
+        get statusDisplay() {
+            let result = this.status;
+            if (this.status === "P")
+                result = "Pending";
+            else if (this.status === "B")
+                result = "Published";
+            return result;
+        },
+
+        get locationDisplay() {
+            let result = "-";
+            if (this.location && this.location.length > 0) {
+                const labels: string[] = [];
+                if (selectOption.OPTIONS_LOCATION()) {
+                    this.location.forEach((location: Location) => {
+                        const label = selectOption.getLabelByValue(location.code, selectOption.OPTIONS_LOCATION());
+                        if (label) {
+                            if (location.area) {
+                                labels.push(`${label} (${location.area})`);
+                            } else {
+                                labels.push(label);
+                            }
+                        }
+                    });
+                }
+                if (labels) {
+                    labels.forEach((label, i) => {
+                        if (i == 0)
+                            result = label;
+                        else
+                            result += " | " + label;
+                    });
+                }
             }
             return result;
         },
-        currency: "MYR",
-        product: {
-            productCode: "T19001",
-            productDesc: "TOP-UP 50 CREDITS @ MYR50",
+
+        get descriptionDisplay() {
+            return this.description ? this.description.replace(/\n/g, "<br/>") : "";
         },
-        totalCredit: 50,
-        status: "A",
-    }, {
-        _id: "3002",
-        trxDateDisplay: moment("2019-02-13 12:26:34.565").format("YYYY-MM-DD HH:mm:ss"),
-        trxType: "U",
-        get trxTypeDisplay() {
-            let result = this.trxType;
-            if (this.trxType === "T") {
-                result = "Top-up";
-            } else if (this.trxType === "R") {
-                result = "Refund";
-            } else if (this.trxType === "C") {
-                result = "Complimentary";
-            } else if (this.trxType === "U") {
-                result = "Utilization";
-            } else if (this.trxType === "E") {
-                result = "Expiry";
-            }
-            return result;
+
+        get applyMethodDisplay() {
+            return this.applyMethod ? this.applyMethod.replace(/\n/g, "<br/>") : "";
         },
-        currency: "MYR",
-        product: {
-            productCode: "P19002",
-            productDesc: "PUBLISH 30 DAYS @ 50 CREDITS",
-        },
-        totalCredit: -50,
-        status: "A",
-    }, {
-        _id: "3001",
-        trxDateDisplay: moment("2019-02-13 09:11:25.465").format("YYYY-MM-DD HH:mm:ss"),
-        trxType: "C",
-        get trxTypeDisplay() {
-            let result = this.trxType;
-            if (this.trxType === "T") {
-                result = "Top-up";
-            } else if (this.trxType === "R") {
-                result = "Refund";
-            } else if (this.trxType === "C") {
-                result = "Complimentary";
-            } else if (this.trxType === "U") {
-                result = "Utilization";
-            } else if (this.trxType === "E") {
-                result = "Expiry";
-            }
-            return result;
-        },
-        currency: "MYR",
-        product: {
-            productCode: "C19001",
-            productDesc: "SIGN-UP CAMPAIGN 2019 FREE 50 CREDITS",
-        },
-        totalCredit: 50,
-        status: "A",
-    }];
+
+    };
 
     // client side script
-    const includeScripts = ["/js/creditAccount/detail.js"];
+    const includeScripts = ["/ckeditor/ckeditor.js", "/js/offlineJob/detail.js"];
 
-    res.render("creditAccount/detail", {
+    res.render("offlineJob/detail", {
         title: "Recruiter",
-        title2: "Credit Account Detail",
-        creditAccount: creditAccountDb,
-        creditAccountId: creditAccountDb._id,
-        creditTrx_list: creditTrx_list,
+        title2: "Offline Job Detail",
+        recruiterId: recruiterId,
+        recruiter: recruiter,
+        productPrice: productPrice,
+        jobId: jobDb._id,
+        job: jobDb,
+        productPrice_list: productPriceList,
         includeScripts: includeScripts,
         bu: req.query.bu,
     });
@@ -525,29 +492,21 @@ export let getCreditAccountDetail = (req: Request, res: Response, next: NextFunc
 };
 
 /**
- * GET /creditAccount/:id/addCredit
- * Add Credit to Credit Account page.
+ * GET /offlineJob/:id/update
+ * Update Recruiter page.
  */
-export let getCreditAccountAddCredit = (req: Request, res: Response, next: NextFunction) => {
+export let getJobUpdate = (req: Request, res: Response, next: NextFunction) => {
 
-    const creditAccountDb = {
-        _id: "2003",
-        url: "/creditAccount/2003",
-        recruiterId: "1003",
-        recruiter: {
-            url: "/recruiter/1003",
-            name: "Recruiter #3",
-            nric: "A0000003",
-            email: "some3@e.mail",
-            mobileNo: "+60122222223",
-            billingName: "Company #3",
-            billingAddress: "ADDR LINE 1"
-                + "\r\nADDR LINE 2"
-                + "\r\nADDR LINE 3"
-                + "\r\n15150 KOTA BHARU"
-                + "\r\nKELANTAN"
-                + "\r\nMALAYSIA",
-        },
+    // TODO: for local testing only
+    const recruiter = {
+        _id: "1003",
+        name: "Recruiter #3",
+        nric: "A0000003",
+    };
+
+    const recruiterId = recruiter._id;
+
+    const creditAccount = {
         validDateStartDisplay: moment("2019-02-13").format("YYYY-MM-DD"),
         validDateEndDisplay: moment("2020-02-13").format("YYYY-MM-DD"),
         creditBalance: 50,
@@ -567,25 +526,60 @@ export let getCreditAccountAddCredit = (req: Request, res: Response, next: NextF
         },
     };
 
-    const creditTrxInput = {
-        currency: "MYR",
-        productPriceId: "4002",
-        totalAmount: 100,
-        totalCredit: 120,
-        paymentReference: "Cash Receipt No.: 2213",
+    const jobInput = {
+        productPriceId: "4101",
+        _id: "5002",
+        url: "/offlineJob/5002",
+        title: "Some Offline Job 2",
+        description: "Some Job Description 2",
+        employerName: "Some Employer 2",
+        applyMethod: "Whatsapp/ SMS 012-3456789",
+        salary: "Min MYR800.00/bulan +EPF+SOCSO",
+        location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+        closing: "SEGERA",
+        publishStartInput: moment("2019-02-16").format("YYYY-MM-DD"),
+        get publishEndInput() {
+            return moment(this.publishStartInput, "YYYY-MM-DD").add(30 - 1, "days").format("YYYY-MM-DD");
+        },
+        // weight: number,
+        // tag: string[],
+        // customContent: string,
+
+        getAreaByLocationCode: function (locationCode: string) {
+            let result: string;
+            if (this.location && this.location.length > 0) {
+                const matched = (this.location as Location[]).find(location => location.code === locationCode);
+                if (matched) {
+                    result = matched.area;
+                }
+            }
+            return result;
+        }
     };
 
-    // client side script
-    const includeScripts = ["/js/creditAccount/formAddCredit.js"];
+    // set default values
+    // const jobInput = new JobModel({
+    //         publishStart: moment().add(1, "days"),
+    //         publishEnd: moment().add(29, "days")
+    // });
 
-    res.render("creditAccount/formAddCredit", {
+    const locationOptions = selectOption.OPTIONS_LOCATION();
+    selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
+
+    // client side script
+    const includeScripts = ["/ckeditor/ckeditor.js", "/js/lib/moment.min.js", "/js/offlineJob/form.js"];
+
+    res.render("offlineJob/form", {
         title: "Recruiter",
-        title2: "Add Credit",
-        creditAccount: creditAccountDb,
-        creditAccountId: creditAccountDb._id,
-        creditTrx: creditTrxInput,
-        productPrice_list: productPriceList,
+        title2: "Edit Offline Job",
+        recruiterId: recruiterId,
+        recruiter: recruiter,
+        creditAccount: creditAccount,
+        job: jobInput,
         includeScripts: includeScripts,
+        locationOptions: locationOptions,
+        productPrice_list: productPriceList,
+        productPriceSet: productPriceList,
         bu: req.query.bu,
     });
 
@@ -629,10 +623,10 @@ export let getCreditAccountAddCredit = (req: Request, res: Response, next: NextF
 };
 
 /**
- * POST /creditAccount/:id/addCredit
- * Commit Add Credit to Credit Account.
+ * POST /offlineJob/:id/update
+ * Update an existing Job.
  */
-export let postCreditAccountAddCredit = [
+export let postJobUpdate = [
     // // convert multiple selection input into array
     // (req: Request, res: Response, next: NextFunction) => {
     //     if (!(req.body.location instanceof Array)) {
@@ -671,8 +665,8 @@ export let postCreditAccountAddCredit = [
     // process request
     (req: Request, res: Response, next: NextFunction) => {
 
-        req.flash("success", { msg: "Transaction successfully updated." });
-        return res.redirect("/creditAccount/2003?bu=" + req.body.bu);
+        req.flash("success", { msg: "Offline Job successfully updated." });
+        return res.redirect("/offlineJob/5002?bu=" + req.body.bu);
 
         // const errors = validationResult(req);
 
@@ -740,22 +734,86 @@ export let postCreditAccountAddCredit = [
 ];
 
 /**
- * POST /recruiter/:id/terminate
- * Terminate an existing Recruiter.
+ * POST /offlineJob/:id/publish
+ * Publish an existing Offline Job.
  */
-export let postRecruiterTerminate = [
+export let postJobPublish = [
     // validate values
-    body("id").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+    body("id").isLength({ min: 1 }).trim().withMessage("Offline Job ID is required."),
 
     // process request
     (req: Request, res: Response, next: NextFunction) => {
 
-        req.flash("success", { msg: "Recruiter successfully terminated." });
+        req.flash("success", { msg: "Offline Job successfully Published." });
         const bu = backUrl.decodeBackUrl(req.body.bu);
         if (bu) {
             return res.redirect(bu);
         } else {
-            return res.redirect("/recruiters");
+            return res.redirect("/offlineJobs");
+        }
+
+        // const errors = validationResult(req);
+
+        // const jobInput = new JobModel({
+        //     _id: req.params.id,
+        //     status: "D",
+        //     updatedBy: req.user.id
+        // });
+
+        // if (errors.isEmpty()) {
+        //     JobModel.findById(req.params.id, (err, targetJob) => {
+        //         if (err) { return next(err); }
+
+        //         if (!targetJob) {
+        //             req.flash("errors", { msg: "Job not found." });
+        //             const bu = backUrl.decodeBackUrl(req.body.bu);
+        //             if (bu) {
+        //                 return res.redirect(bu);
+        //             } else {
+        //                 return res.redirect("/jobs");
+        //             }
+        //         }
+
+        //         JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
+        //             if (err) { return next(err); }
+        //             req.flash("success", { msg: "Job successfully deleted." });
+        //             const bu = backUrl.decodeBackUrl(req.body.bu);
+        //             if (bu) {
+        //                 return res.redirect(bu);
+        //             } else {
+        //                 return res.redirect("/jobs");
+        //             }
+        //         });
+        //     });
+        // } else {
+        //     req.flash("errors", errors.array());
+        //     const bu = backUrl.decodeBackUrl(req.body.bu);
+        //     if (bu) {
+        //         return res.redirect(bu);
+        //     } else {
+        //         return res.redirect("/jobs");
+        //     }
+        // }
+    }
+];
+
+/**
+ * POST /offlineJob/:id/delete
+ * Delete an existing Offline Job.
+ */
+export let postJobDelete = [
+    // validate values
+    body("id").isLength({ min: 1 }).trim().withMessage("Offline Job ID is required."),
+
+    // process request
+    (req: Request, res: Response, next: NextFunction) => {
+
+        req.flash("success", { msg: "Offline Job successfully Deleted." });
+        const bu = backUrl.decodeBackUrl(req.body.bu);
+        if (bu) {
+            return res.redirect(bu);
+        } else {
+            return res.redirect("/offlineJobs");
         }
 
         // const errors = validationResult(req);

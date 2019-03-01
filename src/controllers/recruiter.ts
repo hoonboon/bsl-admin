@@ -164,6 +164,7 @@ export let getRecruiterCreate = (req: Request, res: Response, next: NextFunction
         raceOptions: raceOptions,
         languageOptions: languageOptions,
         genderOptions: genderOptions,
+        bu: req.query.bu,
     });
 };
 

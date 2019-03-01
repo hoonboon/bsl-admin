@@ -26,7 +26,10 @@ const roles: RoleAccess = {
         can: [{ name: "user:login" }]
     },
     admin_1: {
-        can: [{ name: "adminJob:list" }],
+        can: [
+            { name: "adminJob:list" },
+            { name: "offlineJob:list" },
+        ],
         extends: ["guest"]
     },
     admin_2: {

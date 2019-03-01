@@ -24,6 +24,7 @@ import * as userController from "./controllers/user";
 import * as adminJobController from "./controllers/adminJob";
 import * as recruiterController from "./controllers/recruiter";
 import * as creditAccountController from "./controllers/creditAccount";
+import * as offlineJobController from "./controllers/offlineJob";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -162,6 +163,16 @@ app.post("/creditAccount/create", passportConfig.isAuthenticated, rbacConfig.has
 app.get("/creditAccount/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountDetail);
 app.get("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountAddCredit);
 app.post("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountAddCredit);
+
+// Offline Job modules
+app.get("/offlineJobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobs);
+app.get("/offlineJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobCreate);
+app.post("/offlineJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobCreate);
+app.get("/offlineJob/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobDetail);
+app.get("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobUpdate);
+app.post("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobUpdate);
+app.post("/offlineJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobPublish);
+app.post("/offlineJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobDelete);
 
 /**
  * API examples routes.

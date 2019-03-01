@@ -1,0 +1,107 @@
+extends ../layout
+
+block content
+  .container
+    if jobId
+      h3
+        if title2
+          = title2
+        else
+          = title
+      p Job Id: #{jobId}
+    else
+      h3
+        if title2
+          = title2
+        else
+          = title
+    
+    p
+      form.form-horizontal
+        .form-group
+          label.col-sm-4.col-xs-6.control-label Recruiter: 
+          .col-sm-6.col-xs-6
+            .form-control-static !{recruiter.name} - !{recruiter.nric}
+          label.col-sm-4.col-xs-6.control-label Credit Available: 
+          .col-sm-6.col-xs-6
+            .form-control-static !{creditAccount.creditAvailable}
+          label.col-sm-4.col-xs-6.control-label Credit Expiry Date: 
+          .col-sm-6.col-xs-6
+            .form-control-static !{creditAccount.validDateEndDisplay}
+    
+    p.text-center
+      font(color="red") 
+        i ** Required fields.
+  
+    form.form-horizontal(id='jobForm', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', id='bu', name='bu', value=bu)
+      input(type='hidden', id='recruiterId', name='recruiterId', value=(recruiterId))
+      .form-group
+        label.col-sm-3.control-label(for='employerName') ** Employer Name
+        .col-sm-7
+          input.form-control(type='text', name='employerName', id='employerName', placeholder='Employer Name', required, value!=(job === undefined ? '' : job.employerName))
+      .form-group
+        label.col-sm-3.control-label(for='title') ** Post Title
+        .col-sm-7
+          input.form-control(type='text', name='title', id='title', placeholder='Post Title', autofocus, required, value!=(job === undefined ? '' : job.title))
+      .form-group
+        label.col-sm-3.control-label(for='location') Job Location
+        .col-sm-7
+          for option in locationOptions
+            .checkbox.col-xs-offset-1.col-xs-11.col-sm-4
+                input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value, checked=option.isSelected)
+                label(for=option.value) #{option.label}
+            .col-xs-12.col-sm-6
+              input.form-control(type='text', name='area_' + option.value, id='area_' + option.value, placeholder='Area in ' + option.label, value!=(job === undefined ? '' : job.getAreaByLocationCode(option.value)))
+      .form-group
+        label.col-sm-3.control-label(for='description') Job Description
+        .col-sm-7
+          textarea.form-control(rows='8', name='description', id='description', placeholder='Job Description') !{job.description}
+      .form-group
+        label.col-sm-3.control-label(for='salary') Salary & Other Benefits
+        .col-sm-7
+          input.form-control(type='text', name='salary', id='salary', placeholder='Salary', value!=(job === undefined ? '' : job.salary))
+      .form-group
+        label.col-sm-3.control-label(for='employerContact') ** Apply Method
+        .col-sm-7
+          textarea.form-control(rows='5', name='applyMethod', id='applyMethod', placeholder='E.g. YATI 015-9012222 (CALL/WHATSAPP) etc', required) !{job.applyMethod}
+      .form-group
+        label.col-sm-3.control-label(for='productPriceId') ** Publish Option
+        .col-sm-7
+          select.form-control(name='productPriceId', id='productPriceId', placeholder='Publish Option')
+            for item in productPrice_list
+              option(
+                label=item.product.productDesc, 
+                value=item._id, 
+                selected=(job.productPriceId == item._id ? 'selected' : false)
+              ) #{item.product.productDesc}
+      .form-group
+        label.col-sm-3.control-label(for='publishStart') ** Publish Date Start
+        .col-sm-7
+          input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', required, value=(job === undefined ? '' : job.publishStartInput))
+      .form-group
+        label.col-sm-3.control-label(for='publishEnd') Publish Date End
+        .col-sm-7
+          input.form-control(type='date', name='publishEnd', id='publishEnd', placeholder='Calculated from selected Publish Option',readonly, value=(job === undefined ? '' : job.publishEndInput))
+      .form-group
+        label.col-sm-3.control-label(for='closing') ** Closing
+        .col-sm-7
+          input.form-control(type='text', name='closing', id='closing', placeholder='E.g. 2020-01-31, SEGERA', required, value!=(job === undefined ? '' : job.closing))
+      .form-group
+        label.col-sm-3.control-label(for='otherInfo') Image URL
+        .col-sm-7
+          input.form-control(type='text', name='imgUrl', id='imgUrl', placeholder='E.g. https://carikijo.my/images/fbProfilePhoto.jpg"', value!=(job === undefined ? '' : job.imgUrl))
+      .form-group
+        label.col-sm-3.control-label(for='customContent') Customized full detail content to be displayed to user
+        .col-sm-7
+          textarea.form-control(rows='15', name='customContent', id='customContent') !{job.customContent}
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          button.btn.btn-success(type='submit') Save
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='goBack()', id='btnGoBack') Cancel
+
+  script.
+      let productPriceSet = !{JSON.stringify(productPriceSet)};

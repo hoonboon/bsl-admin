@@ -20,8 +20,8 @@
             ul.dropdown-menu
               if user.hasAccess('adminJob:list')
                 li
-                  a(href='/adminJobs') Admin Job List
-        if user && (user.hasAccess('recruiter:list') || user.hasAccess('creditAccount:list'))
+                  a(href='/adminJobs') Admin Job
+        if user && (user.hasAccess('recruiter:list') || user.hasAccess('creditAccount:list') || user.hasAccess('offlineJob:list'))
           li.dropdown(class=(title == 'Recruiter') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               span Recruiter
@@ -29,10 +29,13 @@
             ul.dropdown-menu
               if user.hasAccess('recruiter:list')
                 li
-                  a(href='/recruiters') Recruiter List
+                  a(href='/recruiters') Recruiter
               if user.hasAccess('creditAccount:list')
                 li
-                  a(href='/creditAccounts') Credit Account List
+                  a(href='/creditAccounts') Credit Account
+              if user.hasAccess('offlineJob:list')
+                li
+                  a(href='/offlineJobs') Offline Job
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)

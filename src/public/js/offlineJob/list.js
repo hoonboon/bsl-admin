@@ -1,0 +1,52 @@
+$(document).ready(function() {
+    let recruiters = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('label'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: recruiterSet,
+        identify: function(obj) { return obj.value; },
+    });
+
+    $('.typeahead').typeahead({
+        hint: true,
+        highlight: true, /* Enable substring highlighting */
+        minLength: 3 /* Specify minimum characters required for showing suggestions */
+    }, {
+        name: 'recruiters',
+        display: 'label',
+        source: recruiters
+    });
+
+    $('.typeahead').bind('typeahead:select', function(ev, selected) {
+        console.log("selected: " + JSON.stringify(selected));
+        submitFilter(selected.value, selected.label);
+      });
+      
+
+});
+
+function showSearch() {
+    $("#searchModal").modal("show");
+}
+
+function submitViewList() {
+    $("#searchForm").submit();
+}
+
+function submitFilter(value, label) {
+    $("#recruiterId").val(value);
+    $("#recruiterLabel").val(label);
+    $("#searchForm").submit();
+}
+
+function viewDetail(targetUrl) {
+    let currentUrl = window.location.pathname + window.location.search;
+    targetUrl += "?bu=" + window.btoa(currentUrl); // TODO: to support UTF-8
+    window.location = targetUrl;
+}
+
+function goCreate(targetUrl) {
+    let currentUrl = window.location.pathname + window.location.search;
+    targetUrl += "?recruiterId=" + $("#recruiterId").val();
+    targetUrl += "&bu=" + window.btoa(currentUrl); // TODO: to support UTF-8
+    window.location = targetUrl;
+}
