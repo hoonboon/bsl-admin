@@ -11,7 +11,9 @@ import { default as JobModel, IJob, POSTTYPE_FB, POSTTYPE_NORMAL, Location } fro
 import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
-import logger from "../util/logger";
+import { Logger } from "../util/logger";
+
+const logger = new Logger("controllers.adminJob");
 
 const DEFAULT_ROW_PER_PAGE: number = 10;
 

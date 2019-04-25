@@ -22,22 +22,30 @@ block content
     form.form-horizontal(id='recruiterForm', method='POST')
       input(type='hidden', name='_csrf', value=_csrf)
       input(type='hidden', name='bu', value=bu)
+      input(type='hidden', name='isEdit', value=isEdit)
       .form-group
         label.col-sm-3.control-label(for='name') ** Name as per NRIC
         .col-sm-7
           input.form-control(type='text', name='name', id='name', placeholder='Recruiter Name', required, value!=(recruiter === undefined ? '' : recruiter.name))
-      .form-group
-        label.col-sm-3.control-label(for='nric') ** NRIC No.
-        .col-sm-7
-          input.form-control(type='text', name='nric', id='nric', placeholder='NRIC No.', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.nric))
-      .form-group
-        label.col-sm-3.control-label(for='email') ** Email Address
-        .col-sm-7
-          input.form-control(type='email', name='email', id='email', placeholder='Email Address', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.email))
+      if (isEdit === "Y")
+        .form-group
+          label.col-sm-3.control-label(for='email') Email Address
+          .col-sm-7
+            input(type='hidden', name='email', value=recruiter.email)
+            .form-control-static !{recruiter.email}
+      else
+        .form-group
+          label.col-sm-3.control-label(for='email') ** Email Address
+          .col-sm-7
+            input.form-control(type='email', name='email', id='email', placeholder='Email Address', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.email))
       .form-group
         label.col-sm-3.control-label(for='mobileNo') ** Mobile Phone No.
         .col-sm-7
           input.form-control(type='text', name='mobileNo', id='mobileNo', placeholder='Mobile Phone No.', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.mobileNo))
+      .form-group
+        label.col-sm-3.control-label(for='nric') NRIC No.
+        .col-sm-7
+          input.form-control(type='text', name='nric', id='nric', placeholder='NRIC No.', autofocus, value!=(recruiter === undefined ? '' : recruiter.nric))
       .form-group
         label.col-sm-3.control-label(for='nationality') Nationality
         .col-sm-7
@@ -83,13 +91,13 @@ block content
                 selected=(option.isSelected ? 'selected' : false)
               ) #{option.label}
       .form-group
-        label.col-sm-3.control-label(for='billingName') ** Billing Name
+        label.col-sm-3.control-label(for='billToName') ** Billing Name
         .col-sm-7
-          input.form-control(type='text', name='billingName', id='billingName', placeholder='Billing Name', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.billingName))
+          input.form-control(type='text', name='billToName', id='billToName', placeholder='Billing Name', autofocus, required, value!=(recruiter === undefined ? '' : recruiter.billTo.name))
       .form-group
-        label.col-sm-3.control-label(for='billingAddress') ** Billing Address
+        label.col-sm-3.control-label(for='billToAddress') ** Billing Address
         .col-sm-7
-          textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address') !{recruiter.billingAddress}
+          textarea.form-control(rows='5', name='billToAddress', id='billToAddress', placeholder='Billing Address') !{recruiter.billTo.address}
       .form-group
         .col-sm-offset-3.col-sm-7
           button.btn.btn-success(type='submit') Save

@@ -7,7 +7,6 @@ import { Request, Response, NextFunction } from "express";
 import { IVerifyOptions } from "passport-local";
 import { WriteError } from "mongodb";
 import { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM_NOREPLY } from "../util/secrets";
-import logger from "../util/logger";
 const request = require("express-validator");
 
 // TODO: refactor - move into a mail service

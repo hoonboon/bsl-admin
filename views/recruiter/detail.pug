@@ -16,10 +16,6 @@ block content
         .col-sm-7
           .form-control-static !{recruiter.name}
       .form-group
-        label.col-sm-3.control-label(for='nric') NRIC No.
-        .col-sm-7
-          .form-control-static !{recruiter.nric}
-      .form-group
         label.col-sm-3.control-label(for='email') Email Address
         .col-sm-7
           .form-control-static !{recruiter.email}
@@ -27,6 +23,10 @@ block content
         label.col-sm-3.control-label(for='mobileNo') Mobile Phone No.
         .col-sm-7
           .form-control-static !{recruiter.mobileNo}
+      .form-group
+        label.col-sm-3.control-label(for='nric') NRIC No.
+        .col-sm-7
+          .form-control-static !{recruiter.nric}
       .form-group
         label.col-sm-3.control-label(for='nationality') Nationality
         .col-sm-7
@@ -74,12 +74,12 @@ block content
       .form-group
         label.col-sm-3.control-label(for='billingName') Billing Name
         .col-sm-7
-          .form-control-static !{recruiter.billingName}
+          .form-control-static !{recruiter.billTo.name}
       .form-group
         label.col-sm-3.control-label(for='billingAddress') Billing Address
         .col-sm-7
           .form-control-static
-            textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address', disabled='disabled') !{recruiter.billingAddress}
+            textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address', disabled='disabled') !{recruiter.billTo.address}
       
       .form-group
         .col-sm-offset-3.col-sm-7

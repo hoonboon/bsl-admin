@@ -1,4 +1,3 @@
-import logger from "./logger";
 
 export function decodeBackUrl(buEncoded: string): string {
     let result: string = buEncoded;
