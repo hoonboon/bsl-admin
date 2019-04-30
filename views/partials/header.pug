@@ -30,6 +30,9 @@
               if user.hasAccess('recruiter:list')
                 li
                   a(href='/recruiters') Recruiter
+              if user.hasAccess('employer:list')
+                li
+                  a(href='/employers') Employer
               if user.hasAccess('creditAccount:list')
                 li
                   a(href='/creditAccounts') Credit Account

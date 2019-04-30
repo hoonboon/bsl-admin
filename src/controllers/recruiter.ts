@@ -91,7 +91,7 @@ export let getRecruiters = (req: Request, res: Response, next: NextFunction) => 
             pageNoOptions: pageNoOptions,
             pageInfo: pageInfo,
             includeScripts: includeScripts,
-            searchTitle: searchName,
+            searchName: searchName,
             searchEmail: searchEmail,
             searchMobileNo: searchMobileNo,
         });
@@ -189,7 +189,7 @@ export let postRecruiterCreate = [
     body("dob").isLength({ min: 1 }).trim().withMessage("Date of Birth is required.")
     .isISO8601().withMessage("Date of Birth is invalid."),
 
-    // // TODO: must be >= 18 years old
+    // TODO: must be >= 18 years old
 
     body("billToName").isLength({ min: 1 }).trim().withMessage("Billing Name is required."),
     body("billToAddress").isLength({ min: 1 }).trim().withMessage("Billing Address is required."),
@@ -222,6 +222,8 @@ export let postRecruiterCreate = [
 
         if (errors.isEmpty()) {
             // check unique email address
+            // TODO: check unique mobile no.
+            // TODO: check unique nric if provided.
             RecruiterModel.findOne(
                 { email: (<string>req.body.email).toLowerCase() },
                 (err, existingRecruiter) => {
@@ -253,6 +255,7 @@ export let postRecruiterCreate = [
                             raceOptions: raceOptions,
                             languageOptions: languageOptions,
                             genderOptions: genderOptions,
+                            bu: req.body.bu,
                         });
                     } else {
                         recruiterInput.save((err, recruiterCreated) => {
@@ -289,6 +292,7 @@ export let postRecruiterCreate = [
                 raceOptions: raceOptions,
                 languageOptions: languageOptions,
                 genderOptions: genderOptions,
+                bu: req.body.bu,
             });
         }
     }
@@ -561,7 +565,7 @@ export let postRecruiterTerminate = [
             if (bu) {
                 return res.redirect(bu);
             } else {
-                return res.redirect("/jobs");
+                return res.redirect("/recruiters");
             }
         }
     }

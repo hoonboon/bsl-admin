@@ -18,15 +18,17 @@ const MongoDbStore = connect(session);
 dotenv.config({ path: ".env" });
 
 import { Logger } from "./util/logger";
-import { MONGODB_URI, SESSION_SECRET } from "./util/secrets";
+import { MONGODB_URI, SESSION_SECRET, ENVIRONMENT } from "./util/secrets";
 
 // Controllers (route handlers)
 import * as homeController from "./controllers/home";
 import * as userController from "./controllers/user";
 import * as adminJobController from "./controllers/adminJob";
 import * as recruiterController from "./controllers/recruiter";
+import * as employerController from "./controllers/employer";
 import * as creditAccountController from "./controllers/creditAccount";
 import * as offlineJobController from "./controllers/offlineJob";
+import * as apiController from "./controllers/api";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
@@ -50,6 +52,8 @@ const mongoConnectOpts = {
   autoReconnect: true,
   poolSize: 20,
 };
+
+mongoose.set("debug", ENVIRONMENT === "production" ? false : true);
 
 mongoose.connect(mongoUrl, mongoConnectOpts).then(
   () => {
@@ -160,6 +164,15 @@ app.get("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasA
 app.post("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterUpdate);
 app.post("/recruiter/:id/terminate", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterTerminate);
 
+// Employer modules
+app.get("/employers", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployers);
+app.get("/employer/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerCreate);
+app.post("/employer/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerCreate);
+app.get("/employer/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerDetail);
+app.get("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerUpdate);
+app.post("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerUpdate);
+app.post("/employer/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerDelete);
+
 // Credit Account modules
 app.get("/creditAccounts", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccounts);
 app.get("/creditAccount/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountCreate);
@@ -179,10 +192,9 @@ app.post("/offlineJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.h
 app.post("/offlineJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobDelete);
 
 /**
- * API examples routes.
+ * API
  */
-// app.get("/api", apiController.getApi);
-// app.get("/api/facebook", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
+app.get("/api/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("api-recruiter:list"), apiController.getRecruiters);
 
 /**
  * OAuth authentication routes. (Sign in)
@@ -202,7 +214,7 @@ app.use(function(req, res, next) {
 app.use(function(err: any, req: any, res: any, next: any) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  res.locals.error = ENVIRONMENT === "production" ? {} : err;
 
   // render the error page
   res.status(err.status || 500);

@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p Employer Id: #{recruiterId}
+
+    p
+      form.form-horizontal
+        .form-group
+          label.col-sm-3.col-xs-4.control-label Recruiter: 
+          .col-sm-6.col-xs-8
+            .form-control-static !{recruiter.name} - !{recruiter.email}
+
+    #recruiterDetail.form-horizontal
+      .form-group
+        label.col-sm-3.control-label(for='name') Employer Name
+        .col-sm-7
+          .form-control-static !{employer.name}
+      .form-group
+        label.col-sm-3.control-label(for='about') About Employer
+        .col-sm-7
+          .form-control-static 
+            textarea.form-control(rows='8', name='about', id='about', placeholder='About Employer', disabled='disabled') !{employer.about}
+      .form-group
+        label.col-sm-3.control-label(for='mobileNo') Employee Size
+        .col-sm-7
+          select.form-control-static(disabled=true)
+            for option in employeeSizeOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='contact') Contacts/ Social Media
+        .col-sm-7
+          .form-control-static 
+            textarea.form-control(rows='4', name='contact', id='contact', placeholder='Contacts/ Social Media', disabled='disabled') !{employer.contact}
+      
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          a.btn.btn-primary(href="#", onclick="editDetail('" + employer.url + "/update')") Edit
+          span
+          | 
+          a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
+          span
+          | 
+          a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+
+  form(id='employerDeleteForm', action=employer.url+'/delete', method='POST')
+    input(type='hidden', name='_csrf', value=_csrf)
+    input(type='hidden', name='recruiterId', id='recruiterId', value=recruiterId)
+    input(type='hidden', name='id', value=employerId)
+    input(type='hidden', name='bu', id='bu', value=bu)

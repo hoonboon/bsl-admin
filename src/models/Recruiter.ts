@@ -54,7 +54,10 @@ const RecruiterSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Virtual for Job's URL
+// Pre-defined indexes
+RecruiterSchema.index({ email: 1 });
+
+// Virtual for recrord's URL
 RecruiterSchema
 .virtual("url")
 .get(function() {

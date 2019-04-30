@@ -29,12 +29,14 @@ const roles: RoleAccess = {
         can: [
             { name: "adminJob:list" },
             { name: "offlineJob:list" },
+            { name: "api-recruiter:list" },
         ],
         extends: ["guest"]
     },
     admin_2: {
         can: [
             { name: "recruiter:list" },
+            { name: "employer:list" },
             { name: "creditAccount:list" },
         ],
         extends: ["admin_1"]

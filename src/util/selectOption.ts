@@ -1,3 +1,5 @@
+import { EMPLOYEESIZE_5, EMPLOYEESIZE_20, EMPLOYEESIZE_50, EMPLOYEESIZE_999 } from "../models/Employer";
+
 export interface SelectOption {
     label: string;
     value: string;
@@ -98,6 +100,16 @@ export function OPTIONS_GENDER() {
         { label: "Male", value: "M" },
         { label: "Female", value: "F" },
         { label: "Other", value: "O" }
+    ] as SelectOption[];
+}
+
+// Employee Sizes
+export function OPTIONS_EMPLOYEE_SIZE() {
+    return [
+        { label: "5 or less", value: EMPLOYEESIZE_5 },
+        { label: "Between 6 and 20", value: EMPLOYEESIZE_20 },
+        { label: "Between 21 and 50", value: EMPLOYEESIZE_50 },
+        { label: "51 or more", value: EMPLOYEESIZE_999 },
     ] as SelectOption[];
 }
 

@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+import * as selectOption  from "../util/selectOption";
+
 const Schema = mongoose.Schema;
 
 // Employee Size
@@ -18,6 +20,7 @@ export interface IEmployer extends mongoose.Document {
   about: string;
   employeeSize: string;
   contact: string;
+  url: string;
   status: string;
   createdBy: any;
   updatedBy: any;
@@ -36,6 +39,42 @@ const EmployerSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// pre-defined indexes
+EmployerSchema.index({ recruiter: 1 });
+
+// Virtual for record's URL
+EmployerSchema
+.virtual("url")
+.get(function() {
+  return "/employer/" + this._id;
+});
+
+EmployerSchema
+.virtual("aboutDisplayShort")
+.get(function () {
+  let result: string = this.about;
+  const MAX_LEN = 100;
+  if (result && result.length > MAX_LEN) {
+    result = result.substr(0, MAX_LEN) + "...";
+  }
+  return result ? result : "-";
+});
+
+EmployerSchema
+.virtual("employeeSizeDisplay")
+.get(function() {
+  let result = "-";
+  if (this.employeeSize) {
+    if (selectOption.OPTIONS_EMPLOYEE_SIZE()) {
+      const label = selectOption.getLabelByValue(this.employeeSize, selectOption.OPTIONS_EMPLOYEE_SIZE());
+      if (label) {
+        result = label;
+      }
+    }
+  }
+  return result;
+});
 
 const EmployerModel = mongoose.model<IEmployer>("Employer", EmployerSchema);
 export default EmployerModel;

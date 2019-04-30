@@ -21,7 +21,7 @@ block content
   
     form.form-horizontal(id='recruiterForm', method='POST')
       input(type='hidden', name='_csrf', value=_csrf)
-      input(type='hidden', name='bu', value=bu)
+      input(type='hidden', id='bu', name='bu', value=bu)
       input(type='hidden', name='isEdit', value=isEdit)
       .form-group
         label.col-sm-3.control-label(for='name') ** Name as per NRIC

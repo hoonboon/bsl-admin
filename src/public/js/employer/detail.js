@@ -6,6 +6,12 @@ $(document).ready(function() {
     }
 });
 
+function submitDelete() {
+    if (confirm("Confirm to Delete this Employer?")) {
+        $("#employerDeleteForm").submit();
+    }
+}
+
 function goBack() {
     let bu = $("#bu").val();
     if (bu) {
@@ -13,4 +19,10 @@ function goBack() {
     } else {
         window.history.back();
     }
+}
+
+function editDetail(targetUrl) {
+    targetUrl += "?recruiterId=" + $("#recruiterId").val();
+    targetUrl += "&bu=" + $("#bu").val();
+    window.location = targetUrl;
 }
