@@ -25,9 +25,9 @@ const OfflineJobSchema = new mongoose.Schema(
     employerName: String,
     publishStart: Date,
     publishEnd: Date,
-    job: { type: Schema.Types.ObjectId, ref: "Job" },
-    recruiter: { type: Schema.Types.ObjectId, ref: "Recruiter" },
-    creditTrx: { type: Schema.Types.ObjectId, ref: "CreditTrx" },
+    job: { type: Schema.Types.ObjectId, ref: "job" },
+    recruiter: { type: Schema.Types.ObjectId, ref: "recruiter" },
+    creditTrx: { type: Schema.Types.ObjectId, ref: "credit-trx" },
     status: { type: String, required: true, default: "A" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -35,5 +35,5 @@ const OfflineJobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const OfflineJobModel = mongoose.model<IOfflineJob>("OfflineJob", OfflineJobSchema);
+const OfflineJobModel = mongoose.model<IOfflineJob>("offline-job", OfflineJobSchema);
 export default OfflineJobModel;

@@ -24,7 +24,7 @@ export interface IProduct extends mongoose.Document {
 
 const ProductSchema = new mongoose.Schema(
   {
-    productCode: { type: String },
+    productCode: { type: String, unique: true },
     productDesc: String,
     productType: { type: String },
     publishInd: String,
@@ -35,5 +35,5 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);
+const ProductModel = mongoose.model<IProduct>("product", ProductSchema);
 export default ProductModel;

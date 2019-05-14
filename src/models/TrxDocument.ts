@@ -12,10 +12,13 @@ export const STATUS_DELETED = "D";
 
 export interface ITrxDocument extends mongoose.Document {
   docType: string;
+  trxYear: number;
   seqNo: number;
+  seqNoDisplay: string;
   creditTrx: any;
   billingName: string;
   billingAddress: string;
+  docNoDisplay: string;
   status: string;
   createdBy: any;
   updatedBy: any;
@@ -24,8 +27,9 @@ export interface ITrxDocument extends mongoose.Document {
 const TrxDocumentSchema = new mongoose.Schema(
   {
     docType: String,
+    trxYear: Number,
     seqNo: Number,
-    creditTrx: { type: Schema.Types.ObjectId, ref: "CreditTrx" },
+    creditTrx: { type: Schema.Types.ObjectId, ref: "credit-trx" },
     billingName: String,
     billingAddress: String,
     status: { type: String, required: true, default: "A" },
@@ -35,5 +39,21 @@ const TrxDocumentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const TrxDocumentModel = mongoose.model<ITrxDocument>("TrxDocument", TrxDocumentSchema);
+TrxDocumentSchema
+  .virtual("seqNoDisplay")
+  .get(function () {
+    let result = this.seqNo as string;
+    if (result) {
+      result = result.padStart(3, "0");
+    }
+    return result;
+  });
+
+TrxDocumentSchema
+  .virtual("docNoDisplay")
+  .get(function () {
+    return `${this.docType}-${this.trxYear}-${this.seqNoDisplay}`;
+  });
+
+const TrxDocumentModel = mongoose.model<ITrxDocument>("trx-document", TrxDocumentSchema);
 export default TrxDocumentModel;

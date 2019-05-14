@@ -21,13 +21,14 @@ block content
       table.table.table-striped
         thead
           tr
-            td(colspan="4")
+            td(colspan="5")
               include ../partials/pagination.pug
           tr
             th Name
             th Email
             th Mobile No.
             th Billing Name
+            th Status
         tbody
           if item_list
             each item in item_list
@@ -37,12 +38,13 @@ block content
                 td #{item.email}
                 td #{item.mobileNo}
                 td !{item.billTo.name}
+                td !{item.statusDisplay}
           else
             tr
-              td(colspan='4' align='center') No records found.
+              td(colspan='5' align='center') No records found.
         tfoot
           tr
-            td(colspan="4")
+            td(colspan="5")
               include ../partials/pagination.pug
 
   #searchModal.modal.fade(tabindex='-1')

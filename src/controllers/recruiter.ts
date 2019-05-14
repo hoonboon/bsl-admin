@@ -1,5 +1,6 @@
 import async from "async";
 import moment from "moment";
+import mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
 
 import { body, validationResult } from "express-validator/check";
@@ -10,6 +11,7 @@ import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
 import { Logger } from "../util/logger";
 import RecruiterModel, { IRecruiter } from "../models/Recruiter";
+import CreditAccountModel from "../models/CreditAccount";
 
 const logger = new Logger("controllers.recruiter");
 
@@ -19,45 +21,46 @@ const DEFAULT_ROW_PER_PAGE: number = 10;
  * GET /recruiters
  * Recruiter listing page.
  */
-export let getRecruiters = (req: Request, res: Response, next: NextFunction) => {
-    const searchName: string = req.query.searchName;
-    const searchEmail: string = req.query.searchEmail;
-    const searchMobileNo: string = req.query.searchMobileNo;
+export let getRecruiters = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const searchName: string = req.query.searchName;
+        const searchEmail: string = req.query.searchEmail;
+        const searchMobileNo: string = req.query.searchMobileNo;
 
-    let newPageNo: number = parseInt(req.query.newPageNo);
-    if (!newPageNo) {
-        newPageNo = 1; // default
-    }
+        let newPageNo: number = parseInt(req.query.newPageNo);
+        if (!newPageNo) {
+            newPageNo = 1; // default
+        }
 
-    let rowPerPage: number = parseInt(req.query.rowPerPage);
-    if (!rowPerPage) {
-        rowPerPage = DEFAULT_ROW_PER_PAGE; // default
-    }
+        let rowPerPage: number = parseInt(req.query.rowPerPage);
+        if (!rowPerPage) {
+            rowPerPage = DEFAULT_ROW_PER_PAGE; // default
+        }
 
-    const query = RecruiterModel.find();
+        const query = RecruiterModel.find();
 
-    // filter records
-    if (searchName) {
-        const regex = new RegExp(searchName.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
-        query.where("name").regex(regex);
-    }
+        // filter records
+        if (searchName) {
+            const regex = new RegExp(searchName.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
+            query.where("name").regex(regex);
+        }
 
-    if (searchEmail) {
-        const regex = new RegExp(searchEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
-        query.where("searchEmail").regex(regex);
-    }
+        if (searchEmail) {
+            const regex = new RegExp(searchEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
+            query.where("email").regex(regex);
+        }
 
-    if (searchMobileNo) {
-        const regex = new RegExp(searchMobileNo.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
-        query.where("searchMobileNo").regex(regex);
-    }
+        if (searchMobileNo) {
+            const regex = new RegExp(searchMobileNo.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
+            query.where("mobileNo").regex(regex);
+        }
 
-    query.where("status").in(["A"]);
+        query.where("status").in(["A", "T"]);
 
-    let pageInfo: PageInfo;
+        let pageInfo: PageInfo;
+        let item_list: any;
 
-    query.count()
-    .then(function(count: number) {
+        const count = await query.count();
         if (count > 0) {
             pageInfo = getNewPageInfo(count, rowPerPage, newPageNo);
 
@@ -65,12 +68,13 @@ export let getRecruiters = (req: Request, res: Response, next: NextFunction) => 
             query.skip(pageInfo.rowNoStart - 1);
             query.limit(rowPerPage);
             query.sort([["name", "ascending"], ["createdAt", "descending"]]);
-            return query.exec();
-        } else {
-            Promise.resolve();
+
+            item_list = await query.exec();
         }
-    })
-    .then(function (item_list: any) {
+        if (!pageInfo) {
+            pageInfo = getNewPageInfo(count, rowPerPage, newPageNo);
+        }
+
         let rowPerPageOptions, pageNoOptions;
         if (pageInfo) {
             rowPerPageOptions = selectOption.OPTIONS_ROW_PER_PAGE();
@@ -95,12 +99,12 @@ export let getRecruiters = (req: Request, res: Response, next: NextFunction) => 
             searchEmail: searchEmail,
             searchMobileNo: searchMobileNo,
         });
-    })
-    .catch(function(error) {
-        console.error(error);
-        return next(error);
-    });
 
+    } catch (err) {
+        logger.error((<Error>err).stack);
+        req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+        res.redirect("/recruiters");
+    }
 };
 
 /**
@@ -108,32 +112,32 @@ export let getRecruiters = (req: Request, res: Response, next: NextFunction) => 
  * Create Recruiter page.
  */
 export let getRecruiterCreate = (req: Request, res: Response, next: NextFunction) => {
-    // // TODO: for local testing only
-    // const recruiterInput = new RecruiterModel({
-    //     name: "Recruiter #2",
-    //     nric: "A0000002",
-    //     email: "some2@e.mail",
-    //     mobileNo: "+60122222222",
-    //     nationality: "MY",
-    //     race: "M",
-    //     language: "ms",
-    //     dob: moment("1992-03-15"),
-    //     gender: "M",
-    //     billTo: {
-    //         name: "Company #2",
-    //         address: "ADDR LINE 1"
-    //             + "\r\nADDR LINE 2"
-    //             + "\r\nADDR LINE 3"
-    //             + "\r\n15150 KOTA BHARU"
-    //             + "\r\nKELANTAN"
-    //             + "\r\nMALAYSIA"
-    //     },
-    // });
-
-    // set default values
+    // TODO: for local testing only
     const recruiterInput = new RecruiterModel({
-
+        name: "Recruiter #2",
+        nric: "A0000002",
+        email: "some2@e.mail",
+        mobileNo: "+60122222222",
+        nationality: "MY",
+        race: "M",
+        language: "ms",
+        dob: moment("1992-03-15"),
+        gender: "M",
+        billTo: {
+            name: "Company #2",
+            address: "ADDR LINE 1"
+                + "\r\nADDR LINE 2"
+                + "\r\nADDR LINE 3"
+                + "\r\n15150 KOTA BHARU"
+                + "\r\nKELANTAN"
+                + "\r\nMALAYSIA"
+        },
     });
+
+    // // set default values
+    // const recruiterInput = new RecruiterModel({
+
+    // });
 
     // client side script
     const includeScripts = ["/js/recruiter/form.js"];
@@ -196,78 +200,82 @@ export let postRecruiterCreate = [
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
-    sanitizeBody("dob").toDate(),
+    // sanitizeBody("dob").toDate(),
 
     // process request
-    (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
 
-        const recruiterInput = new RecruiterModel({
-            name: req.body.name,
-            nric: req.body.nric,
-            email: (<string>req.body.email).toLowerCase(),
-            mobileNo: req.body.mobileNo,
-            nationality: req.body.nationality,
-            race: req.body.race,
-            language: req.body.language,
-            dob: req.body.dob,
-            gender: req.body.gender,
-            billTo: {
-                name: req.body.billToName,
-                address: req.body.billToAddress,
-            },
-            status: "A",
-            createdBy: req.user.id
-        });
+        try {
+            const errors = validationResult(req);
 
-        if (errors.isEmpty()) {
-            // check unique email address
-            // TODO: check unique mobile no.
-            // TODO: check unique nric if provided.
-            RecruiterModel.findOne(
-                { email: (<string>req.body.email).toLowerCase() },
-                (err, existingRecruiter) => {
-                    if (err) { return next(err); }
-                    if (existingRecruiter) {
-                        req.flash("errors", { msg: "Recruiter with the same Email already exists." });
+            const recruiterInput = new RecruiterModel({
+                name: req.body.name,
+                nric: req.body.nric,
+                email: (<string>req.body.email).toLowerCase(),
+                mobileNo: req.body.mobileNo,
+                nationality: req.body.nationality,
+                race: req.body.race,
+                language: req.body.language,
+                dobInput: req.body.dob,
+                gender: req.body.gender,
+                billTo: {
+                    name: req.body.billToName,
+                    address: req.body.billToAddress,
+                },
+                status: "A",
+                createdBy: req.user.id
+            });
 
-                        const nationalityOptions = selectOption.OPTIONS_NATIONALITY();
-                        selectOption.markSelectedOption(req.body.nationality, nationalityOptions);
-
-                        const raceOptions = selectOption.OPTIONS_RACE();
-                        selectOption.markSelectedOption(req.body.race, raceOptions);
-
-                        const languageOptions = selectOption.OPTIONS_LANGUAGE();
-                        selectOption.markSelectedOption(req.body.language, languageOptions);
-
-                        const genderOptions = selectOption.OPTIONS_GENDER();
-                        selectOption.markSelectedOption(req.body.gender, genderOptions);
-
-                        // client side script
-                        const includeScripts = ["/js/recruiter/form.js"];
-
-                        res.render("recruiter/form", {
-                            title: "Recruiter",
-                            title2: "Create Recruiter",
-                            recruiter: recruiterInput,
-                            includeScripts: includeScripts,
-                            nationalityOptions: nationalityOptions,
-                            raceOptions: raceOptions,
-                            languageOptions: languageOptions,
-                            genderOptions: genderOptions,
-                            bu: req.body.bu,
-                        });
-                    } else {
-                        recruiterInput.save((err, recruiterCreated) => {
-                            if (err) { return next(err); }
-                            req.flash("success", { msg: "New Recruiter created: " + recruiterCreated._id });
-                            return res.redirect("/recruiters");
-                        });
-                    }
+            if (errors.isEmpty()) {
+                // check unique email address
+                // TODO: check unique mobile no.
+                // TODO: check unique nric if provided.
+                const existingRecruiter = await RecruiterModel.findOne({
+                    email: (<string>req.body.email).toLowerCase(),
+                    status: { $in: ["A", "T"] }
                 });
-        } else {
-            req.flash("errors", errors.array());
 
+                if (existingRecruiter) {
+                    req.flash("errors", { msg: "Recruiter with the same Email already exists." });
+                } else {
+                    const recruiterCreated = await recruiterInput.save(opts);
+
+                    // auto-create CreditAccount
+                    const validDateStart = moment();
+                    const validDateEnd = moment(validDateStart).add(6, "months");
+
+                    const creditAccountInput = new CreditAccountModel({
+                        recruiter: recruiterCreated._id,
+                        validDateStartInput: validDateStart.format("YYYY-MM-DD"),
+                        validDateEndInput: validDateEnd.format("YYYY-MM-DD"),
+                        creditBalance: 0,
+                        creditLocked: 0,
+                        status: "A",
+                        createdBy: req.user.id
+                    });
+
+                    const creditAccountCreated = await creditAccountInput.save(opts);
+
+                    // update recruiter.creditAccount
+                    recruiterCreated.creditAccount = creditAccountCreated._id;
+                    const recruiterUpdated = await RecruiterModel.findByIdAndUpdate(recruiterCreated._id, recruiterCreated, opts);
+
+                    // only commmit data changes in this block
+                    await mongodbSession.commitTransaction();
+                    mongodbSession.endSession();
+
+                    req.flash("success", { msg: "New Recruiter created: " + recruiterUpdated._id });
+                    return res.redirect("/recruiters");
+                }
+
+            } else {
+                req.flash("errors", errors.array());
+            }
+
+            // default routing
             const nationalityOptions = selectOption.OPTIONS_NATIONALITY();
             selectOption.markSelectedOption(req.body.nationality, nationalityOptions);
 
@@ -294,6 +302,19 @@ export let postRecruiterCreate = [
                 genderOptions: genderOptions,
                 bu: req.body.bu,
             });
+
+            // default transaction handling: rollback
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/recruiters");
         }
     }
 ];
@@ -302,40 +323,11 @@ export let postRecruiterCreate = [
  * GET /recruiter/:id
  * View Recruiter Detail page.
  */
-export let getRecruiterDetail = (req: Request, res: Response, next: NextFunction) => {
-    RecruiterModel.findById(req.params.id)
-    .exec((err, recruiterDb) => {
-        if (err) { return next(err); }
-        if (recruiterDb) {
-            const nationalityOptions = selectOption.OPTIONS_NATIONALITY();
-            selectOption.markSelectedOption(recruiterDb.nationality, nationalityOptions);
+export let getRecruiterDetail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const recruiterDb = await RecruiterModel.findById(req.params.id);
 
-            const raceOptions = selectOption.OPTIONS_RACE();
-            selectOption.markSelectedOption(recruiterDb.race, raceOptions);
-
-            const languageOptions = selectOption.OPTIONS_LANGUAGE();
-            selectOption.markSelectedOption(recruiterDb.language, languageOptions);
-
-            const genderOptions = selectOption.OPTIONS_GENDER();
-            selectOption.markSelectedOption(recruiterDb.gender, genderOptions);
-
-            // client side script
-            const includeScripts = ["/js/recruiter/detail.js"];
-
-            res.render("recruiter/detail", {
-                title: "Recruiter",
-                title2: "Recruiter Detail",
-                recruiter: recruiterDb,
-                recruiterId: recruiterDb._id,
-                includeScripts: includeScripts,
-                bu: req.query.bu,
-                nationalityOptions: nationalityOptions,
-                raceOptions: raceOptions,
-                languageOptions: languageOptions,
-                genderOptions: genderOptions,
-            });
-
-        } else {
+        if (!recruiterDb) {
             req.flash("errors", { msg: "Recruiter not found." });
             const bu = backUrl.decodeBackUrl(req.query.bu);
             if (bu) {
@@ -344,7 +336,39 @@ export let getRecruiterDetail = (req: Request, res: Response, next: NextFunction
                 return res.redirect("/recruiters");
             }
         }
-    });
+
+        const nationalityOptions = selectOption.OPTIONS_NATIONALITY();
+        selectOption.markSelectedOption(recruiterDb.nationality, nationalityOptions);
+
+        const raceOptions = selectOption.OPTIONS_RACE();
+        selectOption.markSelectedOption(recruiterDb.race, raceOptions);
+
+        const languageOptions = selectOption.OPTIONS_LANGUAGE();
+        selectOption.markSelectedOption(recruiterDb.language, languageOptions);
+
+        const genderOptions = selectOption.OPTIONS_GENDER();
+        selectOption.markSelectedOption(recruiterDb.gender, genderOptions);
+
+        // client side script
+        const includeScripts = ["/js/recruiter/detail.js"];
+
+        return res.render("recruiter/detail", {
+            title: "Recruiter",
+            title2: "Recruiter Detail",
+            recruiter: recruiterDb,
+            recruiterId: recruiterDb._id,
+            includeScripts: includeScripts,
+            bu: req.query.bu,
+            nationalityOptions: nationalityOptions,
+            raceOptions: raceOptions,
+            languageOptions: languageOptions,
+            genderOptions: genderOptions,
+        });
+    } catch (err) {
+        logger.error((<Error>err).stack);
+        req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+        res.redirect("/recruiters");
+    }
 };
 
 /**
@@ -437,7 +461,7 @@ export let postRecruiterUpdate = [
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
-    sanitizeBody("dob").toDate(),
+    // sanitizeBody("dob").toDate(),
 
     // process request
     (req: Request, res: Response, next: NextFunction) => {
@@ -451,7 +475,7 @@ export let postRecruiterUpdate = [
             nationality: req.body.nationality,
             race: req.body.race,
             language: req.body.language,
-            dob: req.body.dob,
+            dobInput: req.body.dob,
             gender: req.body.gender,
             billTo: {
                 name: req.body.billToName,

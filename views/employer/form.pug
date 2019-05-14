@@ -45,7 +45,7 @@ block content
       .form-group
         label.col-sm-3.control-label(for='about') ** About Employer
         .col-sm-7
-          textarea.form-control(rows='8', name='about', id='about', placeholder='About Employer') !{employer.about}
+          textarea.form-control(rows='8', name='about', id='about', placeholder='About Employer', required) !{employer.about}
       .form-group
         label.col-sm-3.control-label(for='employeeSize') ** Employee Size
         .col-sm-7
@@ -59,7 +59,7 @@ block content
       .form-group
         label.col-sm-3.control-label(for='contact') ** Contacts/ Social Media
         .col-sm-7
-          textarea.form-control(rows='4', name='contact', id='contact', placeholder='Contacts/ Social Media') !{employer.contact}
+          textarea.form-control(rows='4', name='contact', id='contact', placeholder='Contacts/ Social Media', required) !{employer.contact}
       .form-group
         .col-sm-offset-3.col-sm-7
           button.btn.btn-success(type='submit') Save

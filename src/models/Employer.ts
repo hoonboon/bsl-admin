@@ -28,7 +28,7 @@ export interface IEmployer extends mongoose.Document {
 
 const EmployerSchema = new mongoose.Schema(
   {
-    recruiter: { type: Schema.Types.ObjectId, ref: "Recruiter" },
+    recruiter: { type: Schema.Types.ObjectId, ref: "recruiter" },
     name: String,
     about: String,
     employeeSize: String,
@@ -76,5 +76,5 @@ EmployerSchema
   return result;
 });
 
-const EmployerModel = mongoose.model<IEmployer>("Employer", EmployerSchema);
+const EmployerModel = mongoose.model<IEmployer>("employer", EmployerSchema);
 export default EmployerModel;

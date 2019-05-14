@@ -17,6 +17,7 @@ $(document).ready(function() {
                         results.push(newElem);
                     });
                 }
+                // console.log("results: " + JSON.stringify(results));
                 return results;
             },
         },
@@ -31,15 +32,20 @@ $(document).ready(function() {
         name: 'recruiters',
         display: 'label',
         source: recruiters,
-        limit: 10,
+        limit: Infinity,
     });
 
     $('.typeahead').bind('typeahead:select', function(ev, selected) {
-        console.log("selected: " + JSON.stringify(selected));
+        // console.log("selected: " + JSON.stringify(selected));
         submitFilter(selected.value, selected.label);
       });
       
-
+    $("#searchName").keypress(function(event) {
+        let keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == "13") {
+            submitViewList();
+        }
+    });
 });
 
 function showSearch() {

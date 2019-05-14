@@ -1,5 +1,10 @@
 $(document).ready(function() {
-
+    $("#searchName, #searchEmail, #searchMobileNo").keypress(function(event) {
+        let keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == "13") {
+            submitViewList();
+        }
+    });
 });
 
 function showSearch() {

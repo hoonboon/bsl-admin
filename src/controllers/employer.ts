@@ -1,5 +1,4 @@
 import async from "async";
-import moment from "moment";
 import { Request, Response, NextFunction } from "express";
 
 import { body, validationResult } from "express-validator/check";
@@ -9,7 +8,7 @@ import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
 import { Logger } from "../util/logger";
-import EmployerModel, { IEmployer, STATUS_ACTIVE, EMPLOYEESIZE_20 } from "../models/Employer";
+import EmployerModel, { IEmployer, STATUS_ACTIVE } from "../models/Employer";
 import RecruiterModel, { IRecruiter } from "../models/Recruiter";
 
 const logger = new Logger("controllers.employer");

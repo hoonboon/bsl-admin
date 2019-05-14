@@ -23,7 +23,7 @@ const AdminJobSchema = new mongoose.Schema(
     employerName: String,
     publishStart: Date,
     publishEnd: Date,
-    job: { type: Schema.Types.ObjectId, ref: "Job" },
+    job: { type: Schema.Types.ObjectId, ref: "job" },
     status: { type: String, required: true, default: "A" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -31,5 +31,5 @@ const AdminJobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const AdminJobModel = mongoose.model<IAdminJob>("AdminJob", AdminJobSchema);
+const AdminJobModel = mongoose.model<IAdminJob>("admin-job", AdminJobSchema);
 export default AdminJobModel;

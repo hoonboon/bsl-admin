@@ -80,18 +80,24 @@ block content
         .col-sm-7
           .form-control-static
             textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address', disabled='disabled') !{recruiter.billTo.address}
+      .form-group
+        label.col-sm-3.control-label Status
+        .col-sm-7
+          .form-control-static !{recruiter.statusDisplay}
       
       .form-group
         .col-sm-offset-3.col-sm-7
-          a.btn.btn-primary(href="#", onclick="editDetail('" + recruiter.url + "/update')") Edit
-          span
-          | 
-          a.btn.btn-danger(href='#', onclick='submitTerminate()') Terminate
-          span
-          | 
+          if (recruiter.status == "A")
+            a.btn.btn-primary(href="#", onclick="editDetail('" + recruiter.url + "/update')") Edit
+            span
+            | 
+            a.btn.btn-danger(href='#', onclick='submitTerminate()') Terminate
+            span
+            | 
           a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
 
-  form(id='recruiterTerminateForm', action=recruiter.url+'/terminate', method='POST')
-    input(type='hidden', name='_csrf', value=_csrf)
-    input(type='hidden', name='id', value=recruiterId)
-    input(type='hidden', name='bu', id='bu', value=bu)
+  if (recruiter.status == "A")
+    form(id='recruiterTerminateForm', action=recruiter.url+'/terminate', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='id', value=recruiterId)
+      input(type='hidden', name='bu', id='bu', value=bu)

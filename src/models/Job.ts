@@ -263,5 +263,5 @@ const getAreaByLocationCode: getAreaByLocationCodeFunc = function (locationCode)
 
 JobSchema.methods.getAreaByLocationCode = getAreaByLocationCode;
 
-const JobModel = mongoose.model<IJob>("Job", JobSchema);
+const JobModel = mongoose.model<IJob>("job", JobSchema);
 export default JobModel;

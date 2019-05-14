@@ -9,14 +9,14 @@ block content
         = title
     
     p.form-group
-      label.col-sm-3.col-xs-4.control-label(for='recruiterLabelDisplay') Recruiter: 
-      .col-sm-6.col-xs-8
+      label.col-sm-3.col-xs-12.control-label(for='recruiterLabelDisplay') Recruiter: 
+      .col-sm-6.col-xs-9
         input.form-control(
             type='text', name='recruiterDisplay', id='recruiterDisplay', 
             placeholder='Please select a Recruiter', 
             value=recruiterDisplay, readonly
           )
-      .col-sm-3.col-sm-offset-0.col-xs-8.col-xs-offset-4
+      .col-sm-3.col-sm-offset-0.col-xs-3
         a(href='#', onclick='showSelectRecruiter()', class='btn btn-primary') Select
 
     p.col-xs-12
@@ -35,7 +35,7 @@ block content
             td(colspan="3")
               include ../partials/pagination.pug
           tr
-            th Company Name
+            th Employer Name
             th About
             th Employee Size
         tbody

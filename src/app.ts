@@ -164,6 +164,12 @@ app.get("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasA
 app.post("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterUpdate);
 app.post("/recruiter/:id/terminate", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterTerminate);
 
+// Credit Account modules
+app.get("/creditAccounts", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccounts);
+app.get("/creditAccount/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountDetail);
+app.get("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountAddCredit);
+app.post("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountAddCredit);
+
 // Employer modules
 app.get("/employers", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployers);
 app.get("/employer/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerCreate);
@@ -172,14 +178,6 @@ app.get("/employer/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("e
 app.get("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerUpdate);
 app.post("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerUpdate);
 app.post("/employer/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerDelete);
-
-// Credit Account modules
-app.get("/creditAccounts", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccounts);
-app.get("/creditAccount/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountCreate);
-app.post("/creditAccount/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountCreate);
-app.get("/creditAccount/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountDetail);
-app.get("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountAddCredit);
-app.post("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountAddCredit);
 
 // Offline Job modules
 app.get("/offlineJobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobs);

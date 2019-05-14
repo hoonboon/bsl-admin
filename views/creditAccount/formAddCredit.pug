@@ -21,18 +21,20 @@ block content
   
     form.form-horizontal(id='addCreditForm', method='POST')
       input(type='hidden', name='_csrf', value=_csrf)
-      input(type='hidden', name='bu', value=bu)
+      input(type='hidden', name='bu', id='bu', value=bu)
       .form-group
-        label.col-sm-3.col-xs-4.control-label Recruiter Name
-        .col-sm-7.col-xs-8
+        label.col-sm-2.col-xs-12.control-label Recruiter Name
+        .col-sm-4.col-xs-12
           .form-control-static !{creditAccount.recruiter.name}
+        label.col-sm-2.col-xs-12.control-label Recruiter Email
+        .col-sm-4.col-xs-12
+          .form-control-static !{creditAccount.recruiter.email}
       .form-group
-        label.col-sm-3.col-xs-4.control-label Recruiter NRIC No.
-        .col-sm-7.col-xs-8
-          .form-control-static !{creditAccount.recruiter.nric}
-      .form-group
-        label.col-sm-3.col-xs-4.control-label Credit Balance
-        .col-sm-7.col-xs-8
+        label.col-sm-2.col-xs-12.control-label Credit Expiry Date
+        .col-sm-4.col-xs-12
+          .form-control-static !{creditAccount.validDateEndDisplay}
+        label.col-sm-2.col-xs-12.control-label Current Credit Balance
+        .col-sm-4.col-xs-12
           .form-control-static !{creditAccount.creditBalance}
       .form-group
         label.col-sm-3.control-label(for='productPriceId') ** Top-up Option
@@ -40,25 +42,28 @@ block content
           select.form-control(name='productPriceId', id='productPriceId', placeholder='Top-up Option')
             for item in productPrice_list
               option(
-                label=item.product.productDesc, 
+                label=item.priceDescription, 
                 value=item._id, 
                 selected=(creditTrx.productPriceId == item._id ? 'selected' : false)
-              ) #{item.product.productDesc}
-      .form-group
-        label.col-sm-3.col-xs-6.control-label(for='totalAmount') Total Amount Due
-        .col-sm-3.col-xs-6
-          input.form-control.text-right(type='text', name='totalAmount', id='totalAmount', placeholder='Total Amount Due', readonly, value=(creditTrx.totalAmount === undefined ? '' : creditTrx.totalAmount))
+              ) #{item.priceDescription}
       .form-group
         label.col-sm-3.col-xs-6.control-label(for='totalCredit') Total Credit Value
         .col-sm-3.col-xs-6
           input.form-control.text-right(type='text', name='totalCredit', id='totalCredit', placeholder='Total Credit Value', readonly, value=(creditTrx.totalCredit === undefined ? '' : creditTrx.totalCredit))
       .form-group
+        label.col-sm-3.col-xs-6.control-label(for='totalAmount') Total Amount Due
+        .col-sm-3.col-xs-6
+          input.form-control.text-right(type='text', name='totalAmount', id='totalAmount', placeholder='Total Amount Due', readonly, value=(creditTrx.totalAmount === undefined ? '' : creditTrx.totalAmount))
+      .form-group
         label.col-sm-3.control-label(for='paymentReference') ** Payment Reference
         .col-sm-7
-          textarea.form-control(rows='3', name='paymentReference', id='paymentReference', placeholder='Payment Reference') !{creditTrx.paymentReference}
+          textarea.form-control(rows='3', name='paymentReference', id='paymentReference', placeholder='E.g. Cash Receipt No.: 2213', required) !{creditTrx.paymentReference}
       .form-group
         .col-sm-offset-3.col-sm-7
-          a.btn.btn-success(href='#', onclick='submitAddCredit()', id='btnSubmit') Save
+          button.btn.btn-success(type='submit', onsubmit='submitAddCredit()', id='btnSubmit') Save
           span
           | 
           a.btn.btn-danger(href='#', onclick='goBack()', id='btnGoBack') Cancel
+
+  script.
+    let productPriceSet = !{JSON.stringify(productPrice_list)};

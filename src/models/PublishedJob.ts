@@ -29,7 +29,7 @@ const PublishedJobSchema = new mongoose.Schema(
         code: String,
         area: String,
     }],
-    job: { type: Schema.Types.ObjectId, ref: "Job" },
+    job: { type: Schema.Types.ObjectId, ref: "job" },
     status: { type: String, required: true, default: "A" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -37,5 +37,5 @@ const PublishedJobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const PublishedJobModel = mongoose.model<IPublishedJob>("PublishedJob", PublishedJobSchema);
+const PublishedJobModel = mongoose.model<IPublishedJob>("published-job", PublishedJobSchema);
 export default PublishedJobModel;

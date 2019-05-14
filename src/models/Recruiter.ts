@@ -27,7 +27,9 @@ export interface IRecruiter extends mongoose.Document {
   gender: string;
   billTo: BillTo;
   url: string;
+  creditAccount: any;
   status?: string;
+  statusDisplay?: string;
   createdBy?: any;
   updatedBy?: any;
 }
@@ -47,6 +49,7 @@ const RecruiterSchema = new mongoose.Schema(
       name: String,
       address: String,
     },
+    creditAccount: { type: Schema.Types.ObjectId, ref: "credit-account" },
     status: { type: String, required: true, default: "A" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -75,8 +78,23 @@ RecruiterSchema
 RecruiterSchema
 .virtual("dobInput")
 .get(function () {
-    return this.dob ? moment(this.dob).format("YYYY-MM-DD") : "";
+  return this.dob ? moment(this.dob).format("YYYY-MM-DD") : "";
+})
+.set(function (value: string) {
+  this.dob = moment(value + " 00:00 +0000", "YYYY-MM-DD HH:mm Z");
 });
 
-const RecruiterModel = mongoose.model<IRecruiter>("Recruiter", RecruiterSchema);
+RecruiterSchema
+  .virtual("statusDisplay")
+  .get(function () {
+    let result: string = this.status;
+    if (result === STATUS_ACTIVE) {
+      result = "Active";
+    } else if (result === STATUS_TERMINATED) {
+      result = "Terminated";
+    }
+    return result;
+  });
+
+const RecruiterModel = mongoose.model<IRecruiter>("recruiter", RecruiterSchema);
 export default RecruiterModel;

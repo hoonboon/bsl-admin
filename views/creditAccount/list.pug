@@ -14,8 +14,6 @@ block content
         .btn-group(role="group")
           a(href='#', onclick='showSearch()' class='btn btn-primary')
             span.glyphicon.glyphicon-search
-        .btn-group(role="group")
-          a(href='/creditAccount/create' class='btn btn-primary') Create
 
     #listing.table-responsive
       table.table.table-striped
@@ -25,7 +23,7 @@ block content
               include ../partials/pagination.pug
           tr
             th Recruiter Name
-            th Recruiter NRIC No.
+            th Recruiter Email
             th Credit Expiry Date
             th Credit Balance
             th Credit Available
@@ -33,14 +31,23 @@ block content
         tbody
           if item_list
             each item in item_list
-              tr
-                td 
-                  a(href="#", onclick="viewDetail('" + item.url + "')") !{item.recruiter.name}
-                td #{item.recruiter.nric}
-                td(align="center") #{item.validDateEndDisplay}
-                td(align="center") #{item.creditBalance}
-                td(align="center") #{item.creditAvailable}
-                td(align="center") #{item.statusDisplay}
+              if (item.creditAccount)
+                tr
+                  td 
+                    a(href="#", onclick="viewDetail('" + item.creditAccount.url + "')") !{item.name}
+                  td #{item.email}
+                  td(align="center") #{item.creditAccount.validDateEndDisplay}
+                  td(align="center") #{item.creditAccount.creditBalance}
+                  td(align="center") #{item.creditAccount.creditAvailable}
+                  td(align="center") #{item.statusDisplay}
+              else
+                tr
+                  td !{item.name}
+                  td #{item.email}
+                  td(align="center") -
+                  td(align="center") -
+                  td(align="center") -
+                  td(align="center") #{item.statusDisplay}
           else
             tr
               td(colspan='6' align='center') No records found.
@@ -65,10 +72,6 @@ block content
               label.col-sm-4(for='searchName') Name: 
               .col-sm-7
                 input.form-control(type='text', name='searchName', id='searchName', placeholder='Search...', value=searchName)
-            .form-group
-              label.col-sm-4(for='searchNric') NRIC No.: 
-              .col-sm-7
-                input.form-control(type='text', name='searchNric', id='searchNric', placeholder='Search...', value=searchNric)
             .form-group
               label.col-sm-4(for='searchEmail') Email: 
               .col-sm-7
