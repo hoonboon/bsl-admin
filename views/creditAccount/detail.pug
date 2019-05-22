@@ -89,12 +89,24 @@ block content
                     | -
                 td(align="center") 
                   if item.trxType === "T"
-                    a(href="#", onclick="getDocument('" + item.trxDocument + "')") Invoice
+                    a(href="#", onclick="downloadDoc('" + item.trxDocument + "')") Invoice
                   else if item.trxType === "R"
-                    a(href="#", onclick="getDocument('" + item.trxDocument + "')") Credit Note
+                    a(href="#", onclick="downloadDoc('" + item.trxDocument + "')") Credit Note
                   else
                     | -
           else
             tr
               td(colspan='5' align='center') No records found.
-        
+        tfoot
+          tr
+            td(colspan='2', align='right') 
+              b Total
+            td(align='center') #{totalAdditions}
+            td(align='center') #{totalDeductions}
+            td &nbsp;
+
+    form.form-horizontal(id='downloadDocForm', action='/creditAccount/trxDocument/download', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='bu', id='bu', value=bu)
+      input(type='hidden', name='creditAccountId', id='creditAccountId', value=creditAccountId)
+      input(type='hidden', name='docId', id='docId')

@@ -20,7 +20,7 @@ function goTo(targetUrl) {
     window.location = targetUrl;
 }
 
-function getDocument(trxId) {
-    const targetUrl = "/creditAccount/" + trxId + "/trxDocument?bu=" + $("#bu").val();
-    alert("This will download Official Document of Trx ID: " + trxId);
+function downloadDoc(docId) {
+    $("#docId").val(docId);
+    $("#downloadDocForm").submit();
 }

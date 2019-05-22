@@ -1,10 +1,12 @@
 import async from "async";
 import moment from "moment";
 import mongoose from "mongoose";
+import numeral from "numeral";
 import { Request, Response, NextFunction } from "express";
 
 import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
+import * as pug from "pug";
 
 import { Logger } from "../util/logger";
 import { PageInfo, getNewPageInfo } from "../util/pagination";
@@ -12,12 +14,14 @@ import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
 import RecruiterModel, { STATUS_TERMINATED, STATUS_ACTIVE } from "../models/Recruiter";
 import CreditAccountModel from "../models/CreditAccount";
-import CreditTrxModel, { TRXTYPE_CREDIT_TOPUP, TRXTYPE_COMPLIMENTARY_CREDIT } from "../models/CreditTrx";
-import ProductModel, { PRODTYPE_CREDIT_TOPUP, PRODTYPE_COMPLIMENTARY_CREDIT } from "../models/Product";
+import CreditTrxModel, { TRXTYPE_CREDIT_TOPUP, TRXTYPE_COMPLIMENTARY_CREDIT, ICreditTrx } from "../models/CreditTrx";
+import ProductModel, { PRODTYPE_CREDIT_TOPUP, PRODTYPE_COMPLIMENTARY_CREDIT, IProduct } from "../models/Product";
 import ProductPriceModel, { IProductPrice } from "../models/ProductPrice";
 import { getRoundedAmount } from "../util/roudingMechanism";
 import TrxDocumentModel, { DOCTYPE_INVOICE } from "../models/TrxDocument";
 import { getNextSeqNo, SEQKEY_INVOICE } from "../util/seqNoGenerator";
+import { Invoice, InvoiceLine, OPTIONS_INVOICE } from "../pdfTemplate/invoice";
+import { PdfGenerator } from "../util/pdfGenerator";
 
 const logger = new Logger("controllers.recruiter");
 
@@ -139,6 +143,19 @@ export let getCreditAccountDetail = async (req: Request, res: Response, next: Ne
                 .sort({ trxDate: -1 })
                 .populate("product");
 
+        // calculate totals of all creditTrx_list
+        let totalAdditions = 0;
+        let totalDeductions = 0;
+        if (creditTrx_list && creditTrx_list.length > 0) {
+            for (const item of creditTrx_list) {
+                if (item.totalCredit > 0) {
+                    totalAdditions = totalAdditions + item.totalCredit;
+                } else if (item.totalCredit < 0) {
+                    totalDeductions = totalDeductions + (item.totalCredit * -1);
+                }
+            }
+        }
+
         // client side script
         const includeScripts = ["/js/creditAccount/detail.js"];
 
@@ -148,6 +165,8 @@ export let getCreditAccountDetail = async (req: Request, res: Response, next: Ne
             creditAccount: creditAccountDb,
             creditAccountId: creditAccountDb._id,
             creditTrx_list: creditTrx_list,
+            totalAdditions: numeral(totalAdditions).format("0,0"),
+            totalDeductions: numeral(totalDeductions).format("0,0"),
             includeScripts: includeScripts,
             bu: req.query.bu,
         });
@@ -435,6 +454,84 @@ export let postCreditAccountAddCredit = [
         }
     }
 ];
+
+/**
+ * POST /creditAccount/trxDocument/download
+ * Download Trx Document.
+ */
+export let postDownloadInvoice = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        req.assert("creditAccountId", "Credit Account Id is required").notEmpty();
+        req.assert("docId", "Trx Document No. is required").notEmpty();
+
+        const errors = req.validationErrors();
+
+        if (errors) {
+            req.flash("errors", errors);
+            return res.redirect("/creditAccounts");
+        }
+
+        const creditAccountId = req.body.creditAccountId;
+        const creditAccountDb = await CreditAccountModel.findById(creditAccountId);
+        if (!creditAccountDb) {
+            const error = new Error(`Credit Account not found for _id=${creditAccountId}`);
+            throw error;
+        }
+
+        const trxDocumentId = req.body.docId;
+        const trxDocumentDb = await TrxDocumentModel.findById(trxDocumentId);
+        if (!trxDocumentDb) {
+            const error = new Error(`Trx Document not found for _id=${trxDocumentId}`);
+            throw error;
+        }
+
+        const creditTrxDb = await CreditTrxModel.findById(trxDocumentDb.creditTrx).populate("product");
+        if (!creditTrxDb) {
+            const error = new Error(`Credit Trx not found for _id=${trxDocumentDb.creditTrx}`);
+            throw error;
+        }
+
+        const productDb = creditTrxDb.product as IProduct;
+
+        const invoiceData = new Invoice ({
+            invoiceNo: trxDocumentDb.docNoDisplay,
+            invoiceDate: creditTrxDb.trxDateDisplay,
+            billTo: {
+                name: trxDocumentDb.billingName,
+                address: trxDocumentDb.billingAddress,
+            },
+            currency: creditTrxDb.currency,
+            amountDue: creditTrxDb.totalAmount,
+            totalAmountDue: creditTrxDb.totalAmount,
+            roundingAmount: creditTrxDb.roundingAmount,
+            paymentReference: creditTrxDb.paymentReference,
+            lines: [
+                new InvoiceLine ({
+                    sn: 1,
+                    itemCode: productDb.productCode,
+                    itemDesc: productDb.productDesc,
+                    unitPrice: creditTrxDb.unitPrice,
+                    qty: creditTrxDb.qty,
+                    totalPrice: creditTrxDb.totalAmount,
+                }),
+            ],
+            printDate: moment().format("YYYY-MM-DD HH:mm"),
+        });
+
+        const localsObject: pug.LocalsObject = {
+            invoice: invoiceData,
+            imagePath: req.protocol + "://" + req.get("host") + "/images/" ,
+        };
+
+        await PdfGenerator.sendPdfGivenTemplatePath(res, OPTIONS_INVOICE, localsObject);
+
+    } catch (err) {
+        logger.error((<Error>err).stack);
+
+        req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+        res.redirect("/creditAccounts");
+    }
+  };
 
 /**
  * POST /recruiter/:id/terminate

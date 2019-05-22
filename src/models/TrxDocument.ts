@@ -42,8 +42,9 @@ const TrxDocumentSchema = new mongoose.Schema(
 TrxDocumentSchema
   .virtual("seqNoDisplay")
   .get(function () {
-    let result = this.seqNo as string;
-    if (result) {
+    let result = "-";
+    if (this.seqNo) {
+      result = (this.seqNo as number).toString();
       result = result.padStart(3, "0");
     }
     return result;

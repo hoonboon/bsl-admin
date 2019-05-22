@@ -169,6 +169,7 @@ app.get("/creditAccounts", passportConfig.isAuthenticated, rbacConfig.hasAccess(
 app.get("/creditAccount/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountDetail);
 app.get("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountAddCredit);
 app.post("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountAddCredit);
+app.post("/creditAccount/trxDocument/download", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postDownloadInvoice);
 
 // Employer modules
 app.get("/employers", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployers);
