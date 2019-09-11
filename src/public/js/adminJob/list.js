@@ -2,24 +2,14 @@ $(document).ready(function() {
     $("#searchTitle").keypress(function(event) {
         let keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == "13") {
-            if ($("#searchTitle").val() == "") {
-                alert("Please enter Job Title for Search.");
-                return false;
-            } else {
-                submitViewList();
-            }
+            submitViewList();
         }
     });
 
     $("#searchEmployerName").keypress(function(event) {
         let keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == "13") {
-            if ($("#searchEmployerName").val() == "") {
-                alert("Please enter Employer Name for Search.");
-                return false;
-            } else {
-                submitViewList();
-            }
+            submitViewList();
         }
     });
 });

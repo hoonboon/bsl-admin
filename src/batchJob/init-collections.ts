@@ -206,7 +206,7 @@ async function execute() {
             {
                 product: {
                     productCode: "P19003",
-                    productDesc: "PUBLISH 45 DAYS @ 70 CREDITS",
+                    productDesc: "PUBLISH 45 DAYS",
                     productType: PRODTYPE_CREDIT_UTILIZATION,
                     publishInd: "Y",
                     status: "A",

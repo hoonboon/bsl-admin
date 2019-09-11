@@ -141,7 +141,8 @@ export let getCreditAccountDetail = async (req: Request, res: Response, next: Ne
             await CreditTrxModel
                 .find({ creditAccount: creditAccountDb._id })
                 .sort({ trxDate: -1 })
-                .populate("product");
+                .populate("product")
+                .populate("job");
 
         // calculate totals of all creditTrx_list
         let totalAdditions = 0;

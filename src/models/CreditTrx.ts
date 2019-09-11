@@ -38,6 +38,8 @@ export interface ICreditTrx extends mongoose.Document {
   totalCreditAvailable: number;
   totalAmountAfterRounding: number;
   trxDocument: any;
+  job: any;
+  creditTrxDescription?: string;
   status: string;
   createdBy: any;
   updatedBy: any;
@@ -60,6 +62,7 @@ const CreditTrxSchema = new mongoose.Schema(
     paymentReference: String,
     totalCreditAvailable: Number,
     trxDocument: { type: Schema.Types.ObjectId, ref: "trx-document" },
+    job: { type: Schema.Types.ObjectId, ref: "job" },
     status: { type: String, required: true, default: "A" },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -96,6 +99,27 @@ CreditTrxSchema
       result = "Credit Utilization";
     } else if (result === TRXTYPE_CREDIT_EXPIRED) {
       result = "Credit Expired";
+    }
+    return result;
+  });
+
+  CreditTrxSchema
+  .virtual("creditTrxDescription")
+  .get(function () {
+    let result = "";
+    const instance = this as ICreditTrx;
+    if (instance.product && instance.product.productDesc) {
+      result = instance.product.productDesc;
+    }
+    if (instance.job && instance.job.title) {
+      if (result == "") {
+        result = instance.job.title;
+      } else {
+        result += `: ${instance.job.title}`;
+      }
+    }
+    if (result == "") {
+      result = "-";
     }
     return result;
   });

@@ -8,88 +8,104 @@ block content
       else
         = title
     
-    p Offline Job Id: #{jobId}
+    p Offline Job Id: #{offlineJobId}
+
+    .boxed.form-horizontal
+      .form-group
+        label.col-sm-4.col-xs-12.control-label Recruiter 
+        .col-sm-6.col-xs-12
+          .form-control-static !{recruiter.name} - !{recruiter.email}
+        label.col-sm-4.col-xs-12.control-label Credit Available: 
+        .col-sm-6.col-xs-12
+          .form-control-static !{creditAccount.creditAvailable}
+        label.col-sm-4.col-xs-12.control-label Credit Expiry Date: 
+        .col-sm-6.col-xs-12
+          .form-control-static !{creditAccount.validDateEndDisplay}
+        label.col-sm-4.col-xs-12.control-label Post Status 
+        .col-sm-6.col-xs-12
+          .form-control-static !{offlineJob.statusDisplay}
 
     p
-      form.form-horizontal
+      #jobDetail.form-horizontal
+        input(type='hidden', name='bu', id='bu', value=bu)
         .form-group
-          label.col-sm-3.col-xs-3.control-label Recruiter 
+          label.col-sm-3.col-xs-3.control-label Employer Name
           .col-sm-7.col-xs-9
-            .form-control-static !{recruiter.name} - !{recruiter.nric}
-          label.col-sm-3.col-xs-3.control-label Post Status 
+            .form-control-static !{job.employerName}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Post Title
           .col-sm-7.col-xs-9
-            .form-control-static !{job.statusDisplay}
-
-    #jobDetail.form-horizontal
-      input(type='hidden', name='bu', id='bu', value=bu)
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Employer Name
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.employerName}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Post Title
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.title}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Job Location
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.locationDisplay}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Job Description
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.descriptionDisplay}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Salary & Other Benefits
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.salary}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Apply Method
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.applyMethodDisplay}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Publish Option
-        .col-sm-7.col-xs-9
-          .form-control-static #{productPrice.product.productDesc}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Publish Date Start
-        .col-sm-7.col-xs-9
-          .form-control-static #{job.publishStartDisplay}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Publish Date End
-        .col-sm-7.col-xs-9
-          .form-control-static #{job.publishEndDisplay}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Closing
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.closing}
-      .form-group
-        label.col-sm-3.col-xs-3.control-label Image URL
-        .col-sm-7.col-xs-9
-          .form-control-static !{job.imgUrl}
-      .form-group
-        label.col-sm-3.control-label Customized full detail content to be displayed to user
-        .col-sm-7
-          .form-control-static
-            textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
-      .form-group
-        .col-sm-offset-3.col-sm-7
-          a.btn.btn-primary(href="#", onclick="editDetail('" + job.url + "/update')") Edit
-          span
-          | 
-          a.btn.btn-primary(href='#', onclick='preview()') Preview
-          span
-          | 
-          a.btn.btn-primary(href='#', onclick="submitPublish('" + job.url + "/publish')") Publish
-          span
-          | 
-          a.btn.btn-danger(href='#', onclick="submitDelete('" + job.url + "/delete')") Delete
-          span
-          | 
-          a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+            .form-control-static !{job.title}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Job Location
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.locationDisplay}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Job Description
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.descriptionDisplay}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Salary & Other Benefits
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.salary}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Apply Method
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.applyMethodDisplay}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Publish Option
+          .col-sm-7.col-xs-9
+            .form-control-static #{productPrice.creditValueDescription}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Publish Date Start
+          .col-sm-7.col-xs-9
+            .form-control-static #{job.publishStartDisplay}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Publish Date End
+          .col-sm-7.col-xs-9
+            .form-control-static #{job.publishEndDisplay}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Closing
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.closing}
+        .form-group
+          label.col-sm-3.col-xs-3.control-label Image URL
+          .col-sm-7.col-xs-9
+            .form-control-static !{job.imgUrl}
+        .form-group
+          label.col-sm-3.control-label Customized full detail content to be displayed to user
+          .col-sm-7
+            .form-control-static
+              textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
+        .form-group
+          .col-sm-offset-3.col-sm-7
+            a.btn.btn-primary(href='#', onclick='preview()') Preview
+            span
+            | 
+            if (offlineJob.status == 'P' || (offlineJob.status == 'A' && offlineJob.publishInd == 'U'))
+              a.btn.btn-primary(href="#", onclick="editDetail('" + offlineJob.url + "/update')") Edit
+              span
+              | 
+            if (offlineJob.status == 'P')
+              a.btn.btn-primary(href='#', onclick="submitPublish('" + offlineJob.url + "/publish')") Publish
+              span
+              | 
+              a.btn.btn-danger(href='#', onclick="submitDelete('" + offlineJob.url + "/delete')") Delete
+              span
+              | 
+            if (offlineJob.status == 'A' && offlineJob.publishInd == 'P')
+              a.btn.btn-danger(href="#", onclick="submitUnpublish('" + offlineJob.url + "/unpublish')") Unpublish
+              span
+              | 
+            if (offlineJob.status == 'A' && offlineJob.publishInd == 'U')
+              a.btn.btn-primary(href="#", onclick="submitRepublish('" + offlineJob.url + "/republish')") Republish
+              span
+              | 
+            a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
 
   include preview.pug
   
   form(id='jobForm', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
-    input(type='hidden', name='id', value=jobId)
+    input(type='hidden', name='recruiterId', value=recruiterId)
     input(type='hidden', name='bu', id='bu', value=bu)

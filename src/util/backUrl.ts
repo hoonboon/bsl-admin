@@ -1,3 +1,4 @@
+import { Request } from "express";
 
 export function decodeBackUrl(buEncoded: string): string {
     let result: string = buEncoded;
@@ -6,4 +7,13 @@ export function decodeBackUrl(buEncoded: string): string {
     }
     // logger.debug(`buEncoded: ${buEncoded}, result: ${result}`);
     return result;
+}
+
+export function goBack(buEncoded: string, buDefault: string) {
+    const bu = decodeBackUrl(buEncoded);
+    if (bu) {
+        return bu;
+    } else {
+        return buDefault;
+    }
 }

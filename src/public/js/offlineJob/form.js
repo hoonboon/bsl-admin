@@ -31,7 +31,12 @@ $(document).ready(function() {
 });
 
 function goBack() {
-    window.history.back();
+    let bu = $("#bu").val();
+    if (bu) {
+        window.location = window.atob(bu);
+    } else {
+        window.history.back();
+    }
 }
 
 function setPublishEnd(publishDateStart, postingDays) {

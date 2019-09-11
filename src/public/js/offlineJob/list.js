@@ -2,7 +2,25 @@ $(document).ready(function() {
     let recruiters = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('label'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        local: recruiterSet,
+        // local: recruiterSet,
+        remote: {
+            url: 'api/recruiters?q=%QUERY',
+            wildcard: '%QUERY',
+            transform: function(response) {
+                let results = [];
+                if (response && response instanceof Array) {
+                    response.forEach(element => {
+                        const newElem = {
+                            value: element._id,
+                            label: element.name + " - " + element.email,
+                        };
+                        results.push(newElem);
+                    });
+                }
+                // console.log("results: " + JSON.stringify(results));
+                return results;
+            },
+        },
         identify: function(obj) { return obj.value; },
     });
 
@@ -13,14 +31,28 @@ $(document).ready(function() {
     }, {
         name: 'recruiters',
         display: 'label',
-        source: recruiters
+        source: recruiters,
+        limit: Infinity,
     });
 
     $('.typeahead').bind('typeahead:select', function(ev, selected) {
         console.log("selected: " + JSON.stringify(selected));
         submitFilter(selected.value, selected.label);
-      });
-      
+    });
+    
+    $("#searchTitle").keypress(function(event) {
+        let keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == "13") {
+            submitViewList();
+        }
+    });
+
+    $("#searchEmployerName").keypress(function(event) {
+        let keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == "13") {
+            submitViewList();
+        }
+    });
 
 });
 
@@ -28,13 +60,16 @@ function showSearch() {
     $("#searchModal").modal("show");
 }
 
+function showSelectRecruiter() {
+    $("#selectRecruiterModal").modal("show");
+}
+
 function submitViewList() {
     $("#searchForm").submit();
 }
 
-function submitFilter(value, label) {
+function submitFilter(value) {
     $("#recruiterId").val(value);
-    $("#recruiterLabel").val(label);
     $("#searchForm").submit();
 }
 

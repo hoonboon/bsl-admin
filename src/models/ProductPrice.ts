@@ -103,5 +103,16 @@ ProductPriceSchema
   return result;
 });
 
+ProductPriceSchema
+.virtual("creditValueDescription")
+.get(function () {
+  let result = "-";
+  const instance = this as IProductPrice;
+  if (instance.product) {
+    result = `${instance.product.productDesc} @ ${instance.unitCreditValueDisplay} Credits`;
+  }
+  return result;
+});
+
 const ProductPriceModel = mongoose.model<IProductPrice>("product-price", ProductPriceSchema);
 export default ProductPriceModel;

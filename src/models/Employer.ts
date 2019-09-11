@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import * as selectOption  from "../util/selectOption";
+import * as selectOption from "../util/selectOption";
 
 const Schema = mongoose.Schema;
 
@@ -78,3 +78,23 @@ EmployerSchema
 
 const EmployerModel = mongoose.model<IEmployer>("employer", EmployerSchema);
 export default EmployerModel;
+
+export async function getEmployerOptions(recruiterId: any) {
+  const results: selectOption.SelectOption[] = [];
+
+  const list = await EmployerModel.find({ recruiter: recruiterId, status: "A" }).sort({ name: 1 });
+  if (list && list.length > 0) {
+    for (const item of list) {
+      results.push({
+        label: item.name,
+        value: item._id.toString(),
+      });
+    }
+  } else {
+    results.push({
+      label: "- Please create Employer first -",
+      value: "",
+    });
+  }
+  return results;
+}

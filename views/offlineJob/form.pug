@@ -17,16 +17,16 @@ block content
           = title
     
     p
-      form.form-horizontal
+      .boxed.form-horizontal
         .form-group
-          label.col-sm-4.col-xs-6.control-label Recruiter: 
-          .col-sm-6.col-xs-6
-            .form-control-static !{recruiter.name} - !{recruiter.nric}
-          label.col-sm-4.col-xs-6.control-label Credit Available: 
-          .col-sm-6.col-xs-6
+          label.col-sm-4.col-xs-12.control-label Recruiter: 
+          .col-sm-6.col-xs-12
+            .form-control-static !{recruiter.name} - !{recruiter.email}
+          label.col-sm-4.col-xs-12.control-label Credit Available: 
+          .col-sm-6.col-xs-12
             .form-control-static !{creditAccount.creditAvailable}
-          label.col-sm-4.col-xs-6.control-label Credit Expiry Date: 
-          .col-sm-6.col-xs-6
+          label.col-sm-4.col-xs-12.control-label Credit Expiry Date: 
+          .col-sm-6.col-xs-12
             .form-control-static !{creditAccount.validDateEndDisplay}
     
     p.text-center
@@ -38,20 +38,26 @@ block content
       input(type='hidden', id='bu', name='bu', value=bu)
       input(type='hidden', id='recruiterId', name='recruiterId', value=(recruiterId))
       .form-group
-        label.col-sm-3.control-label(for='employerName') ** Employer Name
+        label.col-sm-3.control-label(for='employer') ** Employer
         .col-sm-7
-          input.form-control(type='text', name='employerName', id='employerName', placeholder='Employer Name', required, value!=(job === undefined ? '' : job.employerName))
+          select.form-control(name='employer', id='employer', placeholder='Employer options')
+            for option in employerOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
       .form-group
         label.col-sm-3.control-label(for='title') ** Post Title
         .col-sm-7
-          input.form-control(type='text', name='title', id='title', placeholder='Post Title', autofocus, required, value!=(job === undefined ? '' : job.title))
+          input.form-control(type='text', name='title', id='title', placeholder='Post Title', autofocus, value!=(job === undefined ? '' : job.title))
       .form-group
         label.col-sm-3.control-label(for='location') Job Location
         .col-sm-7
           for option in locationOptions
             .checkbox.col-xs-offset-1.col-xs-11.col-sm-4
-                input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value, checked=option.isSelected)
-                label(for=option.value) #{option.label}
+              input.checkbox-input(type='checkbox', name='location', id=option.value, value=option.value, checked=option.isSelected)
+              label(for=option.value) #{option.label}
             .col-xs-12.col-sm-6
               input.form-control(type='text', name='area_' + option.value, id='area_' + option.value, placeholder='Area in ' + option.label, value!=(job === undefined ? '' : job.getAreaByLocationCode(option.value)))
       .form-group
@@ -69,17 +75,24 @@ block content
       .form-group
         label.col-sm-3.control-label(for='productPriceId') ** Publish Option
         .col-sm-7
-          select.form-control(name='productPriceId', id='productPriceId', placeholder='Publish Option')
-            for item in productPrice_list
-              option(
-                label=item.product.productDesc, 
-                value=item._id, 
-                selected=(job.productPriceId == item._id ? 'selected' : false)
-              ) #{item.product.productDesc}
+          if (job.status == 'A' && job.publishInd == 'U')
+            input(type='hidden', id='productPriceId', name='productPriceId', value=productPriceId)
+            | #{productPrice.creditValueDescription}
+          else
+            select.form-control(name='productPriceId', id='productPriceId', placeholder='Publish Option')
+              for item in productPrice_list
+                option(
+                  label=item.creditValueDescription, 
+                  value=item._id, 
+                  selected=(productPriceId.toString() == item._id.toString() ? 'selected' : false)
+                ) #{item.creditValueDescription}
       .form-group
         label.col-sm-3.control-label(for='publishStart') ** Publish Date Start
         .col-sm-7
-          input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', required, value=(job === undefined ? '' : job.publishStartInput))
+          if (job.status == 'A' && job.publishInd == 'U')
+            input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', readonly, value=(job === undefined ? '' : job.publishStartInput))
+          else
+            input.form-control(type='date', name='publishStart', id='publishStart', placeholder='Publish Date Start', required, value=(job === undefined ? '' : job.publishStartInput))
       .form-group
         label.col-sm-3.control-label(for='publishEnd') Publish Date End
         .col-sm-7
@@ -104,4 +117,4 @@ block content
           a.btn.btn-danger(href='#', onclick='goBack()', id='btnGoBack') Cancel
 
   script.
-      let productPriceSet = !{JSON.stringify(productPriceSet)};
+      let productPriceSet = !{JSON.stringify(productPrice_list)};

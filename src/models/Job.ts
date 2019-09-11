@@ -19,6 +19,7 @@ export interface IJob extends mongoose.Document {
   description: string;
   descriptionDisplay: string;
   employerName: string;
+  employer: any;
   applyMethod: string;
   applyMethodDisplay: string;
   salary: string;
@@ -55,6 +56,7 @@ const JobSchema = new mongoose.Schema({
   title: { type: String },
   description: String,
   employerName: { type: String },
+  employer: { type: Schema.Types.ObjectId, ref: "employer" },
   applyMethod: String,
   salary: String,
   location: [{

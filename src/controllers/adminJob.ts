@@ -149,7 +149,7 @@ export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-function composeLocationFromRequest(req: Request) {
+export function composeLocationFromRequest(req: Request) {
     const locations: string[] = req.body.location;
     const results: Location[] = [];
     if (locations && locations.length > 0) {

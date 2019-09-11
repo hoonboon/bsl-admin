@@ -73,9 +73,9 @@ block content
                 td(align="center") #{item.trxDateDisplay}
                 td 
                   if item.status === "P"
-                    | #{item.product.productDesc} (Pending)
+                    | #{item.creditTrxDescription} (Pending)
                   else
-                    | #{item.product.productDesc}
+                    | #{item.creditTrxDescription}
                 //- td #{item.trxTypeDisplay}
                 td(align="center") 
                   if item.totalCredit > 0
