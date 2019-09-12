@@ -188,14 +188,18 @@ export let postJobCreate = [
     body("employerName").isLength({ min: 1 }).trim().withMessage("Employer Name is required."),
     body("applyMethod").isLength({ min: 1 }).trim().withMessage("Apply Method is required."),
 
-    // TODO: must be >= today
+    // must be >= today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
-    .isISO8601().withMessage("Publish Date Start is invalid."),
+    .isISO8601().withMessage("Publish Date Start is invalid.")
+    .isAfter(moment().add(-1, "day").format("YYYY-MM-DD")).withMessage("Publish Date Start must be from today onwards."),
 
     body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
-    .isISO8601().withMessage("Publish Date End is invalid."),
-
-    // TODO: publish start <= publish end
+    .isISO8601().withMessage("Publish Date End is invalid.")
+    .custom((value, { req }) => {
+        const publishEndDate = moment(value, "YYYY-MM-DD");
+        const publishStartDate = moment(req.body.publishStart, "YYYY-MM-DD");
+        return !publishStartDate.isAfter(publishEndDate);
+    }).withMessage("Publish Date End must be the same or after Publish Date Start"),
 
     body("closing").isLength({ min: 1 }).trim().withMessage("Closing is required."),
 
@@ -354,14 +358,18 @@ export let postJobUpdate = [
     body("employerName").isLength({ min: 1 }).trim().withMessage("Employer Name is required."),
     body("applyMethod").isLength({ min: 1 }).trim().withMessage("Apply Method is required."),
 
-    // TODO: must be >= today
+    // must be >= today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
-    .isISO8601().withMessage("Publish Date Start is invalid."),
+    .isISO8601().withMessage("Publish Date Start is invalid.")
+    .isAfter(moment().add(-1, "day").format("YYYY-MM-DD")).withMessage("Publish Date Start must be from today onwards."),
 
     body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
-    .isISO8601().withMessage("Publish Date End is invalid."),
-
-    // TODO: publish start <= publish end
+    .isISO8601().withMessage("Publish Date End is invalid.")
+    .custom((value, { req }) => {
+        const publishEndDate = moment(value, "YYYY-MM-DD");
+        const publishStartDate = moment(req.body.publishStart, "YYYY-MM-DD");
+        return !publishStartDate.isAfter(publishEndDate);
+    }).withMessage("Publish Date End must be the same or after Publish Date Start"),
 
     body("closing").isLength({ min: 1 }).trim().withMessage("Closing is required."),
 
@@ -527,14 +535,18 @@ export let postJobEmbedFbPost = [
     body("title").isLength({ min: 1 }).trim().withMessage("Post Title is required."),
     body("fbPostUrl").isLength({ min: 1 }).trim().withMessage("Facebook Post URL is required."),
 
-    // TODO: must be >= today
+    // must be >= today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
-    .isISO8601().withMessage("Publish Date Start is invalid."),
+    .isISO8601().withMessage("Publish Date Start is invalid.")
+    .isAfter(moment().add(-1, "day").format("YYYY-MM-DD")).withMessage("Publish Date Start must be from today onwards."),
 
     body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
-    .isISO8601().withMessage("Publish Date End is invalid."),
-
-    // TODO: publish start <= publish end
+    .isISO8601().withMessage("Publish Date End is invalid.")
+    .custom((value, { req }) => {
+        const publishEndDate = moment(value, "YYYY-MM-DD");
+        const publishStartDate = moment(req.body.publishStart, "YYYY-MM-DD");
+        return !publishStartDate.isAfter(publishEndDate);
+    }).withMessage("Publish Date End must be the same or after Publish Date Start"),
 
     // sanitize values
     sanitizeBody("*").trim().escape(),
@@ -630,14 +642,18 @@ export let postJobUpdateFbPost = [
     body("title").isLength({ min: 1 }).trim().withMessage("Post Title is required."),
     body("fbPostUrl").isLength({ min: 1 }).trim().withMessage("Facebook Post URL is required."),
 
-    // TODO: must be >= today
+    // must be >= today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
-    .isISO8601().withMessage("Publish Date Start is invalid."),
+    .isISO8601().withMessage("Publish Date Start is invalid.")
+    .isAfter(moment().add(-1, "day").format("YYYY-MM-DD")).withMessage("Publish Date Start must be from today onwards."),
 
     body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
-    .isISO8601().withMessage("Publish Date End is invalid."),
-
-    // TODO: publish start <= publish end
+    .isISO8601().withMessage("Publish Date End is invalid.")
+    .custom((value, { req }) => {
+        const publishEndDate = moment(value, "YYYY-MM-DD");
+        const publishStartDate = moment(req.body.publishStart, "YYYY-MM-DD");
+        return !publishStartDate.isAfter(publishEndDate);
+    }).withMessage("Publish Date End must be the same or after Publish Date Start."),
 
     // sanitize values
     sanitizeBody("*").trim().escape(),

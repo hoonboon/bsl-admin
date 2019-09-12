@@ -13,7 +13,7 @@ import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
 import RecruiterModel, { STATUS_TERMINATED } from "../models/Recruiter";
-import OfflineJobModel, { STATUS_ACTIVE, PUBIND_NEW, STATUS_PENDING, PUBIND_UNPUBLISHED, STATUS_DELETED, PUBIND_PUBLISHED } from "../models/OfflineJob";
+import OfflineJobModel, { STATUS_ACTIVE, PUBIND_NEW, STATUS_PENDING, PUBIND_UNPUBLISHED, STATUS_DELETED, PUBIND_PUBLISHED, PUBIND_REPUBLISHED } from "../models/OfflineJob";
 import ProductPriceModel, { IProductPrice } from "../models/ProductPrice";
 import ProductModel, { PRODTYPE_CREDIT_UTILIZATION } from "../models/Product";
 import CreditTrxModel, { TRXTYPE_CREDIT_UTILIZATION, TRXTYPE_CREDIT_TOPUP, TRXTYPE_COMPLIMENTARY_CREDIT } from "../models/CreditTrx";
@@ -317,12 +317,18 @@ export let postJobCreate = [
     body("applyMethod").isLength({ min: 1 }).trim().withMessage("Apply Method is required."),
     body("productPriceId").isLength({ min: 1 }).trim().withMessage("Publish Option is required."),
 
-    // TODO: must be > today
+    // must be > today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
-    .isISO8601().withMessage("Publish Date Start is invalid."),
+    .isISO8601().withMessage("Publish Date Start is invalid.")
+    .isAfter(moment().format("YYYY-MM-DD")).withMessage("Publish Date Start must be from tomorrow onwards."),
 
     body("publishEnd").isLength({ min: 1 }).trim().withMessage("Publish Date End is required.")
-    .isISO8601().withMessage("Publish Date End is invalid."),
+    .isISO8601().withMessage("Publish Date End is invalid.")
+    .custom((value, { req }) => {
+        const publishEndDate = moment(value, "YYYY-MM-DD");
+        const publishStartDate = moment(req.body.publishStart, "YYYY-MM-DD");
+        return !publishStartDate.isAfter(publishEndDate);
+    }).withMessage("Publish Date End must be the same or after Publish Date Start"),
 
     body("closing").isLength({ min: 1 }).trim().withMessage("Closing is required."),
 
@@ -417,11 +423,6 @@ export let postJobCreate = [
                 });
 
                 const offlineJobCreated = await offlineJobInput.save(opts);
-
-                // TODO: Only during Publish action
-                // create creditTrx for utilization
-                // update creditTrx to deduct from available credit, FIFO
-                // update creditAccount
 
                 // only commmit data changes in this block
                 await mongodbSession.commitTransaction();
@@ -694,7 +695,6 @@ export let postJobUpdate = [
     body("applyMethod").isLength({ min: 1 }).trim().withMessage("Apply Method is required."),
     body("productPriceId").isLength({ min: 1 }).trim().withMessage("Publish Option is required."),
 
-    // TODO: must be > today
     body("publishStart").isLength({ min: 1 }).trim().withMessage("Publish Date Start is required.")
     .isISO8601().withMessage("Publish Date Start is invalid."),
 
@@ -770,6 +770,19 @@ export let postJobUpdate = [
                 throw error;
             }
 
+            const customValidationErrors = [];
+
+            /**
+             * Custom Validations
+             * - When editing status "Pending", publishdInd "New" posts:
+             */
+            if (offlineJobDb.status === STATUS_PENDING && offlineJobDb.publishInd === PUBIND_NEW) {
+                // Publish Start must be > today
+                if (!moment(req.body.publishStart, "YYYY-MM-DD").isAfter(moment())) {
+                    customValidationErrors.push({ msg: "Publish Date Start must be from tomorrow onwards." });
+                }
+            }
+
             const offlineJobInput = {
                 title: req.body.title,
                 employerName: employerDb.name,
@@ -797,7 +810,7 @@ export let postJobUpdate = [
                 updatedBy: req.user.id
             };
 
-            if (errors.isEmpty()) {
+            if (errors.isEmpty() && customValidationErrors.length == 0) {
                 /**
                  * - Only the following posting can be edited:
                  *  - Status = "Pending"; Publish Ind = "New"
@@ -825,8 +838,10 @@ export let postJobUpdate = [
                 req.flash("success", { msg: "Offline Job successfully updated" });
                 return res.redirect(`/offlineJobs?recruiterId=${recruiterId}`);
 
-            } else {
+            } else if (!errors.isEmpty()) {
                 req.flash("errors", errors.array());
+            } else {
+                req.flash("errors", customValidationErrors);
             }
 
             const productPriceList = await getPostingCostOptions();
@@ -981,6 +996,14 @@ export let postJobPublish = [
                 }
 
                 /**
+                 * Publish Date Start must > today
+                 */
+                if (!moment(offlineJobDb.publishStart, "YYYY-MM-DD").isAfter(moment())) {
+                    req.flash("errors", { msg: "Publish Date Start must be from tomorrow onwards. Please edit and try again." });
+                    return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+                }
+
+                /**
                  * Only status "Pending" posting can be published.
                  */
                 if (offlineJobDb.status !== STATUS_PENDING) {
@@ -1024,6 +1047,12 @@ export let postJobPublish = [
                     throw error;
                 }
 
+                const totalCreditToBeUtilized = productPriceDb.unitCreditValue * productPriceDb.fixedQty;
+                if (totalCreditToBeUtilized > creditAccountDb.creditAvailable) {
+                    req.flash("errors", { msg: "Credit Account Balance is insufficient. Please Top-up Credit and try again." });
+                    return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+                }
+
                 // get all available source credit trx to deduct credit
                 const availableCreditTrxList = await CreditTrxModel.find({
                     creditAccount: creditAccountDb._id,
@@ -1033,11 +1062,9 @@ export let postJobPublish = [
                 }).sort({ trxDate: 1 }).session(mongodbSession);
 
                 if (!availableCreditTrxList || availableCreditTrxList.length == 0) {
-                    req.flash("success", { msg: "Credit Trx not available for deduction." });
+                    req.flash("errors", { msg: "Credit Trx not available for deduction. Please contact Administrator." });
                     return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
                 }
-
-                const totalCreditToBeUtilized = productPriceDb.unitCreditValue * productPriceDb.fixedQty;
 
                 const creditTrxInput = new CreditTrxModel({
                     trxDate: moment(),
@@ -1141,6 +1168,171 @@ export let postJobPublish = [
                 mongodbSession.endSession();
 
                 req.flash("success", { msg: "Offline Job successfully published." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+
+            } else {
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+            }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/offlineJobs");
+        }
+    }
+];
+
+/**
+ * POST /offlineJob/:id/unpublish
+ * Unpublish an existing Published Offline Job.
+ */
+export let postJobUnpublish = [
+    // validate values
+    body("recruiterId").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+
+    // process request
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
+
+        try {
+            const errors = validationResult(req);
+
+            const offlineJobId = req.params.id;
+
+            if (errors.isEmpty()) {
+                const offlineJobDb = await OfflineJobModel.findById(offlineJobId);
+                if (!offlineJobDb) {
+                    const error = new Error(`Offline Job not found for _id=${offlineJobId}.`);
+                    throw error;
+                }
+
+                /**
+                 * Only status "Active", publishInd "Published"/ "Republished" posting can be deleted.
+                 */
+                if (!(offlineJobDb.status === STATUS_ACTIVE && (offlineJobDb.publishInd === PUBIND_PUBLISHED || offlineJobDb.publishInd === PUBIND_REPUBLISHED))) {
+                    const error = new Error(`Offline Job cannot be unpublished for _id=${offlineJobId}.`);
+                    throw error;
+                }
+
+                // find current Active publishedJob
+                const publishedJobDb = await PublishedJobModel.findOne({ "job": offlineJobDb.job, "status": STATUS_ACTIVE });
+                if (!publishedJobDb) {
+                    const error = new Error(`Published Job not found for publishedJob.job=${offlineJobDb.job}`);
+                    throw error;
+                }
+
+                const offlineJobInput = {
+                    publishInd: PUBIND_UNPUBLISHED,
+                    updatedBy: req.user.id
+                };
+                const updatedOfflineJob = await Object.assign(offlineJobDb, offlineJobInput).save(opts);
+
+                // delete publishedJob
+                const publishedJobInput = {
+                    status: STATUS_DELETED,
+                    updatedBy: req.user.id
+                };
+                const updatedPublishedJob = await Object.assign(publishedJobDb, publishedJobInput).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Offline Job successfully unpublished." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+
+            } else {
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
+            }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/offlineJobs");
+        }
+    }
+];
+
+/**
+ * POST /offlineJob/:id/republish
+ * Republish an existing Unpublished Offline Job.
+ */
+export let postJobRepublish = [
+    // validate values
+    body("recruiterId").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+
+    // process request
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
+
+        try {
+            const errors = validationResult(req);
+
+            const offlineJobId = req.params.id;
+
+            if (errors.isEmpty()) {
+                const offlineJobDb = await OfflineJobModel.findById(offlineJobId);
+                if (!offlineJobDb) {
+                    const error = new Error(`Offline Job not found for _id=${offlineJobId}.`);
+                    throw error;
+                }
+
+                /**
+                 * Only status "Active", publishInd "Unpublished" posting can be deleted.
+                 */
+                if (!(offlineJobDb.status === STATUS_ACTIVE && offlineJobDb.publishInd === PUBIND_UNPUBLISHED)) {
+                    const error = new Error(`Offline Job cannot be republished for _id=${offlineJobId}.`);
+                    throw error;
+                }
+
+                const jobDb = await JobModel.findById(offlineJobDb.job);
+                if (!jobDb) {
+                    const error = new Error(`Job not found for job._id=${offlineJobDb.job}`);
+                    throw error;
+                }
+
+                const offlineJobInput = {
+                    publishInd: PUBIND_REPUBLISHED,
+                    lastPublishDate: moment(),
+                    updatedBy: req.user.id
+                };
+                const updatedOfflineJob = await Object.assign(offlineJobDb, offlineJobInput).save(opts);
+
+                // re-create publishedJob
+                const publishedJobCreated = await new PublishedJobModel({
+                    title: jobDb.title,
+                    employerName: jobDb.employerName,
+                    publishStart: jobDb.publishStart,
+                    publishEnd: jobDb.publishEnd,
+                    location: jobDb.location,
+                    job: jobDb._id,
+                    status: "A",
+                    createdBy: req.user.id,
+                }).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Offline Job successfully republished." });
                 return res.redirect(backUrl.goBack(req.body.bu, "/offlineJobs"));
 
             } else {

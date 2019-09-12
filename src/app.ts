@@ -187,8 +187,10 @@ app.post("/offlineJob/create", passportConfig.isAuthenticated, rbacConfig.hasAcc
 app.get("/offlineJob/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobDetail);
 app.get("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobUpdate);
 app.post("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobUpdate);
-app.post("/offlineJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobPublish);
 app.post("/offlineJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobDelete);
+app.post("/offlineJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobPublish);
+app.post("/offlineJob/:id/unpublish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobUnpublish);
+app.post("/offlineJob/:id/republish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobRepublish);
 
 /**
  * API

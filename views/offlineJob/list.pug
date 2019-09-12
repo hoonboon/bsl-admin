@@ -32,7 +32,7 @@ block content
       table.table.table-striped
         thead
           tr
-            td(colspan="6")
+            td(colspan="7")
               include ../partials/pagination.pug
           tr
             th Post Title
@@ -40,7 +40,8 @@ block content
             th Publish Date From
             th Publish Date To
             th Closing
-            th Status
+            th Post Status
+            th Publish Status
         tbody
           if item_list
             each item in item_list
@@ -52,12 +53,13 @@ block content
                 td #{item.publishEndDisplay}
                 td !{item.job.closing}
                 td !{item.statusDisplay}
+                td !{item.publishIndDisplay}
           else
             tr
-              td(colspan='6' align='center') No records found.
+              td(colspan='7' align='center') No records found.
         tfoot
           tr
-            td(colspan="6")
+            td(colspan="7")
               include ../partials/pagination.pug
 
   #searchModal.modal.fade(tabindex='-1')

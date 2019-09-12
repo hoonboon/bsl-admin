@@ -37,5 +37,8 @@ const PublishedJobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// pre-defined indexes
+PublishedJobSchema.index({ job: 1 });
+
 const PublishedJobModel = mongoose.model<IPublishedJob>("published-job", PublishedJobSchema);
 export default PublishedJobModel;

@@ -24,6 +24,9 @@ block content
         label.col-sm-4.col-xs-12.control-label Post Status 
         .col-sm-6.col-xs-12
           .form-control-static !{offlineJob.statusDisplay}
+        label.col-sm-4.col-xs-12.control-label Publish Status
+        .col-sm-6.col-xs-12
+          .form-control-static !{offlineJob.publishIndDisplay}
 
     p
       #jobDetail.form-horizontal
@@ -93,7 +96,7 @@ block content
               a.btn.btn-danger(href='#', onclick="submitDelete('" + offlineJob.url + "/delete')") Delete
               span
               | 
-            if (offlineJob.status == 'A' && offlineJob.publishInd == 'P')
+            if (offlineJob.status == 'A' && (offlineJob.publishInd == 'P' || offlineJob.publishInd == 'R'))
               a.btn.btn-danger(href="#", onclick="submitUnpublish('" + offlineJob.url + "/unpublish')") Unpublish
               span
               | 

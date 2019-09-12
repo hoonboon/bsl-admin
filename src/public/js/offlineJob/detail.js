@@ -22,6 +22,26 @@ function submitDelete(actionUrl) {
 function submitPublish(actionUrl) {
     if (confirm("Confirm to Publish this record?")) {
         $("#jobForm").attr("action", actionUrl);
+        let currentUrl = window.location.pathname + window.location.search;
+        $("#jobForm #bu").val(window.btoa(currentUrl));
+        $("#jobForm").submit();
+    }
+}
+
+function submitUnpublish(actionUrl) {
+    if (confirm("Confirm to Unpublish this record?")) {
+        $("#jobForm").attr("action", actionUrl);
+        let currentUrl = window.location.pathname + window.location.search;
+        $("#jobForm #bu").val(window.btoa(currentUrl));
+        $("#jobForm").submit();
+    }
+}
+
+function submitRepublish(actionUrl) {
+    if (confirm("Confirm to Republish this record?")) {
+        $("#jobForm").attr("action", actionUrl);
+        let currentUrl = window.location.pathname + window.location.search;
+        $("#jobForm #bu").val(window.btoa(currentUrl));
         $("#jobForm").submit();
     }
 }
