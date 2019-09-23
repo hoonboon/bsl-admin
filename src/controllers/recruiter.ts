@@ -60,7 +60,7 @@ export let getRecruiters = async (req: Request, res: Response, next: NextFunctio
         let pageInfo: PageInfo;
         let item_list: any;
 
-        const count = await query.count();
+        const count = await query.countDocuments();
         if (count > 0) {
             pageInfo = getNewPageInfo(count, rowPerPage, newPageNo);
 

@@ -1,4 +1,3 @@
-import async from "async";
 import moment from "moment";
 import mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
@@ -6,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator/check";
 import { sanitizeBody } from "express-validator/filter";
 
-import { default as JobModel, IJob, POSTTYPE_FB, POSTTYPE_NORMAL, Location } from "../models/Job";
+import { default as JobModel, POSTTYPE_NORMAL, Location } from "../models/Job";
 
 import { Logger } from "../util/logger";
 import { PageInfo, getNewPageInfo } from "../util/pagination";
@@ -20,8 +19,7 @@ import CreditTrxModel, { TRXTYPE_CREDIT_UTILIZATION, TRXTYPE_CREDIT_TOPUP, TRXTY
 import EmployerModel, { getEmployerOptions } from "../models/Employer";
 import { composeLocationFromRequest } from "./adminJob";
 import CreditAccountModel from "../models/CreditAccount";
-import { getRoundedAmount } from "../util/roudingMechanism";
-import PublishedJobModel from "../models/PublishedJob";
+import PublishedJobModel, { WEIGHT_HIGH } from "../models/PublishedJob";
 
 const logger = new Logger("controllers.offlineJob");
 
@@ -90,7 +88,7 @@ export let getJobs = async (req: Request, res: Response, next: NextFunction) => 
 
             query.where("status").in([STATUS_ACTIVE, STATUS_PENDING]);
 
-            recordCount = await query.count();
+            recordCount = await query.countDocuments();
             if (recordCount > 0) {
                 pageInfo = getNewPageInfo(recordCount, rowPerPage, newPageNo);
 
@@ -633,12 +631,6 @@ export let getJobUpdate = async (req: Request, res: Response, next: NextFunction
             publishInd: offlineJobDb.publishInd,
         });
 
-        // set default values
-        // const jobInput = new JobModel({
-        //         publishStart: moment().add(1, "days"),
-        //         publishEnd: moment().add(29, "days")
-        // });
-
         const locationOptions = selectOption.OPTIONS_LOCATION();
         selectOption.markSelectedOptions(jobDb.locationCodes, locationOptions);
 
@@ -654,6 +646,7 @@ export let getJobUpdate = async (req: Request, res: Response, next: NextFunction
             recruiterId: recruiterDb._id.toString(),
             recruiter: recruiterDb,
             creditAccount: creditAccountDb,
+            offlineJobId: offlineJobId,
             job: jobInput,
             includeScripts: includeScripts,
             locationOptions: locationOptions,
@@ -756,11 +749,11 @@ export let postJobUpdate = [
 
             const locationInput = composeLocationFromRequest(req);
 
-            const jobId = req.params.id;
+            const offlineJobId = req.params.id;
 
-            const offlineJobDb = await OfflineJobModel.findById(jobId);
+            const offlineJobDb = await OfflineJobModel.findById(offlineJobId);
             if (!offlineJobDb) {
-                const error = new Error(`Offline Job not found for _id=${jobId}`);
+                const error = new Error(`Offline Job not found for _id=${offlineJobId}`);
                 throw error;
             }
 
@@ -865,6 +858,7 @@ export let postJobUpdate = [
                 recruiterId: recruiterId,
                 recruiter: recruiterDb,
                 creditAccount: creditAccountDb,
+                offlineJobId: offlineJobId,
                 job: Object.assign(jobDb, jobInput),
                 includeScripts: includeScripts,
                 locationOptions: locationOptions,
@@ -1150,6 +1144,7 @@ export let postJobPublish = [
                     publishEnd: jobDb.publishEnd,
                     location: jobDb.location,
                     job: jobDb._id,
+                    weight: WEIGHT_HIGH,
                     status: "A",
                     createdBy: req.user.id,
                 }).save(opts);
@@ -1324,6 +1319,7 @@ export let postJobRepublish = [
                     publishEnd: jobDb.publishEnd,
                     location: jobDb.location,
                     job: jobDb._id,
+                    weight: WEIGHT_HIGH,
                     status: "A",
                     createdBy: req.user.id,
                 }).save(opts);

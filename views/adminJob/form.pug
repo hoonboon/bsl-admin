@@ -2,13 +2,13 @@ extends ../layout
 
 block content
   .container
-    if jobId
+    if adminJobId
       h3
         if title2
           = title2
         else
           = title
-      p Job Id: #{jobId}
+      p Admin Job Id: #{adminJobId}
     else
       h3
         if title2

@@ -62,7 +62,7 @@ export let getEmployers = async (req: Request, res: Response, next: NextFunction
 
             query.where("status").equals(STATUS_ACTIVE);
 
-            recordCount = await query.count();
+            recordCount = await query.countDocuments();
             if (recordCount > 0) {
                 pageInfo = getNewPageInfo(recordCount, rowPerPage, newPageNo);
 

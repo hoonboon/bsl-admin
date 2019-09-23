@@ -32,15 +32,15 @@ block content
             th Publish Date To
             th Closing
         tbody
-          if job_list
-            each job in job_list
+          if item_list
+            each item in item_list
               tr
                 td 
-                  a(href="#", onclick="viewDetail('" + job.url + "')") !{job.title}
-                td !{job.employerName}
-                td #{job.publishStartDisplay}
-                td #{job.publishEndDisplay}
-                td !{job.closing}
+                  a(href="#", onclick="viewDetail('" + item.url + "')") !{item.title}
+                td !{item.employerName}
+                td #{item.publishStartDisplay}
+                td #{item.publishEndDisplay}
+                td !{item.job.closing}
           else
             tr
               td(colspan='5' align='center') No records found.

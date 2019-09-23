@@ -12,9 +12,10 @@ $(document).ready(function() {
     }
 });
 
-function submitDelete() {
-    if (confirm("Confirm to delete this record?")) {
-        $("#jobDeleteForm").submit();
+function submitDelete(actionUrl) {
+    if (confirm("Confirm to Delete this record?")) {
+        $("#jobForm").attr("action", actionUrl);
+        $("#jobForm").submit();
     }
 }
 
