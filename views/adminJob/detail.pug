@@ -43,12 +43,25 @@ block content
               .form-control-static #{job.publishEndDisplay}
           .form-group
             .col-sm-offset-3.col-sm-7
-              a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/updateFbPost')") Edit
-              span
-              | 
-              a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
-              span
-              | 
+              if (adminJob.status == 'P' || (adminJob.status == 'A' && adminJob.publishInd == 'U'))
+                a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/updateFbPost')") Edit
+                span
+                | 
+              if (adminJob.status == 'P')
+                a.btn.btn-danger(href='#', onclick="submitPublish('" + adminJob.url + "/publish')") Publish
+                span
+                | 
+                a.btn.btn-danger(href='#', onclick="submitDelete('" + adminJob.url + "/delete')") Delete
+                span
+                | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-danger(href='#', onclick="submitUnpublish('" + adminJob.url + "/unpublish')") Unpublish
+                span
+                | 
+              if (adminJob.status == 'A' && adminJob.publishInd == 'U')
+                a.btn.btn-danger(href='#', onclick="submitRepublish('" + adminJob.url + "/republish')") Republish
+                span
+                | 
               a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
         else
           .form-group
@@ -98,18 +111,32 @@ block content
                 textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
           .form-group
             .col-sm-offset-3.col-sm-7
-              a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/update')") Edit
-              span
-              | 
+              if (adminJob.status == 'P' || (adminJob.status == 'A' && adminJob.publishInd == 'U'))
+                a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/update')") Edit
+                span
+                | 
               a.btn.btn-primary(href='#', onclick='preview()') Preview
               span
               | 
-              a.btn.btn-primary(href='#', onclick='fbShare(\'' + job.publishUrl + '\')') FB Share
-              span
-              | 
-              a.btn.btn-danger(href='#', onclick='submitDelete()') Delete
-              span
-              | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-primary(href='#', onclick='fbShare(\'' + job.publishUrl + '\')') FB Share
+                span
+                | 
+              if (adminJob.status == 'P')
+                a.btn.btn-danger(href='#', onclick="submitPublish('" + adminJob.url + "/publish')") Publish
+                span
+                | 
+                a.btn.btn-danger(href='#', onclick="submitDelete('" + adminJob.url + "/delete')") Delete
+                span
+                | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-danger(href='#', onclick="submitUnpublish('" + adminJob.url + "/unpublish')") Unpublish
+                span
+                | 
+              if (adminJob.status == 'A' && adminJob.publishInd == 'U')
+                a.btn.btn-danger(href='#', onclick="submitRepublish('" + adminJob.url + "/republish')") Republish
+                span
+                | 
               a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
 
   include preview.pug

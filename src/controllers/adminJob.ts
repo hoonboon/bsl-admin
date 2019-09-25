@@ -1,4 +1,3 @@
-import async from "async";
 import moment from "moment";
 import mongoose from "mongoose";
 import { Request, Response, NextFunction } from "express";
@@ -13,7 +12,8 @@ import { PageInfo, getNewPageInfo } from "../util/pagination";
 import * as selectOption from "../util/selectOption";
 import * as backUrl from "../util/backUrl";
 import { Logger } from "../util/logger";
-import AdminJobModel, { PUBIND_NEW, STATUS_PENDING, STATUS_ACTIVE, PUBIND_UNPUBLISHED } from "../models/AdminJob";
+import AdminJobModel, { PUBIND_NEW, STATUS_PENDING, STATUS_ACTIVE, PUBIND_UNPUBLISHED, STATUS_DELETED, PUBIND_PUBLISHED, PUBIND_REPUBLISHED } from "../models/AdminJob";
+import PublishedJobModel, { WEIGHT_LOW } from "../models/PublishedJob";
 
 const logger = new Logger("controllers.adminJob");
 
@@ -119,43 +119,46 @@ export let getJobs = async (req: Request, res: Response, next: NextFunction) => 
  * Create Job page.
  */
 export let getJobCreate = (req: Request, res: Response, next: NextFunction) => {
-    // TODO: for local testing only
-    const jobInput = {
-        employerName: "Some Employer 3",
-        title: "Some Admin Job 3",
-        description: "Some Admin Job Description 3",
-        applyMethod: "Whatsapp/ SMS 012-3456789",
-        salary: "Min MYR800.00/bulan +EPF+SOCSO",
-        location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
-        closing: "SEGERA",
-        publishStartInput: moment().add(1, "days").format("YYYY-MM-DD"),
-        get publishEndInput() {
-            return moment(this.publishStartInput, "YYYY-MM-DD").add(30 - 1, "days").format("YYYY-MM-DD");
-        },
-        // weight: number,
-        // tag: string[],
-        // customContent: string,
+    // // TODO: for local testing only
+    // const jobInput = {
+    //     employerName: "Some Employer 3",
+    //     title: "Some Admin Job 3",
+    //     description: "Some Admin Job Description 3",
+    //     applyMethod: "Whatsapp/ SMS 012-3456789",
+    //     salary: "Min MYR800.00/bulan +EPF+SOCSO",
+    //     location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+    //     closing: "SEGERA",
+    //     publishStartInput: moment().add(1, "days").format("YYYY-MM-DD"),
+    //     get publishEndInput() {
+    //         return moment(this.publishStartInput, "YYYY-MM-DD").add(30 - 1 + 1, "days").format("YYYY-MM-DD");
+    //     },
+    //     // weight: number,
+    //     // tag: string[],
+    //     // customContent: string,
 
-        getAreaByLocationCode: function (locationCode: string) {
-            let result: string;
-            if (this.location && this.location.length > 0) {
-                const matched = (this.location as Location[]).find(location => location.code === locationCode);
-                if (matched) {
-                    result = matched.area;
-                }
-            }
-            return result;
-        }
-    };
+    //     getAreaByLocationCode: function (locationCode: string) {
+    //         let result: string;
+    //         if (this.location && this.location.length > 0) {
+    //             const matched = (this.location as Location[]).find(location => location.code === locationCode);
+    //             if (matched) {
+    //                 result = matched.area;
+    //             }
+    //         }
+    //         return result;
+    //     }
+    // };
 
-    // // set default values
-    // const jobInput = new JobModel({
-    //         publishStart: moment().add(1, "days"),
-    //         publishEnd: moment().add(29, "days")
-    // });
+    // const locationOptions = selectOption.OPTIONS_LOCATION();
+    // selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
+
+    // set default values
+    const jobInput = new JobModel({
+            publishStart: moment().add(1, "days"),
+            publishEnd: moment().add(30 - 1 + 1, "days")
+    });
 
     const locationOptions = selectOption.OPTIONS_LOCATION();
-    selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
+    selectOption.markSelectedOptions(jobInput.locationCodes, locationOptions);
 
     // client side script
     const includeScripts = ["/ckeditor/ckeditor.js", "/js/adminJob/form.js"];
@@ -620,56 +623,77 @@ export let postJobUpdate = [
  */
 export let postJobDelete = [
     // validate values
-    body("id").isLength({ min: 1 }).trim().withMessage("Job ID is required."),
+    // body("id").isLength({ min: 1 }).trim().withMessage("Job ID is required."),
 
     // process request
-    (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
 
-        const jobInput = new JobModel({
-            _id: req.params.id,
-            status: "D",
-            updatedBy: req.user.id
-        });
+        try {
+            const errors = validationResult(req);
 
-        if (errors.isEmpty()) {
-            JobModel.findById(req.params.id, (err, targetJob) => {
-                if (err) { return next(err); }
+            const adminJobId = req.params.id;
 
-                if (!targetJob) {
-                    req.flash("errors", { msg: "Job not found." });
-                    const bu = backUrl.decodeBackUrl(req.body.bu);
-                    if (bu) {
-                        return res.redirect(bu);
-                    } else {
-                        return res.redirect("/adminJobs");
-                    }
+            if (errors.isEmpty()) {
+                const adminJobDb = await AdminJobModel.findById(adminJobId);
+                if (!adminJobDb) {
+                    const error = new Error(`Admin Job not found for _id=${adminJobId}.`);
+                    throw error;
                 }
 
-                JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
-                    if (err) { return next(err); }
-                    req.flash("success", { msg: "Job successfully deleted." });
-                    const bu = backUrl.decodeBackUrl(req.body.bu);
-                    if (bu) {
-                        return res.redirect(bu);
-                    } else {
-                        return res.redirect("/adminJobs");
-                    }
-                });
-            });
-        } else {
-            req.flash("errors", errors.array());
-            const bu = backUrl.decodeBackUrl(req.body.bu);
-            if (bu) {
-                return res.redirect(bu);
+                /**
+                 * Only status "Pending" posting can be deleted.
+                 */
+                if (adminJobDb.status !== STATUS_PENDING) {
+                    const error = new Error(`Admin Job cannot be deleted for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                const jobDb = await JobModel.findById(adminJobDb.job);
+                if (!jobDb) {
+                    const error = new Error(`Job not found for _id=${adminJobDb.job}`);
+                    throw error;
+                }
+
+                const adminJobInput = {
+                    status: STATUS_DELETED,
+                    updatedBy: req.user.id
+                };
+                const updatedAdminJob = await Object.assign(adminJobDb, adminJobInput).save(opts);
+
+                const jobInput = {
+                    status: STATUS_DELETED,
+                    updatedBy: req.user.id
+                };
+                const updatedJob = await Object.assign(jobDb, jobInput).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Admin Job successfully deleted." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+
             } else {
-                return res.redirect("/adminJobs");
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
             }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
         }
     }
 ];
-
-
 
 /**
  * GET /adminJob/embedFbPost
@@ -678,9 +702,9 @@ export let postJobDelete = [
 export let getJobEmbedFbPost = (req: Request, res: Response, next: NextFunction) => {
 
     // set default values
-    const jobInput = new JobModel({
+    const jobInput = new AdminJobModel({
             publishStart: moment().add(1, "days"),
-            publishEnd: moment().add(29, "days")
+            publishEnd: moment().add(30 - 1 + 1, "days")
     });
 
     // client side script
@@ -722,29 +746,52 @@ export let postJobEmbedFbPost = [
     sanitizeBody("publishEnd").toDate(),
 
     // process request
-    (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
 
-        const jobInput = new JobModel({
-            title: req.body.title,
-            fbPostUrl: req.body.fbPostUrl,
-            publishStart: req.body.publishStart,
-            publishEnd: req.body.publishEnd,
-            // weight: number,
-            // tag: string[],
-            postType: POSTTYPE_FB,
-            status: "A",
-            createdBy: req.user.id
-        });
+        try {
+            const errors = validationResult(req);
 
-        if (errors.isEmpty()) {
-            jobInput.save((err, jobCreated) => {
-                if (err) { return next(err); }
-                req.flash("success", { msg: "New post created: " + jobCreated._id });
-                return res.redirect("/adminJobs");
+            const jobInput = new JobModel({
+                title: req.body.title,
+                fbPostUrl: req.body.fbPostUrl,
+                publishStart: req.body.publishStart,
+                publishEnd: req.body.publishEnd,
+                // weight: number,
+                // tag: string[],
+                postType: POSTTYPE_FB,
+                status: "A",
+                createdBy: req.user.id
             });
-        } else {
-            req.flash("errors", errors.array());
+
+            if (errors.isEmpty()) {
+                // create Job
+                const jobCreated = await jobInput.save(opts);
+
+                // create AdminJob
+                const adminJobInput = new AdminJobModel({
+                    title: jobCreated.title,
+                    publishStart: jobCreated.publishStart,
+                    publishEnd: jobCreated.publishEnd,
+                    job: jobCreated._id,
+                    publishInd: PUBIND_NEW,
+                    status: STATUS_PENDING,
+                    createdBy: jobCreated.createdBy,
+                });
+
+                const adminJobCreated = await adminJobInput.save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "New Admin FB Post created: " + adminJobInput._id });
+                return res.redirect("/adminJobs");
+            } else {
+                req.flash("errors", errors.array());
+            }
 
             // client side script
             const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
@@ -754,7 +801,17 @@ export let postJobEmbedFbPost = [
                 title2: "Embed Facebook Post",
                 job: jobInput,
                 includeScripts: includeScripts,
+                bu: req.query.bu,
             });
+
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
         }
     }
 ];
@@ -765,26 +822,48 @@ export let postJobEmbedFbPost = [
  * GET /adminJob/:id/updateFbPost
  * Update Embedded Facebook Post page.
  */
-export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction) => {
-    async.parallel({
-        job: function(callback) {
-            JobModel.findById(req.params.id)
-                .exec(callback);
-        }
-    }, function(err, results) {
-        if (err) { return next(err); }
+export let getJobUpdateFbPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const adminJobId = req.params.id;
+        const adminJobDb = await AdminJobModel.findById(adminJobId);
 
-        if (!results.job) {
-            req.flash("errors", { msg: "Post not found." });
-            const bu = backUrl.decodeBackUrl(req.query.bu);
-            if (bu) {
-                return res.redirect(bu);
-            } else {
-                return res.redirect("/adminJobs");
-            }
+        if (!adminJobDb) {
+            req.flash("errors", { msg: "Admin Job not found." });
+            return res.redirect(backUrl.goBack(req.query.bu, "/adminJobs"));
         }
 
-        const jobDb = results.job as IJob;
+        /**
+         * - Only the following posting can be edited:
+         *  - Status = "Pending"; Publish Ind = "New"
+         *    - All fields are editable.
+         *  - Status = "Active"; Publish Ind = "Unpublished"
+         *    - "Publish Option" and "Publish Start Date" fields are not editable.
+         */
+        let isEditable = false;
+        if ((adminJobDb.status === STATUS_PENDING && adminJobDb.publishInd === PUBIND_NEW)
+            || (adminJobDb.status === STATUS_ACTIVE && adminJobDb.publishInd === PUBIND_UNPUBLISHED)) {
+                isEditable = true;
+        }
+        if (!isEditable) {
+            const error = new Error("Admin Job is not editable.");
+            throw error;
+        }
+
+        const jobId = adminJobDb.job;
+        const jobDb = await JobModel.findById(jobId);
+        if (!jobDb) {
+            const error = new Error(`Job not found for adminJobDb._id=${adminJobDb._id}`);
+            throw error;
+        }
+
+        const jobInput = Object.assign(jobDb, {
+            title: adminJobDb.title,
+            employerName: adminJobDb.employerName,
+            publishStart: adminJobDb.publishStart,
+            publishEnd: adminJobDb.publishEnd,
+            status: adminJobDb.status,
+            publishInd: adminJobDb.publishInd,
+        });
 
         // client side script
         const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
@@ -792,13 +871,18 @@ export let getJobUpdateFbPost = (req: Request, res: Response, next: NextFunction
         res.render("adminJob/formEmbedFbPost", {
             title: "Admin",
             title2: "Edit Embedded Facebook Post Detail",
-            job: jobDb,
-            jobId: jobDb._id,
+            adminJobId: adminJobId,
+            job: jobInput,
             includeScripts: includeScripts,
             bu: req.query.bu,
         });
 
-    });
+    } catch (err) {
+        logger.error((<Error>err).stack);
+
+        req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+        res.redirect("/adminJobs");
+    }
 };
 
 /**
@@ -830,43 +914,91 @@ export let postJobUpdateFbPost = [
     sanitizeBody("publishEnd").toDate(),
 
     // process request
-    (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
 
-        const jobInput = new JobModel({
-            title: req.body.title,
-            fbPostUrl: req.body.fbPostUrl,
-            publishStart: req.body.publishStart,
-            publishEnd: req.body.publishEnd,
-            // weight: number,
-            // tag: string[],
-            postType: POSTTYPE_FB,
-            _id: req.params.id,
-            updatedBy: req.user.id
-        });
+        try {
+            const errors = validationResult(req);
 
-        if (errors.isEmpty()) {
-            JobModel.findById(req.params.id, (err, targetJob) => {
-                if (err) { return next(err); }
+            const adminJobId = req.params.id;
 
-                if (!targetJob) {
-                    req.flash("errors", { msg: "Post not found." });
-                    const bu = backUrl.decodeBackUrl(req.body.bu);
-                    if (bu) {
-                        return res.redirect(bu);
-                    } else {
-                        return res.redirect("/adminJobs");
-                    }
+            const adminJobDb = await AdminJobModel.findById(adminJobId);
+            if (!adminJobDb) {
+                const error = new Error(`Admin Job not found for _id=${adminJobId}`);
+                throw error;
+            }
+
+            const jobDb = await JobModel.findById(adminJobDb.job);
+            if (!jobDb) {
+                const error = new Error(`Job not found for _id=${adminJobDb.job}`);
+                throw error;
+            }
+
+            const customValidationErrors = [];
+
+            /**
+             * Custom Validations
+             * - When editing status "Pending", publishdInd "New" posts:
+             */
+            if (adminJobDb.status === STATUS_PENDING && adminJobDb.publishInd === PUBIND_NEW) {
+                // Publish Start must be > today
+                if (!moment(req.body.publishStart, "YYYY-MM-DD").isAfter(moment())) {
+                    customValidationErrors.push({ msg: "Publish Date Start must be from tomorrow onwards." });
+                }
+            }
+
+            const adminJobInput = {
+                title: req.body.title,
+                publishStart: req.body.publishStart,
+                publishEnd: req.body.publishEnd,
+                updatedBy: req.user.id
+            };
+
+            const jobInput = {
+                title: req.body.title,
+                fbPostUrl: req.body.fbPostUrl,
+                publishStart: req.body.publishStart,
+                publishEnd: req.body.publishEnd,
+                // weight: number,
+                // tag: string[],
+                updatedBy: req.user.id
+            };
+
+            if (errors.isEmpty() && customValidationErrors.length == 0) {
+                /**
+                 * - Only the following posting can be edited:
+                 *  - Status = "Pending"; Publish Ind = "New"
+                 *    - All fields are editable.
+                 *  - Status = "Active"; Publish Ind = "Unpublished"
+                 *    - All fields are editable.
+                 */
+                let isEditable = false;
+                if ((adminJobDb.status === STATUS_PENDING && adminJobDb.publishInd === PUBIND_NEW)
+                    || (adminJobDb.status === STATUS_ACTIVE && adminJobDb.publishInd === PUBIND_UNPUBLISHED)) {
+                        isEditable = true;
+                }
+                if (!isEditable) {
+                    const error = new Error("Admin Job is not editable.");
+                    throw error;
                 }
 
-                JobModel.findByIdAndUpdate(req.params.id, jobInput, (err, jobUpdated: IJob) => {
-                    if (err) { return next(err); }
-                    req.flash("success", { msg: "Post successfully updated." });
-                    return res.redirect(jobUpdated.url + "?bu=" + req.body.bu);
-                });
-            });
-        } else {
-            req.flash("errors", errors.array());
+                const adminJobUpdated = await Object.assign(adminJobDb, adminJobInput).save(opts);
+                const jobUpdated = await Object.assign(jobDb, jobInput).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Admin FB Post successfully updated" });
+                return res.redirect("/adminJobs");
+
+            } else if (!errors.isEmpty()) {
+                req.flash("errors", errors.array());
+            } else {
+                req.flash("errors", customValidationErrors);
+            }
 
             // client side script
             const includeScripts = ["/js/adminJob/formEmbedFbPost.js"];
@@ -874,11 +1006,289 @@ export let postJobUpdateFbPost = [
             res.render("adminJob/formEmbedFbPost", {
                 title: "Admin",
                 title2: "Edit Embedded Facebook Post Detail",
-                job: jobInput,
-                jobId: jobInput._id,
+                adminJobId: adminJobId,
+                job: Object.assign(jobDb, jobInput),
                 includeScripts: includeScripts,
                 bu: req.body.bu,
             });
+
+            // default transaction handling: rollback
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
+        }
+    }
+];
+
+/**
+ * POST /adminJob/:id/publish
+ * Publish an existing Admin Job.
+ */
+export let postJobPublish = [
+    // validate values
+    // body("recruiterId").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+
+    // process request
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
+
+        try {
+            const errors = validationResult(req);
+
+            const adminJobId = req.params.id;
+
+            if (errors.isEmpty()) {
+                const adminJobDb = await AdminJobModel.findById(adminJobId).session(mongodbSession);
+                if (!adminJobDb) {
+                    const error = new Error(`Admin Job not found for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                /**
+                 * Publish Date Start must > today
+                 */
+                if (!moment(adminJobDb.publishStart, "YYYY-MM-DD").isAfter(moment())) {
+                    req.flash("errors", { msg: "Publish Date Start must be from tomorrow onwards. Please edit and try again." });
+                    return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+                }
+
+                /**
+                 * Only status "Pending" posting can be published.
+                 */
+                if (adminJobDb.status !== STATUS_PENDING) {
+                    const error = new Error(`Admin Job cannot be published for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                const jobDb = await JobModel.findById(adminJobDb.job).session(mongodbSession);
+                if (!jobDb) {
+                    const error = new Error(`Job not found for _id=${adminJobDb.job}`);
+                    throw error;
+                }
+
+                // create new publishedJob
+                const publishedJobCreated = await new PublishedJobModel({
+                    title: jobDb.title,
+                    employerName: jobDb.employerName,
+                    publishStart: jobDb.publishStart,
+                    publishEnd: jobDb.publishEnd,
+                    location: jobDb.location,
+                    job: jobDb._id,
+                    weight: WEIGHT_LOW,
+                    status: "A",
+                    createdBy: req.user.id,
+                }).save(opts);
+
+                // update admin job
+                const adminJobInput = {
+                    status: "A",
+                    publishInd: PUBIND_PUBLISHED,
+                    lastPublishDate: moment(),
+                    updatedBy: req.user.id
+                };
+                const updatedAdminJob = await Object.assign(adminJobDb, adminJobInput).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Admin Job successfully published." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+
+            } else {
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+            }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
+        }
+    }
+];
+
+/**
+ * POST /adminJob/:id/unpublish
+ * Unpublish an existing Published Admin Job.
+ */
+export let postJobUnpublish = [
+    // validate values
+    // body("recruiterId").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+
+    // process request
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
+
+        try {
+            const errors = validationResult(req);
+
+            const adminJobId = req.params.id;
+
+            if (errors.isEmpty()) {
+                const adminJobDb = await AdminJobModel.findById(adminJobId);
+                if (!adminJobDb) {
+                    const error = new Error(`Admin Job not found for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                /**
+                 * Only status "Active", publishInd "Published"/ "Republished" posting can be deleted.
+                 */
+                if (!(adminJobDb.status === STATUS_ACTIVE && (adminJobDb.publishInd === PUBIND_PUBLISHED || adminJobDb.publishInd === PUBIND_REPUBLISHED))) {
+                    const error = new Error(`Admin Job cannot be unpublished for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                // find current Active publishedJob
+                const publishedJobDb = await PublishedJobModel.findOne({ "job": adminJobDb.job, "status": STATUS_ACTIVE });
+                // do not throw error if not found as expired publishedJob maybe removed by scheduled job
+                // if (!publishedJobDb) {
+                //     const error = new Error(`Published Job not found for publishedJob.job=${adminJobDb.job}`);
+                //     throw error;
+                // }
+
+                const adminJobInput = {
+                    publishInd: PUBIND_UNPUBLISHED,
+                    updatedBy: req.user.id
+                };
+                const updatedAdminJob = await Object.assign(adminJobDb, adminJobInput).save(opts);
+
+                // delete publishedJob only if exists
+                if (publishedJobDb) {
+                    const publishedJobInput = {
+                        status: STATUS_DELETED,
+                        updatedBy: req.user.id
+                    };
+                    const updatedPublishedJob = await Object.assign(publishedJobDb, publishedJobInput).save(opts);
+                }
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Admin Job successfully unpublished." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+
+            } else {
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+            }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
+        }
+    }
+];
+
+/**
+ * POST /adminJob/:id/republish
+ * Republish an existing Unpublished Admin Job.
+ */
+export let postJobRepublish = [
+    // validate values
+    // body("recruiterId").isLength({ min: 1 }).trim().withMessage("Recruiter ID is required."),
+
+    // process request
+    async (req: Request, res: Response, next: NextFunction) => {
+        const mongodbSession = await mongoose.startSession();
+        mongodbSession.startTransaction();
+        const opts = { session: mongodbSession, new: true };
+
+        try {
+            const errors = validationResult(req);
+
+            const adminJobId = req.params.id;
+
+            if (errors.isEmpty()) {
+                const adminJobDb = await AdminJobModel.findById(adminJobId);
+                if (!adminJobDb) {
+                    const error = new Error(`Admin Job not found for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                /**
+                 * Only status "Active", publishInd "Unpublished" posting can be deleted.
+                 */
+                if (!(adminJobDb.status === STATUS_ACTIVE && adminJobDb.publishInd === PUBIND_UNPUBLISHED)) {
+                    const error = new Error(`Admin Job cannot be republished for _id=${adminJobId}.`);
+                    throw error;
+                }
+
+                const jobDb = await JobModel.findById(adminJobDb.job);
+                if (!jobDb) {
+                    const error = new Error(`Job not found for job._id=${adminJobDb.job}`);
+                    throw error;
+                }
+
+                const adminJobInput = {
+                    publishInd: PUBIND_REPUBLISHED,
+                    lastPublishDate: moment(),
+                    updatedBy: req.user.id
+                };
+                const updatedAdminJob = await Object.assign(adminJobDb, adminJobInput).save(opts);
+
+                // re-create publishedJob
+                const publishedJobCreated = await new PublishedJobModel({
+                    title: jobDb.title,
+                    employerName: jobDb.employerName,
+                    publishStart: jobDb.publishStart,
+                    publishEnd: jobDb.publishEnd,
+                    location: jobDb.location,
+                    job: jobDb._id,
+                    weight: WEIGHT_LOW,
+                    status: "A",
+                    createdBy: req.user.id,
+                }).save(opts);
+
+                // only commmit data changes in this block
+                await mongodbSession.commitTransaction();
+                mongodbSession.endSession();
+
+                req.flash("success", { msg: "Admin Job successfully republished." });
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+
+            } else {
+                await mongodbSession.abortTransaction();
+                mongodbSession.endSession();
+
+                req.flash("errors", errors.array());
+                return res.redirect(backUrl.goBack(req.body.bu, "/adminJobs"));
+            }
+        } catch (err) {
+            logger.error((<Error>err).stack);
+
+            await mongodbSession.abortTransaction();
+            mongodbSession.endSession();
+
+            req.flash("errors", { msg: "Unexpected error. Please try again later. Contact Support Team if the problem persists." });
+            res.redirect("/adminJobs");
         }
     }
 ];

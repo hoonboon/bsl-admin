@@ -224,44 +224,48 @@ export let getJobCreate = async (req: Request, res: Response, next: NextFunction
             throw error;
         }
 
-        // TODO: for local testing only
-        const productPriceDb = productPriceList[1];
-        const jobInput = {
-            employer: "",
-            title: "Some Offline Job 3",
-            description: "Some Offline Job Description 3",
-            applyMethod: "Whatsapp/ SMS 012-3456789",
-            salary: "Min MYR800.00/bulan +EPF+SOCSO",
-            location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
-            closing: "SEGERA",
-            publishStartInput: moment().add(1, "days").format("YYYY-MM-DD"),
-            get publishEndInput() {
-                return moment(this.publishStartInput, "YYYY-MM-DD").add(30 - 1, "days").format("YYYY-MM-DD");
-            },
-            // weight: number,
-            // tag: string[],
-            // customContent: string,
+        const productPriceDb = productPriceList[0];
 
-            getAreaByLocationCode: function (locationCode: string) {
-                let result: string;
-                if (this.location && this.location.length > 0) {
-                    const matched = (this.location as Location[]).find(location => location.code === locationCode);
-                    if (matched) {
-                        result = matched.area;
-                    }
-                }
-                return result;
-            }
-        };
+        // // TODO: for local testing only
+        // const jobInput = {
+        //     employer: "",
+        //     title: "Some Offline Job 3",
+        //     description: "Some Offline Job Description 3",
+        //     applyMethod: "Whatsapp/ SMS 012-3456789",
+        //     salary: "Min MYR800.00/bulan +EPF+SOCSO",
+        //     location: [{ code: "03-02", area: "Pasir Pekan, Wakaf Bahru" }],
+        //     closing: "SEGERA",
+        //     publishStartInput: moment().add(1, "days").format("YYYY-MM-DD"),
+        //     get publishEndInput() {
+        //         return moment(this.publishStartInput, "YYYY-MM-DD").add(productPriceDb.postingDays - 1, "days").format("YYYY-MM-DD");
+        //     },
+        //     // weight: number,
+        //     // tag: string[],
+        //     // customContent: string,
+
+        //     getAreaByLocationCode: function (locationCode: string) {
+        //         let result: string;
+        //         if (this.location && this.location.length > 0) {
+        //             const matched = (this.location as Location[]).find(location => location.code === locationCode);
+        //             if (matched) {
+        //                 result = matched.area;
+        //             }
+        //         }
+        //         return result;
+        //     }
+        // };
+
+        // const locationOptions = selectOption.OPTIONS_LOCATION();
+        // selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
 
         // set default values
-        // const jobInput = new JobModel({
-        //         publishStart: moment().add(1, "days"),
-        //         publishEnd: moment().add(29, "days")
-        // });
+        const jobInput = new JobModel({
+            publishStart: moment().add(1, "days"),
+            publishEnd: moment().add(1, "days").add(productPriceDb.postingDays - 1, "days"),
+        });
 
         const locationOptions = selectOption.OPTIONS_LOCATION();
-        selectOption.markSelectedOptions([jobInput.location[0].code], locationOptions);
+        selectOption.markSelectedOptions(jobInput.locationCodes, locationOptions);
 
         const employerOptions =  await getEmployerOptions(recruiterDb._id);
         selectOption.markSelectedOptions([jobInput.employer], employerOptions);
@@ -1154,6 +1158,7 @@ export let postJobPublish = [
                     status: "A",
                     publishInd: PUBIND_PUBLISHED,
                     creditTrx: creditTrxCreated._id,
+                    lastPublishDate: moment(),
                     updatedBy: req.user.id
                 };
                 const updatedOfflineJob = await Object.assign(offlineJobDb, offlineJobInput).save(opts);
@@ -1220,10 +1225,11 @@ export let postJobUnpublish = [
 
                 // find current Active publishedJob
                 const publishedJobDb = await PublishedJobModel.findOne({ "job": offlineJobDb.job, "status": STATUS_ACTIVE });
-                if (!publishedJobDb) {
-                    const error = new Error(`Published Job not found for publishedJob.job=${offlineJobDb.job}`);
-                    throw error;
-                }
+                // do not throw error if not found as expired publishedJob maybe removed by scheduled job
+                // if (!publishedJobDb) {
+                //     const error = new Error(`Published Job not found for publishedJob.job=${offlineJobDb.job}`);
+                //     throw error;
+                // }
 
                 const offlineJobInput = {
                     publishInd: PUBIND_UNPUBLISHED,
@@ -1231,12 +1237,14 @@ export let postJobUnpublish = [
                 };
                 const updatedOfflineJob = await Object.assign(offlineJobDb, offlineJobInput).save(opts);
 
-                // delete publishedJob
-                const publishedJobInput = {
-                    status: STATUS_DELETED,
-                    updatedBy: req.user.id
-                };
-                const updatedPublishedJob = await Object.assign(publishedJobDb, publishedJobInput).save(opts);
+                // delete publishedJob only if exists
+                if (publishedJobDb) {
+                    const publishedJobInput = {
+                        status: STATUS_DELETED,
+                        updatedBy: req.user.id
+                    };
+                    const updatedPublishedJob = await Object.assign(publishedJobDb, publishedJobInput).save(opts);
+                }
 
                 // only commmit data changes in this block
                 await mongodbSession.commitTransaction();

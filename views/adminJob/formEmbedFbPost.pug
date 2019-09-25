@@ -2,13 +2,13 @@ extends ../layout
 
 block content
   .container
-    if jobId
+    if adminJobId
       h3
         if title2
           = title2
         else
           = title
-      p Job Id: #{jobId}
+      p Admin Post Id: #{adminJobId}
     else
       h3
         if title2
@@ -24,7 +24,7 @@ block content
       .form-group
         label.col-sm-3.control-label(for='title') ** Post Title
         .col-sm-7
-          input.form-control(type='text', name='title', id='title', placeholder='Job Title', autofocus, required, value!=(job === undefined ? '' : job.title))
+          input.form-control(type='text', name='title', id='title', placeholder='Post Title', autofocus, required, value!=(job === undefined ? '' : job.title))
       .form-group
         label.col-sm-3.control-label(for='fbPostUrl') ** Facebook Post URL
         .col-sm-7

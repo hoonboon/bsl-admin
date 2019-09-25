@@ -154,6 +154,9 @@ app.post("/adminJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasA
 app.get("/adminJob/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobUpdateFbPost);
 app.post("/adminJob/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobUpdateFbPost);
 app.post("/adminJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobDelete);
+app.post("/adminJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobPublish);
+app.post("/adminJob/:id/unpublish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobUnpublish);
+app.post("/adminJob/:id/republish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobRepublish);
 
 // Recruiter modules
 app.get("/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiters);
