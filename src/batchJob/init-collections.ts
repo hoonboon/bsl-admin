@@ -39,6 +39,7 @@ import OfflineJobModel from "../models/OfflineJob";
 import PublishedJobModel from "../models/PublishedJob";
 import ProductModel, { PRODTYPE_CREDIT_TOPUP, PRODTYPE_COMPLIMENTARY_CREDIT, PRODTYPE_CREDIT_UTILIZATION } from "../models/Product";
 import ProductPriceModel from "../models/ProductPrice";
+import AdminJobModel from "../models/AdminJob";
 
 async function execute() {
     try {
@@ -63,6 +64,9 @@ async function execute() {
 
         dummyRecord = await new PublishedJobModel({}).save();
         await PublishedJobModel.findByIdAndDelete(dummyRecord._id);
+
+        dummyRecord = await new AdminJobModel({}).save();
+        await AdminJobModel.findByIdAndDelete(dummyRecord._id);
 
         // TODO: Initialize collection data without data entry screens
 

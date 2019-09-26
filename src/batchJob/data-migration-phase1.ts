@@ -43,7 +43,7 @@ async function execute() {
         /**
          * clear all existing records: AdminJob
          */
-        await AdminJobModel.deleteMany({});
+        // await AdminJobModel.deleteMany({});
 
         /**
          * Create AdminJob for all existing Job records
@@ -58,12 +58,37 @@ async function execute() {
             query.sort([["_id", "ascending"]]);
             const item_list = await query.exec();
 
+            // init map of existing job records belonging to either offlineJob or adminJob records
+            const validJobMap = new Map();
+
+            const offlineJob_list = await OfflineJobModel.find({}, "_id job");
+            if (offlineJob_list && offlineJob_list.length > 0) {
+                for (const item of offlineJob_list) {
+                    // must use `${ObjectId}` to convert ObjectId to string value to be used as map key
+                    validJobMap.set(`${item.job}`, 1);
+                }
+            }
+
+            const adminJob_list = await AdminJobModel.find({}, "_id job");
+            if (adminJob_list && adminJob_list.length > 0) {
+                for (const item of adminJob_list) {
+                    // must use `${ObjectId}` to convert ObjectId to string value to be used as map key
+                    validJobMap.set(`${item.job}`, 1);
+                }
+            }
+
+            // logger.debug(`validJobMap.size: ${validJobMap.size}`);
+            // validJobMap.forEach(function(value, key) {
+            //     logger.debug((key + " = " + value));
+            // });
+
             const input_list = [];
             for (const item of item_list) {
-                // skip item if is created by OfflineJob
-                const offlineJobCount = await OfflineJobModel.countDocuments({"job": item._id});
-                // else create as adminJob
-                if (offlineJobCount === 0) {
+                // must use `${ObjectId}` to convert ObjectId to string value to be used as map key
+                const hasKey = validJobMap.has(`${item._id}`);
+
+                // create as adminJob if not belonging to existing OfflineJob or AdminJob
+                if (!hasKey) {
                     const adminJobInput = {
                         title: item.title,
                         employerName: item.employerName,
