@@ -113,31 +113,31 @@ export let getRecruiters = async (req: Request, res: Response, next: NextFunctio
  */
 export let getRecruiterCreate = (req: Request, res: Response, next: NextFunction) => {
     // TODO: for local testing only
-    const recruiterInput = new RecruiterModel({
-        name: "Recruiter #2",
-        nric: "A0000002",
-        email: "some2@e.mail",
-        mobileNo: "+60122222222",
-        nationality: "MY",
-        race: "M",
-        language: "ms",
-        dob: moment("1992-03-15"),
-        gender: "M",
-        billTo: {
-            name: "Company #2",
-            address: "ADDR LINE 1"
-                + "\r\nADDR LINE 2"
-                + "\r\nADDR LINE 3"
-                + "\r\n15150 KOTA BHARU"
-                + "\r\nKELANTAN"
-                + "\r\nMALAYSIA"
-        },
-    });
-
-    // // set default values
     // const recruiterInput = new RecruiterModel({
-
+    //     name: "Recruiter #2",
+    //     nric: "A0000002",
+    //     email: "some2@e.mail",
+    //     mobileNo: "+60122222222",
+    //     nationality: "MY",
+    //     race: "M",
+    //     language: "ms",
+    //     dob: moment("1992-03-15"),
+    //     gender: "M",
+    //     billTo: {
+    //         name: "Company #2",
+    //         address: "ADDR LINE 1"
+    //             + "\r\nADDR LINE 2"
+    //             + "\r\nADDR LINE 3"
+    //             + "\r\n15150 KOTA BHARU"
+    //             + "\r\nKELANTAN"
+    //             + "\r\nMALAYSIA"
+    //     },
     // });
+
+    // set default values
+    const recruiterInput = new RecruiterModel({
+
+    });
 
     // client side script
     const includeScripts = ["/js/recruiter/form.js"];

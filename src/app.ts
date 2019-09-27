@@ -65,7 +65,7 @@ mongoose.connect(mongoUrl, mongoConnectOpts).then(
   // process.exit();
 });
 
- // Session store
+// Session store
 const sessionStore = new MongoDbStore({
   uri: mongoUrl,
   collection: "sessions",

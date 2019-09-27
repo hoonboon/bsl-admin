@@ -105,11 +105,11 @@ JobSchema
     return this.publishEnd ? moment(this.publishEnd).format("YYYY-MM-DD") : "";
 });
 
-// Virtual for Job's URL
+// Virtual for Job's URL ** not used as job record is not directly accessible in admin modules
 JobSchema
 .virtual("url")
 .get(function() {
-    return "/adminJob/" + this._id;
+    return "/job/" + this._id;
 });
 
 // Virtual for Job's Published URL on public site

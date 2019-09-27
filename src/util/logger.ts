@@ -16,7 +16,7 @@ const timestampFormat = winston.format(function(info, opts) {
 const options = {
     file: {
         level: logLevel,
-        filename: `${appRoot}/logs/app.log`,
+        filename: `${appRoot}/app.log`,
         handleExceptions: true,
         json: true,
         maxsize: 5242880, // 5MB
