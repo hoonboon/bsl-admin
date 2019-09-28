@@ -18,7 +18,9 @@ export class PdfGenerator {
     static async sendPdfGivenPageUrl(res: Response, targetPageUrl: string) {
         if (!PdfGenerator.browser) {
             logger.debug("init PdfGenerator.browser");
-            PdfGenerator.browser = await puppeteer.launch({args: ["--proxy-server='direct://'", "--proxy-bypass-list=*"]});
+            PdfGenerator.browser = await puppeteer.launch({
+                args: ["--proxy-server='direct://'", "--proxy-bypass-list=*", "-no-sandbox", "--disable-setuid-sandbox"]
+            });
         }
         const page = await PdfGenerator.browser.newPage();
         const response = await page.goto(targetPageUrl, {
@@ -34,7 +36,9 @@ export class PdfGenerator {
 
     static async sendPdfGivenTemplatePath(res: Response, templateOptions: TemplateOptions, localsObject: pug.Options & pug.LocalsObject) {
         if (!PdfGenerator.browser) {
-            PdfGenerator.browser = await puppeteer.launch({args: ["--proxy-server='direct://'", "--proxy-bypass-list=*"]});
+            PdfGenerator.browser = await puppeteer.launch({
+                args: ["--proxy-server='direct://'", "--proxy-bypass-list=*", "-no-sandbox", "--disable-setuid-sandbox"]
+            });
         }
         const page = await PdfGenerator.browser.newPage();
         let htmlTemplateOptions: pug.Options & pug.LocalsObject = {...localsObject};
