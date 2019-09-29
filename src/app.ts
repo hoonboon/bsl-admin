@@ -11,23 +11,32 @@ import path from "path";
 import mongoose from "mongoose";
 import passport from "passport";
 import expressValidator from "express-validator";
-import { MONGODB_URI, SESSION_SECRET } from "./util/secrets";
 
 const MongoDbStore = connect(session);
 
 // Load environment variables from .env file, where API keys and passwords are configured
-dotenv.config({ path: ".env.example" });
+dotenv.config({ path: ".env" });
+
+import { Logger } from "./util/logger";
+import { MONGODB_URI, SESSION_SECRET, ENVIRONMENT } from "./util/secrets";
 
 // Controllers (route handlers)
 import * as homeController from "./controllers/home";
 import * as userController from "./controllers/user";
-import * as jobController from "./controllers/job";
+import * as adminJobController from "./controllers/adminJob";
+import * as recruiterController from "./controllers/recruiter";
+import * as employerController from "./controllers/employer";
+import * as creditAccountController from "./controllers/creditAccount";
+import * as offlineJobController from "./controllers/offlineJob";
+import * as apiController from "./controllers/api";
 
 // API keys and Passport configuration
 import * as passportConfig from "./config/passport";
 
 // Role Based Access Control configuration
 import * as rbacConfig from "./config/accessControl";
+
+const logger = new Logger("app");
 
 // Create Express server
 const app = express();
@@ -44,17 +53,19 @@ const mongoConnectOpts = {
   poolSize: 20,
 };
 
+mongoose.set("debug", ENVIRONMENT === "production" ? false : true);
+
 mongoose.connect(mongoUrl, mongoConnectOpts).then(
   () => {
     /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
-    console.log("MongoDB connected.");
+    logger.info("MongoDB connected.");
   },
 ).catch(err => {
-  console.log("MongoDB connection error. Please make sure MongoDB is running. " + err);
+  logger.error("MongoDB connection error. Please make sure MongoDB is running. " + err);
   // process.exit();
 });
 
- // Session store
+// Session store
 const sessionStore = new MongoDbStore({
   uri: mongoUrl,
   collection: "sessions",
@@ -131,24 +142,63 @@ app.post("/account/password", passportConfig.isAuthenticated, userController.pos
 app.post("/account/delete", passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get("/account/unlink/:provider", passportConfig.isAuthenticated, userController.getOauthUnlink);
 
-// Job module
-app.get("/jobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobs);
-app.get("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobCreate);
-app.post("/job/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobCreate);
-app.get("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobEmbedFbPost);
-app.post("/job/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobEmbedFbPost);
-app.get("/job/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobDetail);
-app.get("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobUpdate);
-app.post("/job/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobUpdate);
-app.get("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.getJobUpdateFbPost);
-app.post("/job/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobUpdateFbPost);
-app.post("/job/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("job:list"), jobController.postJobDelete);
+// Admin Job module
+app.get("/adminJobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobs);
+app.get("/adminJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobCreate);
+app.post("/adminJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobCreate);
+app.get("/adminJob/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobEmbedFbPost);
+app.post("/adminJob/embedFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobEmbedFbPost);
+app.get("/adminJob/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobDetail);
+app.get("/adminJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobUpdate);
+app.post("/adminJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobUpdate);
+app.get("/adminJob/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.getJobUpdateFbPost);
+app.post("/adminJob/:id/updateFbPost", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobUpdateFbPost);
+app.post("/adminJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobDelete);
+app.post("/adminJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobPublish);
+app.post("/adminJob/:id/unpublish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobUnpublish);
+app.post("/adminJob/:id/republish", passportConfig.isAuthenticated, rbacConfig.hasAccess("adminJob:list"), adminJobController.postJobRepublish);
+
+// Recruiter modules
+app.get("/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiters);
+app.get("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterCreate);
+app.post("/recruiter/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterCreate);
+app.get("/recruiter/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterDetail);
+app.get("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.getRecruiterUpdate);
+app.post("/recruiter/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterUpdate);
+app.post("/recruiter/:id/terminate", passportConfig.isAuthenticated, rbacConfig.hasAccess("recruiter:list"), recruiterController.postRecruiterTerminate);
+
+// Credit Account modules
+app.get("/creditAccounts", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccounts);
+app.get("/creditAccount/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountDetail);
+app.get("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.getCreditAccountAddCredit);
+app.post("/creditAccount/:id/addCredit", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postCreditAccountAddCredit);
+app.post("/creditAccount/trxDocument/download", passportConfig.isAuthenticated, rbacConfig.hasAccess("creditAccount:list"), creditAccountController.postDownloadInvoice);
+
+// Employer modules
+app.get("/employers", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployers);
+app.get("/employer/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerCreate);
+app.post("/employer/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerCreate);
+app.get("/employer/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerDetail);
+app.get("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.getEmployerUpdate);
+app.post("/employer/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerUpdate);
+app.post("/employer/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("employer:list"), employerController.postEmployerDelete);
+
+// Offline Job modules
+app.get("/offlineJobs", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobs);
+app.get("/offlineJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobCreate);
+app.post("/offlineJob/create", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobCreate);
+app.get("/offlineJob/:id", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobDetail);
+app.get("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.getJobUpdate);
+app.post("/offlineJob/:id/update", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobUpdate);
+app.post("/offlineJob/:id/delete", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobDelete);
+app.post("/offlineJob/:id/publish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobPublish);
+app.post("/offlineJob/:id/unpublish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobUnpublish);
+app.post("/offlineJob/:id/republish", passportConfig.isAuthenticated, rbacConfig.hasAccess("offlineJob:list"), offlineJobController.postJobRepublish);
 
 /**
- * API examples routes.
+ * API
  */
-// app.get("/api", apiController.getApi);
-// app.get("/api/facebook", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
+app.get("/api/recruiters", passportConfig.isAuthenticated, rbacConfig.hasAccess("api-recruiter:list"), apiController.getRecruiters);
 
 /**
  * OAuth authentication routes. (Sign in)
@@ -168,7 +218,7 @@ app.use(function(req, res, next) {
 app.use(function(err: any, req: any, res: any, next: any) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  res.locals.error = ENVIRONMENT === "production" ? {} : err;
 
   // render the error page
   res.status(err.status || 500);

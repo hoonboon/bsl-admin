@@ -1,0 +1,103 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p Recruiter Id: #{recruiterId}
+  
+    #recruiterDetail.form-horizontal
+      .form-group
+        label.col-sm-3.control-label(for='name') Name as per NRIC
+        .col-sm-7
+          .form-control-static !{recruiter.name}
+      .form-group
+        label.col-sm-3.control-label(for='email') Email Address
+        .col-sm-7
+          .form-control-static !{recruiter.email}
+      .form-group
+        label.col-sm-3.control-label(for='mobileNo') Mobile Phone No.
+        .col-sm-7
+          .form-control-static !{recruiter.mobileNo}
+      .form-group
+        label.col-sm-3.control-label(for='nric') NRIC No.
+        .col-sm-7
+          .form-control-static !{recruiter.nric}
+      .form-group
+        label.col-sm-3.control-label(for='nationality') Nationality
+        .col-sm-7
+          select.form-control-static(disabled=true)
+            for option in nationalityOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='race') Race
+        .col-sm-7
+          select.form-control-static(disabled=true)
+            for option in raceOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='language') Preferred Spoken Language
+        .col-sm-7
+          select.form-control-static(disabled=true)
+            for option in languageOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='dob') Date of Birth
+        .col-sm-7
+          .form-control-static !{recruiter.dobDisplay}
+      .form-group
+        label.col-sm-3.control-label(for='gender') Gender
+        .col-sm-7
+          select.form-control-static(disabled=true)
+            for option in genderOptions
+              option(
+                label=option.label, 
+                value=option.value, 
+                selected=(option.isSelected ? 'selected' : false)
+              ) #{option.label}
+      .form-group
+        label.col-sm-3.control-label(for='billingName') Billing Name
+        .col-sm-7
+          .form-control-static !{recruiter.billTo.name}
+      .form-group
+        label.col-sm-3.control-label(for='billingAddress') Billing Address
+        .col-sm-7
+          .form-control-static
+            textarea.form-control(rows='5', name='billingAddress', id='billingAddress', placeholder='Billing Address', disabled='disabled') !{recruiter.billTo.address}
+      .form-group
+        label.col-sm-3.control-label Status
+        .col-sm-7
+          .form-control-static !{recruiter.statusDisplay}
+      
+      .form-group
+        .col-sm-offset-3.col-sm-7
+          if (recruiter.status == "A")
+            a.btn.btn-primary(href="#", onclick="editDetail('" + recruiter.url + "/update')") Edit
+            span
+            | 
+            a.btn.btn-danger(href='#', onclick='submitTerminate()') Terminate
+            span
+            | 
+          a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+
+  if (recruiter.status == "A")
+    form(id='recruiterTerminateForm', action=recruiter.url+'/terminate', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='id', value=recruiterId)
+      input(type='hidden', name='bu', id='bu', value=bu)

@@ -26,12 +26,24 @@ const roles: RoleAccess = {
         can: [{ name: "user:login" }]
     },
     admin_1: {
-        can: [{ name: "job:list" }],
+        can: [
+            { name: "adminJob:list" },
+            { name: "offlineJob:list" },
+            { name: "api-recruiter:list" },
+        ],
         extends: ["guest"]
     },
     admin_2: {
-        can: [{ name: "user:signup" }],
+        can: [
+            { name: "recruiter:list" },
+            { name: "employer:list" },
+            { name: "creditAccount:list" },
+        ],
         extends: ["admin_1"]
+    },
+    admin_99: {
+        can: [{ name: "user:signup" }],
+        extends: ["admin_2"]
     }
 };
 

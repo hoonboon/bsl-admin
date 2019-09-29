@@ -11,12 +11,12 @@ describe("GET /login", () => {
   });
 });
 
-describe("GET /signup", () => {
-  it("should return 200 OK", () => {
-    return request(app).get("/signup")
-      .expect(200);
-  });
-});
+// describe("GET /signup", () => {
+//   it("should return 200 OK", () => {
+//     return request(app).get("/signup")
+//       .expect(200);
+//   });
+// });
 
 
 describe("POST /login", () => {

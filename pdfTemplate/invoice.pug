@@ -1,0 +1,95 @@
+doctype html
+html(lang='')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    //- Use !{var} to use unescaped content
+    style(type="text/css") !{compiledStyle}
+
+  body
+    .invoice-by
+      table
+        tr
+          td(width='25%', align='left')
+            img(src=imagePath + "company_logo.jpg", height='100px')
+          td(width='75%', align='left')
+            h2 BSL Asia Resources 
+            p 
+              | SSM Reg. No.: KT0440611-U
+              br 
+              | Lot 229, Tmn Sri Morak, Kg Kebakat, 16250 Wakaf Bahru, Kelantan
+              br 
+              | Email: customer-service@bsl-asia.com.my
+      hr
+
+    h1.title-center INVOICE
+
+    .invoice-header
+      table
+        tr
+          td(align='right', colspan='2') 
+            h2 PAID
+        tr
+          td(width='65%', align='left', valign='top')
+            .label Billed To: 
+            p #{invoice.billTo.name}
+            p !{invoice.billToAddressDisplay}
+          td(width='35%', align='left', valign='top')
+            table
+              tr
+                td(align='right').label Invoice No:
+                td(align='left') #{invoice.invoiceNo}
+              tr
+                td(align='right').label Invoice Date:
+                td(align='left') #{invoice.invoiceDate}
+              tr
+                td(align='right').label Currency:
+                td(align='left') #{invoice.currency}
+
+    .invoice-detail
+      table
+        thead
+          tr
+            th(width='5%', align='center') No.
+            th(width='55%', align='left') Description
+            th(width='15%', align='right') Unit Price
+            th(width='10%', align='right') Qty
+            th(width='15%', align='right') Total Price
+        tbody
+          each line in invoice.lines
+            tr
+              td(align="center") #{line.sn}
+              td !{line.itemCode} - !{line.itemDesc}
+              td(align="right") #{line.unitPriceDisplay}
+              td(align="right") #{line.qtyDisplay}
+              td(align="right") #{line.totalPriceDisplay}
+          tr
+            td(align='center', colspan='5') ** End of list **
+
+    .invoice-total
+      table
+        tr
+          td(width='50%') &nbsp;
+          td.label-right(width='35%') Total Amount Due: 
+          td.text-right(width='15%') #{invoice.totalAmountDueDisplay}
+        tr
+          td &nbsp;
+          td.label-right Rounding Amount: 
+          td.text-right #{invoice.roundingAmountDisplay}
+        tr
+          td &nbsp;
+          td.label-right Total Amount Due After Rounding: 
+          td.subtotal.text-right #{invoice.totalAmountDueAfterRoundingDisplay}
+        tr
+          td Payment Ref: !{invoice.paymentReferenceDisplay}
+          td.label-right Total Amount Paid: 
+          td.text-right -#{invoice.totalAmountDueAfterRoundingDisplay}
+        tr
+          td &nbsp;
+          td.label-right Balance to Pay: 
+          td.total.text-right 0.00
+
+    .invoice-footer
+      .spacer &nbsp;
+      hr
+      .text-italic Printed On: #{invoice.printDate}

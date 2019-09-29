@@ -1,0 +1,116 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p.form-group
+      label.col-sm-3.col-xs-12.control-label(for='recruiterLabelDisplay') Recruiter: 
+      .col-sm-6.col-xs-9
+        input.form-control(
+            type='text', name='recruiterDisplay', id='recruiterDisplay', 
+            placeholder='Please select a Recruiter', 
+            value=recruiterDisplay, readonly
+          )
+      .col-sm-3.col-sm-offset-0.col-xs-3
+        a(href='#', onclick='showSelectRecruiter()', class='btn btn-primary') Select
+
+    p.col-xs-12
+      .btn-toolbar(role="toolbar")
+        if recruiterId
+          .btn-group(role="group")
+            a(href='#', onclick='showSearch()', class='btn btn-primary')
+              span.glyphicon.glyphicon-search
+          .btn-group(role="group")
+            a(href='#', onclick="goCreate('/offlineJob/create')", class='btn btn-primary') Create
+
+    #listing.table-responsive
+      table.table.table-striped
+        thead
+          tr
+            td(colspan="7")
+              include ../partials/pagination.pug
+          tr
+            th Post Title
+            th Employer Name
+            th Publish Date From
+            th Publish Date To
+            th Closing
+            th Post Status
+            th Publish Status
+        tbody
+          if item_list
+            each item in item_list
+              tr
+                td 
+                  a(href="#", onclick="viewDetail('" + item.url + "')") !{item.title}
+                td !{item.employerName}
+                td #{item.publishStartDisplay}
+                td #{item.publishEndDisplay}
+                td !{item.job.closing}
+                td !{item.statusDisplay}
+                td !{item.publishIndDisplay}
+          else
+            tr
+              td(colspan='7' align='center') No records found.
+        tfoot
+          tr
+            td(colspan="7")
+              include ../partials/pagination.pug
+
+  #searchModal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal')
+            span &times;
+          h4 Search
+        .modal-body
+          form.form-horizontal(id="searchForm")
+            input(type='hidden', id='recruiterId', name='recruiterId', value=(recruiterId))
+            if (pageInfo && pageInfo.totalRow > 0)
+              input(type='hidden', id='newPageNo', name='newPageNo')
+              input(type='hidden', id='rowPerPage', name='rowPerPage', value=(pageInfo.rowPerPage))
+            .form-group
+              label.col-sm-4(for='searchPublishStartFrom') Publish Date From: 
+              .col-sm-7
+                input.form-control(type='date', name='searchPublishStartFrom', id='searchPublishStartFrom', placeholder='Search...', value=searchPublishStartFrom)
+            .form-group
+              label.col-sm-4(for='searchPublishStartTo') Publish Date To: 
+              .col-sm-7
+                input.form-control(type='date', name='searchPublishStartTo', id='searchPublishStartTo', placeholder='Search...', value=searchPublishStartTo)
+            .form-group
+              label.col-sm-4(for='searchTitle') Job Title: 
+              .col-sm-7
+                input.form-control(type='text', name='searchTitle', id='searchTitle', placeholder='Search...', value=searchTitle)
+            .form-group
+              label.col-sm-4(for='searchEmployerName') Employer Name: 
+              .col-sm-7
+                input.form-control(type='text', name='searchEmployerName', id='searchEmployerName', placeholder='Search...', value=searchEmployerName)
+        .modal-footer
+          button.btn.btn-default(type='button', data-dismiss='modal') Close
+          button.btn.btn-primary(type='button', onclick="submitViewList()") Submit
+
+  #selectRecruiterModal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          button.close(type='button', data-dismiss='modal')
+            span &times;
+          h4 Select Recruiter
+        .modal-body
+          .form-horizontal
+            .form-group
+              label.col-sm-4.control-label(for='selectRecruiter') Recruiter: 
+              #scrollable-dropdown-menu.col-sm-7
+                input.form-control.typeahead(
+                  type='text', name='selectRecruiter', id='selectRecruiter', 
+                  placeholder='Enter Name or Email to select a Recruiter first', 
+                  value=recruiterLabel
+                )
+        .modal-footer
+          button.btn.btn-default(type='button', data-dismiss='modal') Close

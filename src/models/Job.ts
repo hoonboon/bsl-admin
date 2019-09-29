@@ -19,6 +19,7 @@ export interface IJob extends mongoose.Document {
   description: string;
   descriptionDisplay: string;
   employerName: string;
+  employer: any;
   applyMethod: string;
   applyMethodDisplay: string;
   salary: string;
@@ -55,6 +56,7 @@ const JobSchema = new mongoose.Schema({
   title: { type: String },
   description: String,
   employerName: { type: String },
+  employer: { type: Schema.Types.ObjectId, ref: "employer" },
   applyMethod: String,
   salary: String,
   location: [{
@@ -103,7 +105,7 @@ JobSchema
     return this.publishEnd ? moment(this.publishEnd).format("YYYY-MM-DD") : "";
 });
 
-// Virtual for Job's URL
+// Virtual for Job's URL ** not used as job record is not directly accessible in admin modules
 JobSchema
 .virtual("url")
 .get(function() {
@@ -263,5 +265,5 @@ const getAreaByLocationCode: getAreaByLocationCodeFunc = function (locationCode)
 
 JobSchema.methods.getAreaByLocationCode = getAreaByLocationCode;
 
-const JobModel = mongoose.model<IJob>("Job", JobSchema);
+const JobModel = mongoose.model<IJob>("job", JobSchema);
 export default JobModel;

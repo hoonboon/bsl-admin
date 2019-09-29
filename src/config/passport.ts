@@ -6,6 +6,9 @@ import _ from "lodash";
 // import { User, UserType } from '../models/User';
 import { default as UserModel } from "../models/User";
 import { Request, Response, NextFunction } from "express";
+import { Logger } from "../util/logger";
+
+const logger = new Logger("config.passport");
 
 const LocalStrategy = passportLocal.Strategy;
 
@@ -14,6 +17,7 @@ passport.serializeUser<any, any>((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
+  // logger.debug("called deserializeUser()");
   UserModel.findById(id, (err, user) => {
     done(err, user);
   });
@@ -24,6 +28,7 @@ passport.deserializeUser((id, done) => {
  * Sign in using Email and Password.
  */
 passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
+  // logger.debug("called verifyFunction()");
   UserModel.findOne({ email: email.toLowerCase() }, (err, user: any) => {
     if (err) { return done(err); }
     if (!user) {

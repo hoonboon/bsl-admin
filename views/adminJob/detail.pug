@@ -1,0 +1,146 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p Admin Job Id: #{adminJobId}
+
+    .boxed.form-horizontal
+      .form-group
+        label.col-sm-4.col-xs-6.control-label Post Status 
+        .col-sm-6.col-xs-6
+          .form-control-static !{adminJob.statusDisplay}
+        label.col-sm-4.col-xs-6.control-label Publish Status
+        .col-sm-6.col-xs-6
+          .form-control-static !{adminJob.publishIndDisplay}
+  
+    P
+      #jobDetail.form-horizontal
+        input(type='hidden', name='bu', id='bu', value=bu)
+        if (job.postType && job.postType == "FB")
+          .form-group
+            label.col-sm-3.col-xs-4.control-label Post Title
+            .col-sm-7.col-xs-8
+              .form-control-static !{job.title}
+          .form-group
+            label.col-sm-3.col-xs-12.control-label Facebook Post URL
+            .col-sm-7.col-xs-12
+              .form-control-static
+                #fbPostUrl !{job.fbPostUrl}
+                .fb-post(data-href!=job.fbPostUrl)
+          .form-group
+            label.col-sm-3.col-xs-4.control-label Publish Date Start
+            .col-sm-7.col-xs-8
+              .form-control-static #{job.publishStartDisplay}
+          .form-group
+            label.col-sm-3.col-xs-4.control-label Publish Date End
+            .col-sm-7.col-xs-8
+              .form-control-static #{job.publishEndDisplay}
+          .form-group
+            .col-sm-offset-3.col-sm-7
+              if (adminJob.status == 'P' || (adminJob.status == 'A' && adminJob.publishInd == 'U'))
+                a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/updateFbPost')") Edit
+                span
+                | 
+              if (adminJob.status == 'P')
+                a.btn.btn-danger(href='#', onclick="submitPublish('" + adminJob.url + "/publish')") Publish
+                span
+                | 
+                a.btn.btn-danger(href='#', onclick="submitDelete('" + adminJob.url + "/delete')") Delete
+                span
+                | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-danger(href='#', onclick="submitUnpublish('" + adminJob.url + "/unpublish')") Unpublish
+                span
+                | 
+              if (adminJob.status == 'A' && adminJob.publishInd == 'U')
+                a.btn.btn-danger(href='#', onclick="submitRepublish('" + adminJob.url + "/republish')") Republish
+                span
+                | 
+              a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+        else
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Employer Name
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.employerName}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Post Title
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.title}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Job Location
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.locationDisplay}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Job Description
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.descriptionDisplay}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Salary & Other Benefits
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.salary}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Apply Method
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.applyMethodDisplay}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Publish Date Start
+            .col-sm-7.col-xs-9
+              .form-control-static #{job.publishStartDisplay}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Publish Date End
+            .col-sm-7.col-xs-9
+              .form-control-static #{job.publishEndDisplay}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Closing
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.closing}
+          .form-group
+            label.col-sm-3.col-xs-3.control-label Image URL
+            .col-sm-7.col-xs-9
+              .form-control-static !{job.imgUrl}
+          .form-group
+            label.col-sm-3.control-label Customized full detail content to be displayed to user
+            .col-sm-7
+              .form-control-static
+                textarea.form-control(rows='15', name='customContent', id='customContent', disabled='disabled') !{job.customContent}
+          .form-group
+            .col-sm-offset-3.col-sm-7
+              if (adminJob.status == 'P' || (adminJob.status == 'A' && adminJob.publishInd == 'U'))
+                a.btn.btn-primary(href="#", onclick="editDetail('" + adminJob.url + "/update')") Edit
+                span
+                | 
+              a.btn.btn-primary(href='#', onclick='preview()') Preview
+              span
+              | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-primary(href='#', onclick='fbShare(\'' + job.publishUrl + '\')') FB Share
+                span
+                | 
+              if (adminJob.status == 'P')
+                a.btn.btn-danger(href='#', onclick="submitPublish('" + adminJob.url + "/publish')") Publish
+                span
+                | 
+                a.btn.btn-danger(href='#', onclick="submitDelete('" + adminJob.url + "/delete')") Delete
+                span
+                | 
+              if (adminJob.status == 'A' && (adminJob.publishInd == 'P' || adminJob.publishInd == 'R'))
+                a.btn.btn-danger(href='#', onclick="submitUnpublish('" + adminJob.url + "/unpublish')") Unpublish
+                span
+                | 
+              if (adminJob.status == 'A' && adminJob.publishInd == 'U')
+                a.btn.btn-danger(href='#', onclick="submitRepublish('" + adminJob.url + "/republish')") Republish
+                span
+                | 
+              a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+
+  include preview.pug
+  
+  form(id='jobForm', method='POST')
+    input(type='hidden', name='_csrf', value=_csrf)
+    input(type='hidden', name='bu', id='bu', value=bu)

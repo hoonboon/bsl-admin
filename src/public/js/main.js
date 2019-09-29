@@ -33,6 +33,10 @@ $(document).ready(function () {
     FB.AppEvents.logPageView(); 
   });
 
+  $('.modal').on('shown.bs.modal', function(e) {
+    $('input:visible:enabled:not([readonly]):first', e.target).focus();
+  });
+  
   // Place JavaScript code here...
 
 });

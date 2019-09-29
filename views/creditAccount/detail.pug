@@ -1,0 +1,112 @@
+extends ../layout
+
+block content
+  .container
+    h3
+      if title2
+        = title2
+      else
+        = title
+    
+    p Credit Account Id: #{creditAccountId}
+  
+    form.form-horizontal
+      input(type='hidden', name='bu', id='bu', value=bu)
+      .form-group
+        label.col-sm-2.col-xs-4.control-label Recruiter Name
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.recruiter.name}
+        label.col-sm-2.col-xs-4.control-label Recruiter Email
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.recruiter.email}
+      .form-group
+        label.col-sm-2.col-xs-4.control-label Valid Since
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.validDateStartDisplay}
+        label.col-sm-2.col-xs-4.control-label Credit Expiry Date
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.validDateEndDisplay}
+      .form-group
+        label.col-sm-2.col-xs-4.control-label Credit Balance
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.creditBalance}
+        label.col-sm-2.col-xs-4.control-label Credit Locked
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.creditLocked}
+      .form-group
+        label.col-sm-2.col-xs-4.control-label(for='mobileNo') Credit Available
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.creditAvailable}
+        label.col-sm-2.col-xs-4.control-label Status
+        .col-sm-4.col-xs-8
+          .form-control-static !{creditAccount.recruiter.statusDisplay}
+      
+      .form-group
+        .col-sm-offset-4.col-sm-4
+          if (creditAccount.recruiter.status == "A")
+            a.btn.btn-primary(href="#", onclick="goTo('" + creditAccount.url + "/addCredit')") Add Credit
+            span
+            | 
+            //- a.btn.btn-primary(href="#", onclick="goTo('" + creditAccount.url + "/deductCredit')") Deduct Credit
+            //- span
+            //- | 
+          a.btn.btn-warning(href='#', onclick='goBack()', id='btnGoBack') Back
+
+    br
+          
+    h4 Transaction History
+
+    #listing.table-responsive
+      table.table.table-striped
+        thead
+          tr
+            th Date
+            th Description
+            //- th Type
+            th Credit Addition
+            th Credit Deduction
+            th Download
+        tbody
+          if (creditTrx_list && creditTrx_list.length > 0)
+            each item in creditTrx_list
+              tr
+                td(align="center") #{item.trxDateDisplay}
+                td 
+                  if item.status === "P"
+                    | #{item.creditTrxDescription} (Pending)
+                  else
+                    | #{item.creditTrxDescription}
+                //- td #{item.trxTypeDisplay}
+                td(align="center") 
+                  if item.totalCredit > 0
+                    | #{item.totalCredit}
+                  else
+                    | -
+                td(align="center") 
+                  if item.totalCredit < 0
+                    | #{item.totalCredit * -1}
+                  else
+                    | -
+                td(align="center") 
+                  if item.trxType === "T"
+                    a(href="#", onclick="downloadDoc('" + item.trxDocument + "')") Invoice
+                  else if item.trxType === "R"
+                    a(href="#", onclick="downloadDoc('" + item.trxDocument + "')") Credit Note
+                  else
+                    | -
+          else
+            tr
+              td(colspan='5' align='center') No records found.
+        tfoot
+          tr
+            td(colspan='2', align='right') 
+              b Total
+            td(align='center') #{totalAdditions}
+            td(align='center') #{totalDeductions}
+            td &nbsp;
+
+    form.form-horizontal(id='downloadDocForm', action='/creditAccount/trxDocument/download', method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      input(type='hidden', name='bu', id='bu', value=bu)
+      input(type='hidden', name='creditAccountId', id='creditAccountId', value=creditAccountId)
+      input(type='hidden', name='docId', id='docId')

@@ -1,6 +1,8 @@
-import logger from "./logger";
 import dotenv from "dotenv";
 import fs from "fs";
+import { Logger } from "./logger";
+
+const logger = new Logger("util.secrets");
 
 if (fs.existsSync(".env")) {
     logger.debug("Using .env file to supply config environment variables");

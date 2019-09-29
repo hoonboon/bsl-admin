@@ -1,0 +1,53 @@
+#previewModal.modal.fade(tabindex='-1')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        button.close(type='button', data-dismiss='modal')
+          span &times;
+        h4 Preview
+      .modal-body
+        .panel.panel-default
+          if job.customContent
+            .panel-heading 
+              h3.panel-title !{job.title}
+          #modalContent
+            .panel-body
+              .col-xs-4.col-xs-offset-4
+                .text-center
+                  img.img-responsive.img-thumbnail(src!=job.publishImgUrl, alt="Post Image")
+              .col-xs-12
+                h3.text-center
+                  | !{job.title}
+                h4.text-center
+                  | !{job.employerName}
+                h5.text-center
+                  | Tempat Kerja: !{job.locationDisplay}
+            table.post-detail.table
+              if job.description
+                tr
+                  th
+                    label.control-label Keterangan
+                tr
+                  td
+                    | !{job.descriptionDisplay}
+              if job.salary
+                tr
+                  th
+                    label.control-label Gaji & Lain-lain Manfaat
+                tr
+                  td
+                    | !{job.salary}
+              tr
+                th
+                  label.control-label Cara Memohon
+              tr
+                td
+                  | !{job.applyMethodDisplay}
+              if job.closing
+                tr
+                  td(align="center")
+                    strong Tarikh Tutup: !{job.closing}
+          .panel-footer
+        
+      .modal-footer
+        button.btn.btn-default(type='button', data-dismiss='modal') Close
